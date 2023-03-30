@@ -1,0 +1,399 @@
+:root {
+       --color-primary: #e3ded7;
+       --color-secondary: #6a958c;
+       --color-tertiary: #8ead7c;
+       --color-quaternary: #2d4443;
+}
+@font-face {
+       font-family: regular;
+       src: url(./font/Prata-Regular.ttf);
+}
+a {
+       color: var(--color-tertiary);
+       text-decoration: none;
+}
+a:hover {
+       color: var(--color-quaternary);
+}
+
+body {
+       background-color: var(--color-primary);
+       color: var(--color-quaternary);
+       font-family: regular;
+       font-size: 16px;
+       font-weight: 400;
+       line-height: 1.5;
+       margin: 0;
+       padding: 0;
+}
+
+/* Path: static/index.css */
+.app {
+       display: flex;
+       flex-direction: column;
+       align-items: center;
+       justify-content: center;
+       background-color: var(--color-primary);
+}
+
+.box {
+       display: inline;
+       flex-direction: column;
+       align-items: center;
+       justify-content: center;
+       background-color: blue;
+       margin: 10px;
+       padding: 10px;
+}
+
+.lContainer {
+       display: grid;
+       grid-template-columns: 1fr 1fr 1fr;
+       grid-template-rows: 1fr 1fr 1fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-template-areas:
+              ". . ."
+              ". login ."
+              ". . .";
+       position: relative;
+       background: var(--color-secondary);
+       border-radius: 0% 0% 0% 0% / 0% 0% 0% 0%;
+       box-shadow: 20px 20px rgba(0, 0, 0, 0.15);
+       transition: all 0.4s ease;
+}
+.login {
+       display: grid;
+       grid-template-rows: 1.1fr 1.7fr 0.7fr 0.5fr;
+       grid-auto-columns: 1fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-area: login;
+}
+.lContainer:hover {
+       border-radius: 0% 0% 50% 50% / 0% 0% 5% 5%;
+       box-shadow: 10px 10px rgba(0, 0, 0, 0.25);
+}
+.login-text {
+       grid-area: 1 / 1 / 2 / 2;
+}
+
+.login-form {
+       grid-area: 2 / 1 / 3 / 2;
+}
+
+.login-submit {
+       grid-area: 3 / 1 / 4 / 2;
+}
+
+.login-registerlink {
+       grid-area: 4 / 1 / 5 / 2;
+}
+
+.rContainer {
+       display: grid;
+       grid-template-columns: 1fr 1fr 1fr;
+       grid-template-rows: 0.5fr 2fr 0.5fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-template-areas:
+              ". . ."
+              ". register ."
+              ". . .";
+       position: relative;
+       background: var(--color-secondary);
+       border-radius: 0% 0% 0% 0% / 0% 0% 0% 0%;
+       box-shadow: 20px 20px rgba(0, 0, 0, 0.15);
+       transition: all 0.4s ease;
+}
+.register {
+       display: grid;
+       grid-template-rows: 0.7fr 3fr 0.4fr 0.5fr 0.4fr;
+       grid-auto-columns: 1fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-area: register;
+}
+.rContainer:hover {
+       border-radius: 0% 0% 50% 50% / 0% 0% 5% 5%;
+       box-shadow: 10px 10px rgba(0, 0, 0, 0.25);
+}
+.register-text {
+       grid-area: 1 / 1 / 2 / 2;
+}
+
+.register-form {
+       grid-area: 2 / 1 / 3 / 2;
+}
+
+.register-submit {
+       grid-area: 3 / 1 / 4 / 2;
+}
+
+.register-emptyspace {
+       grid-area: 4 / 1 / 5 / 2;
+}
+
+.register-loginlink {
+       grid-area: 5 / 1 / 6 / 2;
+}
+
+.bContainer {
+       display: grid;
+       grid-template-columns: 0.2fr 1.8fr 1fr;
+       grid-template-rows: 0.2fr 2.7fr 0.1fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-template-areas:
+              ". cPostBox bUser"
+              ". bPost bRightSideArea"
+              ". . .";
+}
+.cPostBox {
+       grid-area: cPostBox;
+       display: grid;
+       grid-template-columns: 0.1fr 3.1fr 0.1fr;
+       grid-template-rows: 0.1fr 3.1fr 0.1fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-template-areas:
+              ". . ."
+              ". bPostForm ."
+              ". . .";
+       width: 1000px;
+       height: 200px;
+}
+
+.bPostForm {
+       grid-area: bPostForm;
+       display: grid;
+       grid-template-rows: 1fr;
+       grid-auto-columns: 1fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       position: relative;
+       background: white;
+       border-radius: 0% 0% 0% 0% / 0% 0% 0% 0%;
+       box-shadow: 20px 20px rgba(0, 0, 0, 0.15);
+       transition: all 0.4s ease;
+}
+.bPostForm:hover {
+       border-radius: 0% 0% 50% 50% / 0% 0% 5% 5%;
+       box-shadow: 10px 10px rgba(0, 0, 0, 0.25);
+}
+
+.topSide {
+       margin-top: 20px;
+       margin-left: 10px;
+       display: grid;
+       grid-template-columns: 1fr 1fr;
+       grid-template-rows: 1fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-template-areas: "pTitle pTopics";
+       grid-area: 1 / 1 / 2 / 2;
+
+       width: 800px;
+}
+
+.pTitle {
+       grid-area: pTitle;
+}
+.pTitle input {
+       width: 100%;
+       height: 30px;
+       outline: none;
+       border: none;
+}
+
+.pTopics {
+       grid-area: pTopics;
+}
+.pTopics input {
+       width: 100%;
+       height: 30px;
+       outline: none;
+       border: none;
+}
+
+.botSide {
+       margin-left: 10px;
+       grid-area: 2 / 1 / 3 / 2;
+       display: grid;
+       grid-template-columns: 1fr 0.1fr;
+       grid-template-rows: 1fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-template-areas: "textBox sendB";
+       width: 95%;
+}
+.textBox {
+       grid-area: textBox;
+       resize: none;
+       outline: none;
+       border: none;
+       width: 800px;
+       height: 100px;
+}
+.sendB {
+  font-size: 1.5em;
+  font-family: regular;
+  outline: none;
+  border: none;
+  position: relative;
+       background: white;
+       border-radius: 0% 0% 0% 0% / 0% 0% 0% 0%;
+       box-shadow: 7px 7px rgba(0, 0, 0, 0.15);
+       transition: all 1s ease;
+}
+.sendB:hover {
+  outline: none;
+  color : black;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 0% 0% 50% 50% / 0% 0% 5% 5%;
+  box-shadow: 10px 10px white;
+}
+.bUser {
+       grid-area: bUser;
+       background-color: white;
+       width: 400px;
+       height: 100px;
+}
+.bPosts {
+       width: 1000px;
+       grid-area: bPost;
+       overflow: auto;
+}
+
+.bRightSideArea {
+       display: grid;
+       grid-template-columns: 0.2fr 2.6fr 0.2fr;
+       grid-template-rows: 0.1fr 1fr 10fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-template-areas:
+              ". . ."
+              ". bTopics ."
+              ". bChat .";
+       grid-area: bRightSideArea;
+}
+
+.bTopics {
+       grid-area: bTopics;
+       height: 100px;
+       display: grid;
+       grid-template-columns: auto auto auto auto;
+}
+
+.bTopic {
+       margin: 10px;
+       padding: 10px;
+       width: 40px;
+       height: 60px;
+       position: relative;
+       background: white;
+       border-radius: 0% 0% 0% 0% / 0% 0% 0% 0%;
+       box-shadow: 10px 10px rgba(0, 0, 0, 0.15);
+       transition: all 0.4s ease;
+}
+.bTopic:hover {
+       border-radius: 0% 0% 50% 50% / 0% 0% 5% 5%;
+       box-shadow: 5px 5px rgba(0, 0, 0, 0.25);
+}
+
+.bChat {
+       display: grid;
+       grid-template-rows: 0.3fr 0.2fr 2.5fr;
+       grid-auto-columns: 1fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-area: bChat;
+       height: 500px;
+       position: relative;
+       background: white;
+       border-radius: 0% 0% 0% 0% / 0% 0% 0% 0%;
+       box-shadow: 20px 20px rgba(0, 0, 0, 0.15);
+       transition: all 0.4s ease;
+}
+.bChat:hover {
+       border-radius: 0% 0% 50% 50% / 0% 0% 5% 5%;
+       box-shadow: 10px 10px rgba(0, 0, 0, 0.25);
+}
+
+.bSreachBar {
+       grid-area: 1 / 1 / 2 / 2;
+}
+
+.bChatName {
+       grid-area: 2 / 1 / 3 / 2;
+}
+
+.bChatBox {
+       grid-area: 3 / 1 / 4 / 2;
+}
+
+.bPost {
+       display: grid;
+       grid-template-columns: 0.1fr 3.1fr 0.1fr;
+       grid-template-rows: 0.1fr 3.1fr 0.1fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-template-areas:
+              ". . ."
+              ". pBox ."
+              ". . .";
+       width: 1000px;
+       height: 200px;
+}
+
+.pBox {
+       display: grid;
+       grid-template-columns: 2.8fr 0.6fr 0.4fr 0.4fr;
+       grid-template-rows: 2.9fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-template-areas: "pContent pBlamer pTopic pComent";
+       grid-area: pBox;
+       position: relative;
+       background: white;
+       border-radius: 0% 0% 0% 0% / 0% 0% 0% 0%;
+       box-shadow: 20px 20px rgba(0, 0, 0, 0.15);
+       transition: all 0.4s ease;
+}
+.pBox:hover {
+       border-radius: 0% 0% 50% 50% / 0% 0% 5% 5%;
+       box-shadow: 10px 10px rgba(0, 0, 0, 0.25);
+}
+
+.pBlamer {
+       grid-area: pBlamer;
+}
+
+.pTopic {
+       grid-area: pTopic;
+}
+
+.pComent {
+       grid-area: pComent;
+}
+
+.pContent {
+       display: grid;
+       grid-template-rows: 1fr 0.5fr 2fr;
+       grid-auto-columns: 1fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-area: pContent;
+}
+
+.pTime {
+       grid-area: 2 / 1 / 3 / 2;
+}
+
+.pTitle {
+       grid-area: 1 / 1 / 2 / 2;
+}
+
+.pStory {
+       grid-area: 3 / 1 / 4 / 2;
+}
