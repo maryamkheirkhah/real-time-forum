@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"real-time-forum/db"
-	"real-time-forum/sessions"
 	"strings"
 	"time"
 )
@@ -159,7 +159,7 @@ calling other functions etc., otherwise the first error encountered is returned 
 a -1 integer as the userId.
 */
 func getUserId(userName string) (int, error) {
-	user, err := db.SelectDataHandler("users", "username", userName)
+	user, err := db.SelectDataHandler("users", "Nickname", userName)
 	if err != nil {
 		return -1, errors.New("error in getting userId")
 	}
@@ -174,7 +174,7 @@ func getUserName(userId int) (string, error) {
 		return "", errors.New("error in getting userName" + err.Error())
 	}
 	if user != nil {
-		return user.(db.User).Username, nil
+		return user.(db.User).NickName, nil
 	}
 	return "", errors.New("user not found error in getUserName")
 }
@@ -188,7 +188,7 @@ func (u *User) FillUserStruct(userName string) error {
 	u.UserRank = "" // Fill this UserRank field in later task
 
 	// Extract entire row for user from "users" table in database
-	userInfo, err := db.SelectDataHandler("users", "userName", userName)
+	userInfo, err := db.SelectDataHandler("users", "NickName", userName)
 	if err != nil {
 		return errors.New("error in getting user info from database: " + err.Error())
 	}
@@ -628,7 +628,8 @@ also returns an error value, which is non-nil if there was an error in the datab
 query.
 */
 func (c *Comment) FillCommentStruct(username string, dbComment db.Comment, r *http.Request) error {
-	activeUsername := sessions.ActiveSessions.GetUsername(r) // Assign values to output struct
+	activeUsername := "guest"
+	//activeUsername := sessions.ActiveSessions.GetUsername(r) // Assign values to output struct
 	c.CommentId = dbComment.CommentId
 	c.PostId = dbComment.PostId
 	c.Content = dbComment.Content
@@ -697,7 +698,7 @@ func (p *Post) FillPostStruct(dbPost db.Post, r *http.Request) error {
 	if err != nil {
 		return errors.New("error in getting user name from database" + err.Error())
 	}
-	p.Username = userName.(db.User).Username
+	p.Username = userName.(db.User).NickName
 
 	// Retrieve all comments associated with this post
 	comments, err := db.SelectDataHandler("comments", "postId", p.PostId)
@@ -737,9 +738,9 @@ topics from the database, filling the MainData struct with the data. It also
 returns an error value, which is non-nil if there was an error in the database
 query. This function is called in the handler for MainPage.
 */
-func GetMainDataStruct(r *http.Request, userName string) (MainData, error) {
+func GetMainDataStruct(r *http.Request, nickName string) (MainData, error) {
 	// Initialise output struct
-	md := MainData{Username: userName}
+	md := MainData{NickName: nickName}
 
 	// Retreive all posts and topics from the database
 	posts, err := getAllPosts(r)
@@ -759,11 +760,100 @@ func GetMainDataStruct(r *http.Request, userName string) (MainData, error) {
 	} else {
 		md.CookieMessage = ""
 	}
-
+	users, err := GetAllUsersNickName()
+	if err != nil {
+		return md, errors.New("error in getMainData in getting all users :" + err.Error())
+	}
+	messages, errMsg := GetMessages(nickName)
+	if errMsg != nil {
+		log.Println(errMsg)
+	}
+	md.Messages = messages
+	//TODO: sort users later
+	md.UserNicknames = users
 	// Compile output struct
 	md.Posts = sortPostSlice(posts)     // Bubble sort posts in descending order of creation time
 	md.Topics = sortStringSlice(topics) // Bubble sort topics in alphabetical order
+
 	return md, nil
+}
+func GetAllUsersNickName() ([]string, error) {
+	users, err := db.SelectDataHandler("users", "", nil)
+	if err != nil {
+		return nil, errors.New("error in getting users from database:" + err.Error())
+	}
+	var userSlice []string
+	for _, user := range users.(map[int]db.User) {
+		userSlice = append(userSlice, user.NickName)
+	}
+	return userSlice, nil
+}
+
+func SaveMessage(msgData MessageData) error {
+	userId, err := getUserId(msgData.Sender)
+	if err != nil {
+		return errors.New("error in getting user id from database:" + err.Error())
+	}
+	receiverId, err := getUserId(msgData.Receiver)
+	if err != nil {
+		return errors.New("error in getting user id from database:" + err.Error())
+	}
+	_, err = db.InsertData("messages", userId, receiverId, msgData.Msg, time.Now().Format("2006-01-02 15:04:05"))
+	if err != nil {
+		return errors.New("error in saving message to database:" + err.Error())
+	}
+	return nil
+}
+
+func GetMessages(nickname string) (map[string][]MessageData, error) {
+	senderId, err := getUserId(nickname)
+	if err != nil {
+		return nil, errors.New("error in getting user id from database:" + err.Error())
+	}
+	SendMessages, err := db.SelectDataHandler("messages", "senderId", senderId)
+
+	if err != nil && err.Error() != "message doesn't exist in messages table" {
+		return nil, errors.New("error in getting messages from database:" + err.Error())
+	}
+	receiverMessages, err := db.SelectDataHandler("messages", "receiverId", senderId)
+	if err != nil && err.Error() != "message doesn't exist in messages table" {
+		return nil, errors.New("error in getting messages from database:" + err.Error())
+	}
+	var messages map[string][]MessageData = make(map[string][]MessageData)
+	if SendMessages != nil {
+
+		for _, message := range SendMessages.(map[int]db.Message) {
+			msg, err := changeDBMessageToMessage(message)
+			if err != nil {
+				return nil, errors.New("error in getting messages from database:" + err.Error())
+			}
+			messages["send"] = append(messages["send"], msg)
+		}
+	}
+	if receiverMessages != nil {
+
+		for _, message := range receiverMessages.(map[int]db.Message) {
+			msg, err := changeDBMessageToMessage(message)
+			if err != nil {
+				return nil, errors.New("error in getting messages from database:" + err.Error())
+			}
+			messages["receive"] = append(messages["receive"], msg)
+		}
+	}
+	return messages, nil
+
+}
+func changeDBMessageToMessage(message db.Message) (MessageData, error) {
+	var msgData MessageData
+	sender, err := getUserName(message.SenderId)
+	if err != nil {
+		return msgData, errors.New("error in getting user id from database:" + err.Error())
+	}
+	receiver, err := getUserName(message.ReceiverId)
+	if err != nil {
+		return msgData, errors.New("error in getting user id from database:" + err.Error())
+	}
+	return MessageData{Sender: sender, Receiver: receiver, Msg: message.Message, Time: message.SendTime}, nil
 }
 
 /*

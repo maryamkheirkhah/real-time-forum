@@ -11,35 +11,34 @@ export default class extends abstract{
         <div class="rContainer">
         <div class="register">
         <div class="register-text">Register</div>
-        <form id="register-form" class="ajax-form" action="/register" method="post">
+        <form id="register-form">
         <div class="register-form">
         <div class="input">
-        <label for="registerusername">Username</label>
-        <input type="text" name="registerusername" id="registerusername" />
+        <input type="text" name="nickName" id="nickName" placeholder="Nickname"/>
         </div>
         <div class="input">
-        <label for="registerfname">First Name</label>
-        <input type="text" name="registerfname" id="registerfname" />
+        <input type="text" name="fistName" id="fistName" placeholder="First Name" />
         </div>
         <div class="input">
-        <label for="registerlname">Last Name</label>
-        <input type="text" name="registerlname" id="registerlname" />
+        <input type="text" name="lastName" id="lastName" placeholder="Last Name" />
+        </div>
+        <select id="gender" name="gender" class="input">
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+        <option value="other">Other</option>
+        </select>
+        <div class="input">
+        <label for="birthdate">Birthdate</label>
+        <input type="date" name="birthdate" id="birthdate" />
         </div>
         <div class="input">
-        <label for="registerbirthdate">Birthdate</label>
-        <input type="date" name="registerbirthdate" id="registerbirthdate" />
+        <input type="email" name="email" id="email" placeholder="Email" />
         </div>
         <div class="input">
-        <label for="registeremail">Email</label>
-        <input type="email" name="registeremail" id="registeremail" />
+        <input type="password" name="password" id="password" placeholder="Password" />
         </div>
         <div class="input">
-        <label for="registerpassword">Password</label>
-        <input type="password" name="registerpassword" id="registerpassword" />
-        </div>
-        <div class="input">
-        <label for="registercpassword">Confirm Password</label>
-        <input type="password" name="registercpassword" id="registercpassword" />
+        <input type="password" name="cpassword" id="cpassword" placeholder="Confirm Password" />
         </div>
         </div>
         <div class="register-submit">
@@ -48,7 +47,7 @@ export default class extends abstract{
         </form>
         <div class="register-emptyspace"></div>
         <div class="register-loginlink">
-        <p>Already have an account? <a href="#login">Login</a></p>
+        <p>Already have an account? <a href="/login" data-link>Login</a></p>
         </div>
         </div>
       </div>

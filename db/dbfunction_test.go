@@ -9,41 +9,37 @@ func TestInsertData(t *testing.T) {
 	//userId := 12
 	//postId := 1
 	//dt := time.Now()
+	//creationTime := time.Now().Format("01-02-2006 15:04:05")
 
 	var tests = [][]any{
-		//{"comments", 1, 1, "hi!", dt.Format("01-02-2006 15:04:05")},
-		//	{"comments", 14, 1, "boooo!", dt.Format("01-02-2006 15:04:05")},
-		//	{"comments", 1, 13, "boooo!", dt.Format("01-02-2006 15:04:05")},
-		{"reactions", 1, 4, -1, "dislike"},
-		/*
-			{"reactions", 2, 3, -1, "dislike"},
-			{"reactions", 1, 3, -1, "like"},
-			{"reactions", 1, 4, -1, "dislike"}, */
-		//{"reactions", 1, 4, -1, "dislike"},
-
-		//{"reactions", 1, 3, -1, "like"},
-
-		//{"reactions", 1, 1, -1, "like"},
-		//{"reactions", 1, 1, -1, "like"},
 
 		//test correct input
 		//{"users", "testuser", "msdf@gmail.com", "1234", "12.12.2022"},
 		//test missing data
 		//{"posts", "testuser2", "first post", "hello world!", "12.12.2022"},
 		//test missing table
-		//	{"postds", "marikh1", "first post", "hello world!", "12.12.2022"},
-		//{"comments", userId, postId, "first comment", "12.12.2022"}, ////////////////adding later
-		/* 		{"topics", "art"},
-		   		//test duplicate name
-		   		{"topics", "sport"},
-		   		{"topics", "music"},
-		   		{"topics", "news"}, */
+		//
+
+		{"topics", "music"},
+		{"topics", "programming"},
+		{"topics", "weather"},
+		{"topics", "bullshit"},
+		{"topics", "news"},
+		{"topics", "sport"},
+		{"topics", "coffiee"},
 	}
+	//{"posts", 1, "first post", "hello world!", dt.Format("01-02-2006 15:04:05")},
+	//{"comments", userId, postId, "first comment", "12.12.2022"}, ////////////////adding later
+	/* 		{"topics", "art"},
+	   		//test duplicate name
+	   		{"topics", "sport"},
+	   		{"topics", "music"},
+	   		{"topics", "news"}, */
 	for _, tt := range tests {
 		// t.Run enables running "subtests", one for each
 		// table entry. These are shown separately
 		// when executing `go test -v`.
-		testname := fmt.Sprintf("%s,%d,%d", tt[0], tt[1], tt[2])
+		testname := fmt.Sprintf("%s,", tt[0])
 		t.Run(testname, func(t *testing.T) {
 			if len(tt) == 5 {
 				_, err := InsertData(tt[0].(string), tt[1], tt[2], tt[3], tt[4])
@@ -101,13 +97,13 @@ func TestDeleteData(t *testing.T) {
 		//	{"users", "marikh"},
 
 		//test missing data
-		//	{"users", "marikh6"},
+		{"PostTopics", 1},
 		//test missing table
 		//	{"users121", "marikh3"},
 		/* 	{"topics", "art"},
 		{"topics", "sport"},
 		{"topics", "music"}, */
-		{"posts", 15},
+		//	{"posts", 15},
 		//	{"topics", "news"},
 	}
 	for _, tt := range tests {

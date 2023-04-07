@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"real-time-forum/handlers"
-	"strings"
 )
 
 func StartServer() {
@@ -16,18 +15,21 @@ func StartServer() {
 		http.ServeFile(w, r, "./static/index.html")
 	})
 	// test
-	http.HandleFunc("/login", handlers.Login)
+	//http.HandleFunc("/login", handlers.Login)
 	http.HandleFunc("/register", handlers.Register)
+	http.HandleFunc("/api/registerData", handlers.Register)
+	http.HandleFunc("/api/loginData", handlers.Login)
 	http.HandleFunc("/blamer", handlers.Blamer)
 	http.HandleFunc("/profile", handlers.Profile)
+	http.HandleFunc("/ws", handlers.WsHandler)
 	// Serve static assets at "/static/*"
 	http.Handle("/static/", http.StripPrefix("/static/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Set the Content-Type header to "text/javascript" for JavaScript module files
-		if strings.HasSuffix(r.URL.Path, ".js") {
-			w.Header().Set("Content-Type", "application/javascript")
-		} else if strings.HasSuffix(r.URL.Path, ".css") {
-			w.Header().Set("Content-Type", "text/css")
-		}
+		/* 		if strings.HasSuffix(r.URL.Path, ".js") {
+		   			w.Header().Set("Content-Type", "application/javascript")
+		   		} else if strings.HasSuffix(r.URL.Path, ".css") {
+		   			w.Header().Set("Content-Type", "text/css")
+		   		} */
 		fileServer.ServeHTTP(w, r)
 	})))
 

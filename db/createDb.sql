@@ -4,7 +4,11 @@ usage: sqlite3 name.db < createDb.sql
 */
 CREATE TABLE users(
     userId INTEGER PRIMARY KEY AUTOINCREMENT,
-    userName TEXT NOT NULL,
+    NickName TEXT NOT NULL,
+    firstName TEXT NOT NULL,
+    lastName TEXT NOT NULL,
+    gender TEXT NOT NULL,
+    birthDate TEXT NOT NULL,
     email TEXT NOT NULL,
     pass TEXT NOT NULL,
     creationTime TEXT NOT NULL
@@ -59,5 +63,5 @@ CREATE TABLE messages(
     messageContent TEXT NOT NULL,
     sendTime TEXT NOT NULL, 
     FOREIGN KEY(senderId) REFERENCES users(userId)
-    FOREIGN KEY(reciverId) REFERENCES users(userId)
+    FOREIGN KEY(receiverId) REFERENCES users(userId)
 );

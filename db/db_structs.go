@@ -2,11 +2,15 @@ package db
 
 type User struct {
 	// not sure about userId!
-	UserId   int
-	Username string
-	Pass     string
-	Email    string
-	Time     string
+	UserId    int
+	NickName  string
+	FirstName string
+	LastName  string
+	Gender    string
+	BirthDate string
+	Pass      string
+	Email     string
+	Time      string
 }
 type Post struct {
 	PostId       int

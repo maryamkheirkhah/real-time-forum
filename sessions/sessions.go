@@ -82,11 +82,8 @@ func (s *LoggedInSessions) RemoveDuplicateSessions(w http.ResponseWriter, r *htt
 	s.rwMutex.RLock()
 
 	for id, session := range s.Data {
-		fmt.Println(session.Username)
-		fmt.Println(userName)
 		if session.Username == userName {
 			s.rwMutex.RUnlock()
-			fmt.Println("4")
 			s.ClearSession(id)
 			s.rwMutex.RLock()
 		}
@@ -105,12 +102,10 @@ It is called by the global CheckSessions function.
 func (s *LoggedInSessions) Status(w http.ResponseWriter, r *http.Request) bool {
 	// Get the session ID cookie
 	cookie, err := r.Cookie(COOKIE_NAME)
-
 	if err != nil {
 		return false // If cookie not found --> User not logged in
 	} else {
 		sessionID := cookie.Value
-
 		// A read-lock is used to allow for concurrent read access to the map,
 		// but only one write access
 		s.rwMutex.RLock()
@@ -162,6 +157,7 @@ session ID. It creates a new session struct and adds it to the map in
 func (s *LoggedInSessions) CreateSession(w http.ResponseWriter, userName string) {
 	// Initialise / declare variables
 	currentTime := time.Now()
+
 	sessionID := s.GenerateSessionID()
 
 	// A full-lock is used to prevent concurrent access to the map
@@ -173,6 +169,7 @@ func (s *LoggedInSessions) CreateSession(w http.ResponseWriter, userName string)
 		Username:   userName,
 		LastAccess: &currentTime,
 	}
+
 	s.rwMutex.Unlock()
 
 	// Create and set a new cookie with the new session ID
@@ -184,6 +181,8 @@ func (s *LoggedInSessions) CreateSession(w http.ResponseWriter, userName string)
 		HttpOnly: true,
 	}
 	http.SetCookie(w, cookie)
+	w.WriteHeader(http.StatusOK)
+
 }
 
 /*
@@ -275,7 +274,6 @@ the GetUsername() method and is returned along with a nil error value.
 func Check(w http.ResponseWriter, r *http.Request) (string, error) {
 	// Check login status
 	userLoggedIn := ActiveSessions.Status(w, r)
-
 	if !userLoggedIn {
 		return "", nil
 	} else {
@@ -298,7 +296,7 @@ Status(). If the session does not exist server-side for whatever reason, it crea
 Otherwise, it calls the local method Renew() to renew the session. If Renew() returns an error,
 the function returns the error value. Otherwise, the function returns a nil error value.
 */
-func Login(w http.ResponseWriter, r *http.Request, userName string) error {
+func Login(w http.ResponseWriter, r *http.Request, userName string) ([]string, error) {
 	// Check if username has a session associated with it
 	// If so remove the session
 	ActiveSessions.RemoveDuplicateSessions(w, r, userName)
@@ -308,12 +306,16 @@ func Login(w http.ResponseWriter, r *http.Request, userName string) error {
 	if err == http.ErrNoCookie {
 		// If cookie does not exist, create a new session
 		ActiveSessions.CreateSession(w, userName)
-		fmt.Println("1")
 		// Log the login
 		log.Printf("User "+Colour.LightBlue+"%s"+Colour.Reset+" has logged in", userName)
-		return nil
+
+		keys := make([]string, 0, len(ActiveSessions.Data))
+		for k := range ActiveSessions.Data {
+			keys = append(keys, k)
+		}
+		return keys, nil
 	} else if err != nil {
-		return fmt.Errorf("error reading cookie: %v", err)
+		return nil, fmt.Errorf("error reading cookie: %v", err)
 	}
 
 	// If cookie exists, check if session exists
@@ -322,15 +324,15 @@ func Login(w http.ResponseWriter, r *http.Request, userName string) error {
 		ActiveSessions.CreateSession(w, userName)
 		// Log the login
 		log.Printf("User "+Colour.LightBlue+"%s"+Colour.Reset+" has logged in", userName)
-		return nil
+		return nil, nil
 	}
 
 	// If cookie exists and session exists, renew session
 	err = ActiveSessions.Renew(w, r)
 	if err != nil {
-		return fmt.Errorf("error renewing session: %v", err)
+		return nil, fmt.Errorf("error renewing session: %v", err)
 	}
-	return nil
+	return nil, nil
 }
 
 /*

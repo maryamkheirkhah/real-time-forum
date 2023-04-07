@@ -95,11 +95,12 @@ func InsertData(tableName string, args ...any) (int64, error) {
 	var id int64
 	switch tableName {
 	case "users":
-		err := NotExistData("users", "userName", args[0])
+		err := NotExistData("users", "NickName", args[0])
 		if err != nil {
 			return -1, errors.New("username already exist")
 		}
-		myQuery = "INSERT INTO users(userName, email, pass, creationTime) VALUES(?,?,?,?)"
+		myQuery = "INSERT INTO users(NickName,firstName,lastName,gender,birthDate, email, pass, creationTime) VALUES(?,?,?,?,?,?,?,?)"
+
 	case "posts":
 		err := NotExistData("users", "userId", args[0])
 		if err == nil {
@@ -202,7 +203,7 @@ func UpdateData(table string, key string, args ...any) error { //// should be up
 	var myQuery string
 	switch table {
 	case "users":
-		myQuery = "UPDATE users SET userName=?, email=?, pass=? where userName=?"
+		myQuery = "UPDATE users SET NickName=?,fisrtName=?,lastName=?,gender=?,birthDate=?, email=?, pass=? where NickName=?"
 	}
 	statement, err := database.Prepare(myQuery)
 	if err != nil {
@@ -229,18 +230,28 @@ this function is specific for selecting user data from user table
 it retruns a map with those users with that specific value on columnName and nil error or nil map and non-nil error when its not exist or there are other problem.
 */
 func selectUserHandler(myQuery string, keyName string, keyValue any) (any, error) {
-	rows, err := selectData(myQuery, keyValue)
+	var rows *sql.Rows
+	var err error
+	if keyName == "" {
+		myQuery = "SELECT * FROM users"
+		rows, err = selectData(myQuery, keyValue)
+	} else {
+		rows, err = selectData(myQuery, keyValue)
+	}
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error in selectUserHandler")
 	}
 	defer rows.Close()
 	users := map[int]User{}
 	u := User{}
 	for rows.Next() {
-		rows.Scan(&u.UserId, &u.Username, &u.Email, &u.Pass, &u.Time)
+		rows.Scan(&u.UserId, &u.NickName, &u.FirstName, &u.LastName, &u.Gender, &u.BirthDate, &u.Email, &u.Pass, &u.Time)
 		users[u.UserId] = u
 	}
 	if u.UserId > 0 {
+		if keyName == "" {
+			return users, nil
+		}
 		return u, nil
 	} else {
 		return nil, errors.New("data doesn't exist")
@@ -395,7 +406,6 @@ func selectMessageHandler(myQuery string, keyName string, keyValue any, args ...
 	}
 	var rows *sql.Rows
 	var err error
-
 	if args != nil {
 		myQuery = "SELECT * FROM messages WHERE " + keyName + "=?" + " AND " + args[0].(string) + "=?"
 		rows, err = selectData(myQuery, keyValue, args[1])
@@ -441,7 +451,7 @@ func DeleteData(tableName string, keyValue any) error {
 	// Check for relevant table title
 	switch tableName {
 	case "users":
-		key = "userName"
+		key = "NickName"
 	case "posts":
 		key = "postId"
 	case "comments":

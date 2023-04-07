@@ -1,0 +1,25 @@
+<input type="text" id="myInput">
+
+<div id="topicList"></div>
+
+<script>
+  const inputField = document.getElementById("myInput");
+  const topicList = document.getElementById("topicList");
+  
+  const topics = ["solo", "ship", "sizz", "sea", "sun"];
+  
+  inputField.addEventListener("input", function() {
+    const inputText = inputField.value;
+    
+    // Filter the topics based on the user's input
+    const filteredTopics = topics.filter(topic => topic.toLowerCase().includes(inputText.toLowerCase()));
+    
+    // Display the filtered topics
+    topicList.innerHTML = "";
+    filteredTopics.forEach(topic => {
+      const topicElement = document.createElement("div");
+      topicElement.innerHTML = topic;
+      topicList.appendChild(topicElement);
+    });
+  });
+</script>

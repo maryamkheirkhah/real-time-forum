@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,6 +10,8 @@ import (
 	"real-time-forum/security"
 	"real-time-forum/sessions"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 const (
@@ -39,65 +42,53 @@ func redirectHandler(w http.ResponseWriter, r *http.Request, pageName string, me
 	}
 	// Set the cookie on the response writer
 	http.SetCookie(w, &messageCookie)
+	w.WriteHeader(http.StatusOK)
 
 	// Redirect to the target page
-	http.Redirect(w, r, pageName, http.StatusMovedPermanently)
+	//http.Redirect(w, r, pageName, http.StatusMovedPermanently)
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
+
 	// Check for logged-in session cookie, renew / update if found, return username if found
-	userName, err := sessions.Check(w, r)
+
+	/* 	if r.Method != "POST" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	} */
+
+	var data LoginData
+	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		// Reload login page if CheckSessions returns an error
-		//		renderTemplate(w, r, err.Error()+": please try logging in or registering",
-		//			"./frontend/static/login.html")
-	} else if userName != "" {
-		// Redirect to main page if user is logged in
-		redirectHandler(w, r, "/", "You are already logged in")
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
-	// Check if redirected from other pages or not
-	msg := ""
-	messageCookie, err := r.Cookie(MESSAGE_COOKIE_NAME)
-	if err == nil {
-		msg = messageCookie.Value
-	}
-	fmt.Println("msg", msg)
-	fmt.Println("username", userName)
-	if r.Method == "POST" {
-
-		// Get the form values and perform database checks for validity
-		username := r.PostFormValue("loginusername")
-		password := r.PostFormValue("loginpassword")
-
-		user, err := db.SelectDataHandler("users", "userName", username)
-		fmt.Println("user", user)
+	user, err := db.SelectDataHandler("users", "NickName", data.NickName)
+	var msg string
+	if err != nil {
+		msg = "The user doesn't exist"
+		fmt.Println("error:", msg)
+		responseData := map[string]string{"nickname": "wrong"}
+		json.NewEncoder(w).Encode(responseData)
+	} else if !security.MatchPasswords([]byte(data.Password), user.(db.User).Pass) {
+		fmt.Println("The password is incorrect")
+		responseData := map[string]string{"nickname": ""}
+		json.NewEncoder(w).Encode(responseData)
+	} else {
+		keys, err := sessions.Login(w, r, data.NickName) // Get userName from Login post method data
 		if err != nil {
 			msg = "The user doesn't exist"
+			fmt.Println("err", err)
 			//	renderTemplate(w, r, msg, "./frontend/static/login.html")
-		} else if !security.MatchPasswords([]byte(password), user.(db.User).Pass) {
-			//renderTemplate(w, r, "The password is incorrect", "./frontend/static/login.html")
 		} else {
-			err := sessions.Login(w, r, username) // Get userName from Login post method data
-			if err != nil {
-				msg = "An error was encountered while logging in. Please try again"
-				//	renderTemplate(w, r, msg, "./frontend/static/login.html")
-			}
-
 			// Redirect to the main page upon successful login
-			fmt.Println("redirecting")
+			responseData := map[string]string{"nickname": keys[0]}
+			json.NewEncoder(w).Encode(responseData)
+
 			redirectHandler(w, r, "/", "You are successfully logged in")
-
 		}
-	} else if r.Method == "GET" {
-		// Display the login page with the message if redirected from other pages
-		//renderTemplate(w, r, msg, "./frontend/static/login.html")
-	} else {
-		//	SendError(w, r, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 	}
-	r.URL.Path = "/"
-	http.ServeFile(w, r, "./static/index.html")
-
 }
 
 func Register(w http.ResponseWriter, r *http.Request) {
@@ -106,87 +97,88 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		// Reload login page if CheckSessions returns an error
 		//		renderTemplate(w, r, err.Error()+": please try logging in or registering",
 		//			"./frontend/static/login.html")
+		fmt.Println("error is :", err.Error())
 	} else if userName != "" {
+		fmt.Println("user is :", userName)
 		// Redirect to main page if user is logged in
 		//		redirectHandler(w, r, "/main", "You are already logged in")
 	}
 
 	// Check if redirected from other pages or not
-	msg := ""
 	messageCookie, err := r.Cookie(MESSAGE_COOKIE_NAME)
 	if err == nil {
-		msg = messageCookie.Value
+		fmt.Println("error is :", messageCookie.Value)
 	}
-	fmt.Println("msg", msg)
-
-	//testing
-	// Decode JSON data from request body
-	var formData RegisterJsonData
-	errGet := json.NewDecoder(r.Body).Decode(&formData)
-	if errGet != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	// Handle form data
-	log.Println("Name:", formData.NickName)
-	log.Println("Email:", formData.Email)
-
-	// Send response
-	response := map[string]string{"message": "Form submitted successfully"}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
-	//end testing
-
 	if r.Method == "POST" {
-		err := r.ParseMultipartForm(0)
-
+		var rgData RegisterJsonData
+		err := json.NewDecoder(r.Body).Decode(&rgData)
 		if err != nil {
-			// Handle error
+			w.WriteHeader(http.StatusBadRequest)
+			return
 		}
-		username := r.PostFormValue("registerusername")
-		fname := r.PostFormValue("registerfname")
-		lname := r.PostFormValue("registerlname")
-		birthdate := r.PostFormValue("registerbirthdate")
-		email := r.PostFormValue("registeremail")
-		password := r.PostFormValue("registerpassword")
-		cpassword := r.PostFormValue("registercpassword")
-		user := fmt.Sprint(username, fname, lname, birthdate, email, password, cpassword)
-		fmt.Println("user", user)
+		// Register the user in the database
+		dt := time.Now()
+		password, errPwd := security.HashPwd([]byte(rgData.Password), 8)
+		if errPwd != nil {
+			fmt.Errorf(errPwd.Error())
+		}
+		_, err = db.InsertData("users", rgData.NickName, rgData.FistName, rgData.LastName, rgData.Gender, rgData.Bd, rgData.Email, password, dt.Format("01-02-2006 15:04:05"))
+		if err != nil {
+			fmt.Println("error reg", err)
+		}
+		// Redirect to the login page upon successful registration
+		redirectHandler(w, r, "/login", "Your account has been created")
+
+		//response success
+		responseData := map[string]string{"status": "success"}
+		json.NewEncoder(w).Encode(responseData)
+
 	}
-	r.URL.Path = "/"
-	http.ServeFile(w, r, "./static/index.html")
 
 }
 
 func Blamer(w http.ResponseWriter, r *http.Request) {
-	userName, err := sessions.Check(w, r)
+	nickname, err := sessions.Check(w, r)
 	if err != nil {
-		// Reload login page if CheckSessions returns an error
-		//		renderTemplate(w, r, err.Error()+": please try logging in or registering",
-		//			"./frontend/static/login.html")
-	} else if userName != "" {
-		// Redirect to main page if user is logged in
-		//		redirectHandler(w, r, "/main", "You are already logged in")
-	}
 
-	// Check if redirected from other pages or not
+	} else if nickname != "" {
+
+	}
 	msg := ""
 	messageCookie, err := r.Cookie(MESSAGE_COOKIE_NAME)
 	if err == nil {
 		msg = messageCookie.Value
+		fmt.Println("msg", msg)
+
 	}
 
-	fmt.Println("msg", msg)
-	fmt.Println("username", userName)
+	if r.Method == "POST" {
+		var post PostJsonData
+		err := json.NewDecoder(r.Body).Decode(&post)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		// insert post into database
+		err = insertPostToDB(nickname, post.Title, post.Content, post.AllTopics)
+		if err != nil {
+			fmt.Println("error reg", err)
+		}
+		// Redirect to the login page upon successful registration
+		redirectHandler(w, r, "/login", "Your account has been created")
+
+		//response success
+		responseData := map[string]string{"status": "success"}
+		json.NewEncoder(w).Encode(responseData)
+
+	}
 
 	// Call the GetMainDataStruct function to get the data
-	mainData, err := GetMainDataStruct(r, userName)
+	mainData, err := GetMainDataStruct(r, nickname)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	// Marshal the MainData struct into a JSON string
 	jsonData, err := json.Marshal(mainData)
 	if err != nil {
@@ -197,9 +189,9 @@ func Blamer(w http.ResponseWriter, r *http.Request) {
 
 	// Set the content type of the response to JSON
 	w.Header().Set("Content-Type", "application/json")
-
 	// Send the JSON string in the response body
 	w.Write(jsonData)
+
 }
 func Profile(w http.ResponseWriter, r *http.Request) {
 	// Check for logged-in session cookie, renew / update if found, return username if found
@@ -224,61 +216,102 @@ func Profile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Handle GET request and render profile page
-	if r.Method == "GET" {
-		url := r.URL.Query()
-		username := url.Get("Username")
-		// Check if username is valid
-		_, err := getUserId(username)
-		if err != nil {
-			redirectHandler(w, r, "/main", "User "+username+" does not exist")
-			return
-		}
-		// Retreive data for profile page
-		profilePageData, err := GetProfileDataStruct(r, activeUsername, username)
-		if err != nil {
-			//SendError(w, r, http.StatusInternalServerError, "Internal Server Error:\n"+err.Error())
-			return
-		}
-
-		// Marshal the MainData struct into a JSON string
-		jsonData, err := json.Marshal(profilePageData)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		// Set the content type of the response to JSON
-		w.Header().Set("Content-Type", "application/json")
-
-		// Send the JSON string in the response body
-		w.Write(jsonData)
-	} else {
-		SendError(w, r, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
-		return
-	}
-
-}
-
-/* func sendData(w http.ResponseWriter, r *http.Request) {
-	// Call the GetMainDataStruct function to get the data
-	mainData, err := GetMainDataStruct(r, "guest")
+	//if r.Method == "GET" {
+	//	url := r.URL.Query()
+	//username := url.Get("Username")
+	username := "testUser5"
+	// Check if username is valid
+	/* 	_, err := getUserId(username)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		redirectHandler(w, r, "/main", "User "+username+" does not exist")
+		return
+	} */
+	// Retreive data for profile page
+	profilePageData, err := GetProfileDataStruct(r, activeUsername, username)
+	if err != nil {
+		//SendError(w, r, http.StatusInternalServerError, "Internal Server Error:\n"+err.Error())
 		return
 	}
 
 	// Marshal the MainData struct into a JSON string
-	jsonData, err := json.Marshal(mainData)
+	jsonData, err := json.Marshal(profilePageData)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	json.Unmarshal(jsonData, &mainData)
+	json.Unmarshal(jsonData, &profilePageData)
 
 	// Set the content type of the response to JSON
 	w.Header().Set("Content-Type", "application/json")
 
 	// Send the JSON string in the response body
 	w.Write(jsonData)
+	/* } else {
+		SendError(w, r, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
+		return
+	} */
+
 }
-*/
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+
+func WsHandler(w http.ResponseWriter, r *http.Request) {
+	// Upgrade the HTTP connection to a WebSocket connection
+	nickname, err := sessions.Check(w, r)
+	if err != nil {
+
+	} else if nickname == "" {
+
+	}
+
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	// Add the WebSocket connection to the clients map
+	Clients[nickname] = conn
+
+	defer func() {
+		// Remove the WebSocket connection from the clients map
+		delete(Clients, nickname)
+		conn.Close()
+	}()
+	// Add new client to clients map
+	Clients[nickname] = conn
+	// Read messages from the WebSocket connection
+	for {
+		_, message, err := conn.ReadMessage()
+		if err != nil {
+			log.Println(err)
+			break
+		}
+		var messageData MessageData
+		err = json.Unmarshal(message, &messageData)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
+		err = SaveMessage(messageData)
+		if err != nil {
+			log.Println(errors.New("error saving message"), err)
+			continue
+		}
+
+		// Broadcast message to receiver
+		for cNickname, c := range Clients {
+			if cNickname == messageData.Receiver || cNickname == messageData.Sender {
+				err = c.WriteMessage(websocket.TextMessage, message)
+				if err != nil {
+					log.Println(err)
+				}
+			}
+		}
+	}
+
+}
