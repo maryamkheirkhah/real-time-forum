@@ -7,6 +7,7 @@ import (
 	"real-time-forum/sessions"
 )
 
+//im adi
 func main() {
 	// Perform database check, initialise if not found
 	db.Check("./db/forum.db", "./db/createDb.sql")
