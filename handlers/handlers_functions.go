@@ -798,7 +798,7 @@ func SaveMessage(msgData MessageData) error {
 	if err != nil {
 		return errors.New("error in getting user id from database:" + err.Error())
 	}
-	_, err = db.InsertData("messages", userId, receiverId, msgData.Msg, time.Now().Format("2006-01-02 15:04:05"))
+	_, err = db.InsertData("messages", userId, receiverId, msgData.Msg, msgData.Time)
 	if err != nil {
 		return errors.New("error in saving message to database:" + err.Error())
 	}

@@ -76,9 +76,9 @@ const router = async () => {
        if (match.route.view == blamer) {
            
               if (
-                     document.getElementById("activeUserName").textContent !==
-                            "guest" &&
-                     document.getElementById("activeUserName") !== null
+                     document.getElementById("activeUserName") !== null && document.getElementById("activeUserName").textContent !==
+                            "guest" 
+                     
               ) {
                      //webSocket connection
 
@@ -105,9 +105,13 @@ const router = async () => {
                             socket.send(JSON.stringify(payload));
                } });
                      // update chatbox when receive message from server
-                     socket.addEventListener("message", (event) => {
-                            view.updatedChatBox()
-                     });
+                 /*     socket.addEventListener("message", (event) => {
+                           view.updatedChatBox()
+                     }); */
+                     socket.onmessage = async (event) => {
+                            console.log("message", event.data)
+                            view.updatedChatBox(JSON.parse(event.data))
+                     };
                      // update chatbox when click on chage chat name
                      document.getElementById("bReceiver").addEventListener("change", (event) => {
                             view.updatedChatBox()
@@ -136,6 +140,7 @@ const router = async () => {
                                           }
                                    }
                             });
+                     // post content to server
                      document
                             .getElementById("letPost")
                             .addEventListener("click", async (e) => {
@@ -156,12 +161,18 @@ const router = async () => {
                                    });
                             });
               } else if (
-                     document.getElementById("activeUserName").textContent ===
+                     document.getElementById("activeUserName") !== null && document.getElementById("activeUserName").textContent ===
                      "guest"
               ) {
                      let postBox = document.getElementById("cPostBox");
                      postBox.style.display = "none";
               }
+              document.querySelectorAll(".pBox").forEach((box) => {
+                     box.addEventListener("click", async () => {
+                             view.blameContent(box);
+                     });    
+              }); 
+
        }
        if (match.route.view == register) {
               console.log("register js");

@@ -12,7 +12,7 @@ a {
        color: var(--color-tertiary);
        text-decoration: none;
 }
-::placeholder{
+::placeholder {
        color: var(--color-primary);
 }
 a:hover {
@@ -81,7 +81,7 @@ body {
 .login-text {
        grid-area: 1 / 1 / 2 / 2;
 }
-.login-text{
+.login-text {
        display: flex;
        justify-content: center;
        align-items: center;
@@ -94,9 +94,8 @@ body {
 .login-form .input {
        position: relative;
        margin: 10px 0;
-       
 }
-#gender{
+#gender {
        margin: 0;
        width: 100%;
        padding: 10px 0;
@@ -109,8 +108,7 @@ body {
        background: transparent;
 }
 
-.login-form .input input{
-       
+.login-form .input input {
        width: 100%;
        padding: 10px 0;
        font-size: 16px;
@@ -121,18 +119,14 @@ body {
        outline: none;
        background: transparent;
 }
-.login-form .input label{
+.login-form .input label {
        position: absolute;
        top: 10px;
        left: 0;
 }
-
-
 .login-form {
        grid-area: 2 / 1 / 3 / 2;
 }
-
-
 .login-submit {
        grid-area: 3 / 1 / 4 / 2;
 }
@@ -187,7 +181,7 @@ body {
 .register-text {
        grid-area: 1 / 1 / 2 / 2;
 }
-.register-text{
+.register-text {
        display: flex;
        justify-content: center;
        align-items: center;
@@ -205,7 +199,7 @@ body {
        position: relative;
        margin: 10px 0;
 }
-.register-form .input input{
+.register-form .input input {
        width: 100%;
        padding: 10px 0;
        font-size: 16px;
@@ -216,7 +210,6 @@ body {
        outline: none;
        background: transparent;
 }
-
 
 .register-submit {
        grid-area: 3 / 1 / 4 / 2;
@@ -267,7 +260,6 @@ body {
               ". . ."
               ". bPostForm ."
               ". . .";
-     
 }
 
 .bPostForm {
@@ -287,11 +279,9 @@ body {
        border-radius: 0% 0% 50% 50% / 0% 0% 5% 5%;
        box-shadow: 10px 10px rgba(0, 0, 0, 0.25);
 }
-.bPostForm:hover .sendB{
+.bPostForm:hover .sendB {
        border-radius: 0% 0% 900% 900% / 0% 0% 500% 500%;
 }
-
-
 .topSide {
        margin-top: 20px;
        margin-left: 10px;
@@ -303,13 +293,11 @@ body {
        grid-template-areas: "pTitle pTopics";
        grid-area: 1 / 1 / 2 / 2;
        width: 929px;
-
 }
-
 .pTitle {
-       grid-area: pTitle; 
+       grid-area: pTitle;
        font-family: regular;
-       font-size: 20px; 
+       font-size: 20px;
        color: var(--color-quaternary);
 }
 .pTitle input {
@@ -319,10 +307,9 @@ body {
        outline: none;
        border: none;
        font-family: regular;
-       font-size: 20px; 
+       font-size: 20px;
        color: var(--color-primary);
 }
-
 .pTopics {
        grid-area: pTopics;
        background: var(--color-quaternary);
@@ -331,10 +318,9 @@ body {
        outline: none;
        border: none;
        font-family: regular;
-       font-size: 20px; 
+       font-size: 20px;
        color: var(--color-primary);
 }
-
 .botSide {
        margin-left: 10px;
        width: 96%;
@@ -344,31 +330,30 @@ body {
        resize: none;
        outline: none;
        border: none;
-       width: 100%;  
+       width: 100%;
        height: 100px;
        font-family: regular;
-       font-size: 20px; 
+       font-size: 20px;
        color: var(--color-primary);
 }
 .sendB {
-  font-size: 1.5em;
-  font-family: regular;
-  outline: none;
-  border: none;
-  position: relative;
+       font-size: 1.5em;
+       font-family: regular;
+       outline: none;
+       border: none;
+       position: relative;
        background: var(--color-quaternary);
-  border-radius: 0% 0% 0% 0% / 0% 0% 0% 0%;
-  transition: all 0.4s ease;
-  color: var(--color-primary);
-  
+       border-radius: 0% 0% 0% 0% / 0% 0% 0% 0%;
+       transition: all 0.4s ease;
+       color: var(--color-primary);
 }
-.sendB:hover{
+.sendB:hover {
        color: var(--color-secondary);
        border-radius: 0% 0% 900% 900% / 0% 0% 500% 500%;
 }
 .bUser {
        grid-area: bUser;
-       
+
        width: 400px;
        height: 100px;
        position: relative;
@@ -378,7 +363,7 @@ body {
        box-shadow: 10px 10px rgba(0, 0, 0, 0.15);
        transition: all 0.4s ease;
 }
-.bUser:hover{
+.bUser:hover {
        border-radius: 0% 0% 50% 50% / 0% 0% 5% 5%;
        box-shadow: 10px 10px rgba(0, 0, 0, 0.25);
 }
@@ -387,9 +372,7 @@ body {
        height: 800px;
        grid-area: bPost;
        overflow: auto;
-
 }
-
 .bRightSideArea {
        display: grid;
        grid-template-columns: 0.2fr 2.6fr 0.2fr;
@@ -401,13 +384,11 @@ body {
               ". bChat .";
        grid-area: bRightSideArea;
 }
-
 .bTopics {
        grid-area: bTopics;
        display: grid;
        grid-template-columns: auto auto auto auto;
 }
-
 .bTopic {
        margin: 10px;
        padding: 10px;
@@ -419,7 +400,7 @@ body {
        box-shadow: 10px 10px rgba(0, 0, 0, 0.15);
        transition: all 0.4s ease;
        font-family: regular;
-       font-size: 20px; 
+       font-size: 20px;
        color: var(--color-quaternary);
        transition: all 0.4s ease;
 }
@@ -427,9 +408,8 @@ body {
        border-radius: 0% 0% 50% 50% / 0% 0% 5% 5%;
        box-shadow: 5px 5px rgba(0, 0, 0, 0.25);
        background-color: var(--color-quaternary);
-       color:var(--color-primary);
+       color: var(--color-primary);
 }
-
 .bChat {
        display: grid;
        grid-template-rows: 0.2fr 0.3fr 2.5fr;
@@ -460,24 +440,20 @@ body {
        color: var(--color-primary);
        transition: all 0.4s ease;
 }
-.bSreachBar option{
+.bSreachBar option {
        background-color: var(--color-quaternary);
        color: var(--color-primary);
        transition: all 0.4s ease;
 }
-
-
-
 .bChatBox {
        grid-area: 3 / 1 / 4 / 2;
 }
-.bChatBox .message-list{
-       height: 400px   ;
+.bChatBox .message-list {
+       height: 400px;
        overflow: auto;
        color: #2d4443;
 }
 .bChatBox .message-list .message1 {
-       
        color: green;
        font-weight: 800;
        right: 0;
@@ -488,16 +464,13 @@ body {
 
        font-weight: 800;
 }
-
-
-.bChatBox .message-input{
-       width:100%;
+.bChatBox .message-input {
+       width: 100%;
        height: 50px;
        outline: none;
        border: none;
        padding: 0;
 }
-
 .bPost {
        display: grid;
        grid-template-columns: 0.1fr 3.1fr 0.1fr;
@@ -508,10 +481,7 @@ body {
               ". . ."
               ". pBox ."
               ". . .";
-
-       
 }
-
 .pBox {
        display: grid;
        grid-template-columns: 2.8fr 0.6fr 0.4fr 0.4fr;
@@ -532,19 +502,186 @@ body {
        border-radius: 0% 0% 50% 50% / 0% 0% 5% 5%;
        box-shadow: 10px 10px rgba(0, 0, 0, 0.25);
 }
+.blameContent {
+       grid-area: pBox;
+       display: grid;
+       grid-template-columns: 0.1fr 3.1fr 0.1fr;
+       grid-template-rows: 0.3fr 0.3fr 3.6fr 0.3fr 0.3fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-template-areas:
+              ". . ."
+              ". pTop ."
+              ". pContent ."
+              ". pBottom ."
+              ". . .";
+       z-index: 2;
+       position: relative;
+       background: white;
+       border-radius: 0% 0% 0% 0% / 0% 0% 0% 0%;
+       box-shadow: 20px 20px rgba(0, 0, 0, 0.15);
+       transition: all 1s ease;
+       align-items: center;
+       padding-left: 10px;
+       height: 400px;
+}
+.blameContent:hover{
+       border-radius: 0% 0% 50% 50% / 0% 0% 5% 5%;
+       box-shadow: 10px 10px rgba(0, 0, 0, 0.25);
+}
+
+.pbTop {
+       display: grid;
+       grid-template-columns: 1fr 1fr 1fr;
+       grid-template-rows: 1fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-area: pTop;
+
+}
+
+.pbTitle {
+       grid-area: 1 / 1 / 2 / 2;
+       font-family: regular;
+       font-size: 20px;
+       color: var(--color-quaternary);
+       font-weight: 800;
+       text-align: left;
+
+}
+
+
+.pbUsername {
+       grid-area: 1 / 3 / 2 / 4;
+       font-family: regular;
+       font-size: 20px;
+       color: var(--color-quaternary);
+       font-weight: 800;
+       text-align: right;
+}
+
+.pbTime {
+       grid-area: 1 / 2 / 2 / 3;
+       font-family: regular;
+       font-size: 13px;
+       color: var(--color-quaternary);
+
+}
+
+ .pbContent {
+       margin-top: 10px;
+       grid-area: pContent;
+       height: 90%;
+       width: 100%;
+       resize: none;
+       outline: none;
+       border: none;
+       font-family: regular;
+       font-size: 18px;
+       color: var(--color-quaternary);
+       
+       
+}
+
+.pbBottom {
+       display: grid;
+       grid-template-columns: 2.5fr 0.5fr 0.5fr 0.5fr;
+       grid-template-rows: 1fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-template-areas: "pTopic pLike pDislike pComment";
+       grid-area: pBottom;
+}
+
+.pbTopic {
+       grid-area: pTopic;
+}
+/* this i just number box */
+
+.pbLike {
+       grid-area: pLike;
+}
+
+.pbDislike {
+       grid-area: pDislike;
+}
+
+.pbComment {
+       grid-area: pComment;
+}
+
+.pbCommentBox{
+       grid-area: pBox;
+       display: grid;
+       grid-template-columns: 0.1fr 2.6fr 0.5fr 0.1fr;
+       grid-template-rows: 0.1fr 0.3fr 3.6fr 0.3fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-template-areas:
+              ". . . ."
+              ". pbCommentBoxTitle . ."
+              ". pbCommentBoxContent sendComment ."
+              ". . . .";
+       z-index: 2;
+       position: relative;
+       background: var(--color-quaternary);
+       border-radius: 0% 0% 0% 0% / 0% 0% 0% 0%;
+       box-shadow: 20px 20px rgba(0, 0, 0, 0.15);
+       transition: all 1s ease;
+}
+.pbCommentBox:hover{
+       border-radius: 0% 0% 50% 50% / 0% 0% 5% 5%;
+       box-shadow: 10px 10px rgba(0, 0, 0, 0.25);
+}
+
+.pbCommentBoxTitle{
+       grid-area: pbCommentBoxTitle;
+       font-family: regular;
+       font-size: 20px;
+       color: var(--color-primary);
+       font-weight: 800;
+       text-align: left;
+       margin-top: 5px;
+}
+
+.pbCommentBoxContent{
+       grid-area: pbCommentBoxContent;
+       background: transparent;
+       color: var(--color-primary);
+       height: 90%;
+       width: 95%;
+       resize: none;
+       outline: none;
+       border: none;
+       font-family: regular;
+       font-size: 18px;
+}
+.sendComment{
+       grid-area: sendComment;
+       background: transparent;
+       color: var(--color-primary);
+       height: 90%;
+       width: 95%;
+       resize: none;
+       outline: none;
+       border: none;
+       font-family: regular;
+       font-size: 18px;
+}
+.sendComment:hover{
+       color: var(--color-secondary);
+}
+
 
 .pBlamer {
        grid-area: pBlamer;
 }
-
 .pTopic {
        grid-area: pTopic;
 }
-
 .pComent {
        grid-area: pComent;
 }
-
 .pContent {
        display: grid;
        grid-template-rows: 1fr 0.5fr 2fr;
@@ -553,59 +690,53 @@ body {
        grid-auto-flow: row;
        grid-area: pContent;
 }
-
 .pTime {
        grid-area: 2 / 1 / 3 / 2;
        font-family: regular;
-       font-size: 15px; 
+       font-size: 15px;
        color: var(--color-quaternary);
 }
-
 .pTitle {
        grid-area: 1 / 1 / 2 / 2;
        font-family: regular;
-       font-size: 20px; 
+       font-size: 20px;
        color: var(--color-quaternary);
        font-weight: 800;
 }
-
 .pStory {
        grid-area: 3 / 1 / 4 / 2;
        font-family: regular;
-       font-size: 18px; 
+       font-size: 18px;
        color: var(--color-quaternary);
 }
-
-
 /*>---------------------- Blamer/main -----------------------< */
 /*>---------------------- Profile -----------------------< */
-
-.pContainer {  display: grid;
+.pContainer {
+       display: grid;
        grid-template-columns: 0.1fr 3fr 0.1fr;
        grid-template-rows: 0.1fr 3fr 0.1fr;
        gap: 0px 0px;
        grid-auto-flow: row;
        grid-template-areas:
-         ". . ."
-         ". profile ."
-         ". . .";
-     }
-     
-     .profile {  display: grid;
+              ". . ."
+              ". profile ."
+              ". . .";
+}
+.profile {
+       display: grid;
        grid-template-columns: 1fr 1.3fr 0.7fr;
        grid-template-rows: 0.2fr 1.8fr;
        grid-auto-columns: 1fr;
        gap: 0px 0px;
        grid-auto-flow: row;
        grid-template-areas:
-         ". . pUser"
-         ". . .";
+              ". . pUser"
+              ". . .";
        grid-area: profile;
-     }
-     
-     .pUser {
+}
+.pUser {
        grid-area: pUser;
-       
+
        width: 400px;
        height: 100px;
        position: relative;
@@ -615,97 +746,93 @@ body {
        box-shadow: 10px 10px rgba(0, 0, 0, 0.15);
        transition: all 0.4s ease;
 }
-.pUser:hover{
+.pUser:hover {
        border-radius: 0% 0% 50% 50% / 0% 0% 5% 5%;
        box-shadow: 10px 10px rgba(0, 0, 0, 0.25);
 }
+.infoContainer {
+       position: absolute;
+       display: grid;
+       grid-template-columns: 0.1fr 3.1fr 0.1fr;
+       grid-template-rows: 0.1fr 2.9fr 0.1fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-template-areas:
+              ". . ."
+              ". pProfileBox ."
+              ". . .";
+       margin: 100px 0 0 0;
+       width: 1300px;
+       height: 1000px;
+}
+.pProfileBox {
+       display: grid;
+       grid-template-columns: 0.6fr 2.3fr 0.1fr;
+       grid-template-rows: 1fr 1.8fr 0.2fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-template-areas:
+              "pProfileImg info1 ."
+              ". info2 ."
+              ". . .";
+       grid-area: pProfileBox;
+       width: 100%;
+       height: 100%;
+       position: relative;
+       background: var(--color-quaternary);
+       border-radius: 0% 0% 0% 0% / 0% 0% 0% 0%;
+       box-shadow: 20px 20px rgba(0, 0, 0, 0.15);
+       transition: all 0.4s ease;
+}
+.pProfileBox:hover {
+       border-radius: 0% 0% 50% 50% / 0% 0% 5% 5%;
+       box-shadow: 10px 10px rgba(0, 0, 0, 0.25);
+}
+.pProfileImg {
+       grid-area: pProfileImg;
+       background: url("/static/images/profile.jpg");
+       background-size: cover;
+       background-position: center;
+       background-repeat: no-repeat;
+       width: 90%;
+       height: 90%;
+       border: #2d4443 5px solid;
+}
+.info1 {
+       display: grid;
+       grid-template-rows: 1fr 0.7fr 0.7fr 1.6fr;
+       grid-auto-columns: 1fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-area: info1;
+}
+.userName {
+       grid-area: 1 / 1 / 2 / 2;
+}
+.userTitle {
+       grid-area: 2 / 1 / 3 / 2;
+}
+.userLater {
+       grid-area: 3 / 1 / 4 / 2;
+}
+.info2 {
+       display: grid;
+       grid-template-rows: 0.4fr 1.6fr;
+       grid-auto-columns: 1fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-area: info2;
+}
+.userNav {
+       grid-area: 1 / 1 / 2 / 2;
+}
 
-     
-       .infoContainer {  
-              position: absolute;
-              display: grid;
-              grid-template-columns: 0.1fr 3.1fr 0.1fr;
-              grid-template-rows: 0.1fr 2.9fr 0.1fr;
-              gap: 0px 0px;
-              grid-auto-flow: row;
-              grid-template-areas:
-                ". . ."
-                ". pProfileBox ."
-                ". . .";
-                margin: 100px 0 0 0;
-                width: 1300px;
-                height: 1000px;
-            }
-            
-            .pProfileBox {  display: grid;
-              grid-template-columns: 0.6fr 2.3fr 0.1fr;
-              grid-template-rows: 1fr 1.8fr 0.2fr;
-              gap: 0px 0px;
-              grid-auto-flow: row;
-              grid-template-areas:
-                "pProfileImg info1 ."
-                ". info2 ."
-                ". . .";
-              grid-area: pProfileBox;
-              width: 100%;
-              height: 100%;
-              position: relative;
-              background: var(--color-quaternary);
-              border-radius: 0% 0% 0% 0% / 0% 0% 0% 0%;
-              box-shadow: 20px 20px rgba(0, 0, 0, 0.15);
-              transition: all 0.4s ease;
+.userInfo {
+       grid-area: 2 / 1 / 3 / 2;
+       display: none;
+}
+.userInfo :active {
+       display: block;
+}
 
-            }
-            .pProfileBox:hover {
-              border-radius: 0% 0% 50% 50% / 0% 0% 5% 5%;
-              box-shadow: 10px 10px rgba(0, 0, 0, 0.25);
-            }
-
-            .pProfileImg{
-
-              grid-area:pProfileImg;
-              background: url("/static/images/profile.jpg");
-              background-size: cover;
-              background-position: center;
-              background-repeat: no-repeat;
-              width: 90%;
-              height: 90%;
-              border: #2d4443 5px solid;
-            }
-            
-            .info1 {  display: grid;
-              grid-template-rows: 1fr 0.7fr 0.7fr 1.6fr;
-              grid-auto-columns: 1fr;
-              gap: 0px 0px;
-              grid-auto-flow: row;
-              grid-area: info1;
-             
-            }
-            
-            .userName { grid-area: 1 / 1 / 2 / 2; 
-             }
-            
-            .userTitle { grid-area: 2 / 1 / 3 / 2; 
-             }
-            
-            .userLater { grid-area: 3 / 1 / 4 / 2; 
-             }
-            
-            .info2 {  display: grid;
-              grid-template-rows: 0.4fr 1.6fr;
-              grid-auto-columns: 1fr;
-              gap: 0px 0px;
-              grid-auto-flow: row;
-              grid-area: info2;
-             ;
-            }
-            
-            .userNav { grid-area: 1 / 1 / 2 / 2;
-             ; }
-            
-            .userInfo { grid-area: 2 / 1 / 3 / 2; 
-              display: none;}
-            .userInfo :active { display: block; }  
-            
-       
 /*>---------------------- Profile -----------------------< */

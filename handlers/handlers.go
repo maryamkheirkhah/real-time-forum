@@ -137,7 +137,13 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 }
 
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+
 func Blamer(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("blamer")
 	nickname, err := sessions.Check(w, r)
 	if err != nil {
 
@@ -180,17 +186,41 @@ func Blamer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Marshal the MainData struct into a JSON string
-	jsonData, err := json.Marshal(mainData)
+	websocketEndpoint(w, r, mainData)
+	/* 	jsonData, err := json.Marshal(mainData)
+	   	if err != nil {
+	   		http.Error(w, err.Error(), http.StatusInternalServerError)
+	   		return
+	   	}
+	   	json.Unmarshal(jsonData, &mainData)
+
+	   	// Set the content type of the response to JSON
+	   	w.Header().Set("Content-Type", "application/json")
+	   	// Send the JSON string in the response body
+	   	w.Write(jsonData) */
+
+}
+func websocketEndpoint(w http.ResponseWriter, r *http.Request, mainData MainData) {
+	fmt.Println("websocketEndpoint")
+	// upgrade the connection
+	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err)
 		return
 	}
-	json.Unmarshal(jsonData, &mainData)
+	// encode the data as a JSON string
+	jsonData, err := json.Marshal(mainData)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
-	// Set the content type of the response to JSON
-	w.Header().Set("Content-Type", "application/json")
-	// Send the JSON string in the response body
-	w.Write(jsonData)
+	// send the JSON string to the client
+	err = conn.WriteMessage(websocket.TextMessage, jsonData)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 }
 func Profile(w http.ResponseWriter, r *http.Request) {
@@ -253,11 +283,6 @@ func Profile(w http.ResponseWriter, r *http.Request) {
 
 }
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
-
 func WsHandler(w http.ResponseWriter, r *http.Request) {
 	// Upgrade the HTTP connection to a WebSocket connection
 	nickname, err := sessions.Check(w, r)
@@ -291,10 +316,19 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		var messageData MessageData
+		fmt.Println("message", string(message), "from", nickname)
 		err = json.Unmarshal(message, &messageData)
 		if err != nil {
 			log.Println(err)
 			continue
+		}
+		messageData.Time = time.Now().Format("2006-01-02 15:04:05")
+
+		// encode the data as a JSON string
+		jsonData, err := json.Marshal(messageData)
+		if err != nil {
+			log.Println(err)
+			return
 		}
 
 		err = SaveMessage(messageData)
@@ -306,7 +340,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		// Broadcast message to receiver
 		for cNickname, c := range Clients {
 			if cNickname == messageData.Receiver || cNickname == messageData.Sender {
-				err = c.WriteMessage(websocket.TextMessage, message)
+				err = c.WriteMessage(websocket.TextMessage, jsonData)
 				if err != nil {
 					log.Println(err)
 				}
