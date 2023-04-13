@@ -4,7 +4,7 @@ export default class extends abstract {
               super();
               this.connect().then(() => {
                      this.getData().then(() => {
-                            console.log("this data", this.data);
+                      /*       console.log("this data", this.data); */
                      });
               });
               this.app = document.querySelector("#app");
@@ -59,7 +59,7 @@ export default class extends abstract {
         <div class="bContainer">
         ${this.postBox}
         ${this.user}
-        ${this.posts}
+        <div id="mainPostsBox" class="bPosts">${this.posts}</div>
         <div class="bRightSideArea">
        ${this.Topics}
        ${this.chatBox}
@@ -67,7 +67,6 @@ export default class extends abstract {
         </div>
    `;
        }
-
        // findUser return user info
        findUser(uName = "guest") {
               if (uName !== "guest") {
@@ -90,10 +89,21 @@ export default class extends abstract {
             </div>`;
               }
        }
+      updatedPostList(topic) {
+
+              let postBox = document.querySelectorAll(".bPost")
+              postBox.forEach((post) => {
+                     post.remove()
+              })
+              // add new posts
+              let posts = this.findPost(topic);
+              document.getElementById("mainPostsBox").innerHTML = posts;
+       }
        // findPost return all posts
        findPost(topics = "all") {
+              let posts = "";
+              this.data.Posts.sort((b, a) => Date.parse(a.CreationTime) - Date.parse(b.CreationTime));
               if (topics == "all") {
-                     let posts = "";
                      if (this.data.Posts.length == 0) {
                             return "";
                      }
@@ -118,11 +128,36 @@ export default class extends abstract {
                                           </div>
                                           `;
                      });
-                     return `
-        <div id="mainPostsBox" class="bPosts">
-        ${posts}
-        </div>`;
+              } else if (topics != "all"){
+                     if (this.data.Posts.length == 0) {
+                            return "";
+                     }
+                     this.data.Posts.forEach((post) => {
+                            let newContent = post.Content;
+                            if (post.Content.length > 75) {
+                                   newContent =
+                                          post.Content.slice(0, 75) + " . . .";
+                            }
+                            if (post.Topics == topics) {
+                                   posts += `
+                                   <div class="bPost">
+                                   <div id="${post.Username}_${post.Title}" class="pBox">
+                                   <div class="pBlamer">${post.Username}</div>
+                                   <div class="pTopic">${post.Topics}</div>
+                                   <div class="pComent">${post.TotalComments}</div>
+                                   <div class="pContent">
+                                   <div class="pTitle">${post.Title}</div>
+                                   <div class="pTime">${post.CreationTime}</div>
+                                   <div class="pStory">${newContent}</div>
+                                   </div>
+                                   </div>
+                                   </div>
+                                   `;}
+                     });
               }
+              if (posts == ""){return this.findPost("all")}
+              return posts;
+           
        }
        findTopics() {
               let topics = "";
@@ -160,7 +195,7 @@ export default class extends abstract {
                 <textarea name="Content" class="textBox" placeholder="Lets Blame" ></textarea>
                 </div>
                 </form> 
-                <button  class="sendB" id="letPost" type="submit" href="/blamer" data-link>Post</button>
+                <button  class="sendB" id="letPost" type="submit" >Post</button>
         </div>
         </div>
         `;

@@ -74,11 +74,10 @@ const router = async () => {
 
        document.querySelector("#app").innerHTML = await view.getHtml();
        if (match.route.view == blamer) {
-           
               if (
-                     document.getElementById("activeUserName") !== null && document.getElementById("activeUserName").textContent !==
-                            "guest" 
-                     
+                     document.getElementById("activeUserName") !== null &&
+                     document.getElementById("activeUserName").textContent !==
+                            "guest"
               ) {
                      //webSocket connection
 
@@ -86,36 +85,69 @@ const router = async () => {
 
                      const messageInput =
                             document.getElementById("message-input");
-                    
-                            //  messageinput get event == enter will sent message to server
-                            messageInput.addEventListener("keydown", (event) => {
-                                   if (event.key === "Enter" && messageInput.value !== "") {
-                            const message = messageInput.value;
-                            messageInput.value = "";
-                            const payload = {
-                                   sender: document.getElementById(
-                                          "activeUserName"
-                                   ).textContent,
-                                   receiver: document.getElementById(
-                                          "bReceiver"
-                                   ).value,
-                                   content: message,
-                                          
-                            };
-                            socket.send(JSON.stringify(payload));
-               } });
+
+                     //  messageinput get event == enter will sent message to server
+                     messageInput.addEventListener("keydown", (event) => {
+                            if (
+                                   event.key === "Enter" &&
+                                   messageInput.value !== ""
+                            ) {
+                                   const message = messageInput.value;
+                                   messageInput.value = "";
+                                   const payload = {
+                                          sender: document.getElementById(
+                                                 "activeUserName"
+                                          ).textContent,
+                                          receiver: document.getElementById(
+                                                 "bReceiver"
+                                          ).value,
+                                          content: message,
+                                   };
+                                   socket.send(JSON.stringify(payload));
+                            }
+                     });
                      // update chatbox when receive message from server
-                 /*     socket.addEventListener("message", (event) => {
+                     /*     socket.addEventListener("message", (event) => {
                            view.updatedChatBox()
                      }); */
                      socket.onmessage = async (event) => {
-                            console.log("message", event.data)
-                            view.updatedChatBox(JSON.parse(event.data))
+                            console.log("message", event.data);
+                            view.updatedChatBox(JSON.parse(event.data));
                      };
                      // update chatbox when click on chage chat name
-                     document.getElementById("bReceiver").addEventListener("change", (event) => {
-                            view.updatedChatBox()
-                     });
+                     document
+                            .getElementById("bReceiver")
+                            .addEventListener("change", (event) => {
+                                   view.updatedChatBox();
+                            });
+                     // post content to server
+                     document
+                            .getElementById("letPost")
+                            .addEventListener("click", async (e) => {
+                                   console.log("im working on posting");
+                                   e.preventDefault();
+                                   const form = document.querySelector("form");
+                                   const data = new FormData(form);
+                                   const values = {};
+                                   for (let [key, value] of data.entries()) {
+                                          values[key] = value;
+                                   }
+                                   if (values.Content !== "" && values.Topics !== "" && values.Title !== "" 
+                                   && values.Content !== undefined && values.Topics !== undefined && values.Title !== undefined) {
+                                          console.log(values);
+                                   const response = await fetch("/blamer", {
+                                          method: "POST",
+                                          headers: {
+                                                 "Content-Type":
+                                                        "application/json",
+                                          },
+                                          body: JSON.stringify(values),
+                                   });
+                                   if (response.status === 200) {
+                                          navigateTo("/blamer");
+                                   }
+                            }
+                            });
 
                      // delete cookie when click logout button
                      document
@@ -140,39 +172,36 @@ const router = async () => {
                                           }
                                    }
                             });
-                     // post content to server
-                     document
-                            .getElementById("letPost")
-                            .addEventListener("click", async (e) => {
-                                   e.preventDefault();
-                                   const form = document.querySelector("form");
-                                   const data = new FormData(form);
-                                   const values = {};
-                                   for (let [key, value] of data.entries()) {
-                                          values[key] = value;
-                                   }
-                                   const response = await fetch("/blamer", {
-                                          method: "POST",
-                                          headers: {
-                                                 "Content-Type":
-                                                        "application/json",
-                                          },
-                                          body: JSON.stringify(values),
-                                   });
-                            });
               } else if (
-                     document.getElementById("activeUserName") !== null && document.getElementById("activeUserName").textContent ===
-                     "guest"
+                     document.getElementById("activeUserName") !== null &&
+                     document.getElementById("activeUserName").textContent ===
+                            "guest"
               ) {
                      let postBox = document.getElementById("cPostBox");
                      postBox.style.display = "none";
               }
-              document.querySelectorAll(".pBox").forEach((box) => {
+              // click on post box will show post content
+              let allPost = document.querySelectorAll(".pBox");
+              allPost.forEach((box) => {
                      box.addEventListener("click", async () => {
-                             view.blameContent(box);
-                     });    
-              }); 
+                            view.blameContent(box);
+                     });
+              });
+              // click on topic will show only posts belong to that topic
 
+              document.querySelectorAll(".bTopic").forEach((topic) => {
+                     topic.addEventListener("click", async () => {
+                            view.updatedPostList(
+                                   topic.querySelector(".tName").textContent
+                            );
+                            allPost = document.querySelectorAll(".pBox");
+                            allPost.forEach((box) => {
+                                   box.addEventListener("click", async () => {
+                                          view.blameContent(box);
+                                   });
+                            });
+                     });
+              });
        }
        if (match.route.view == register) {
               console.log("register js");
@@ -229,11 +258,11 @@ window.addEventListener("popstate", router);
 document.addEventListener("DOMContentLoaded", () => {
        document.body.addEventListener("click", (e) => {
               if (e.target.matches("[data-link]")) {
-                     console.log(
+                     /*   console.log(
                             "link",
                             e.target,
                             e.target.matches("[data-link]")
-                     );
+                     ); */
                      e.preventDefault();
                      navigateTo(e.target.href);
               }
