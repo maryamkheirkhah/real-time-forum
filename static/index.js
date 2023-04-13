@@ -79,48 +79,7 @@ const router = async () => {
                      document.getElementById("activeUserName").textContent !==
                             "guest"
               ) {
-                     //webSocket connection
-
-                     const socket = new WebSocket("ws://localhost:8080/ws");
-
-                     const messageInput =
-                            document.getElementById("message-input");
-
-                     //  messageinput get event == enter will sent message to server
-                     messageInput.addEventListener("keydown", (event) => {
-                            if (
-                                   event.key === "Enter" &&
-                                   messageInput.value !== ""
-                            ) {
-                                   const message = messageInput.value;
-                                   messageInput.value = "";
-                                   const payload = {
-                                          sender: document.getElementById(
-                                                 "activeUserName"
-                                          ).textContent,
-                                          receiver: document.getElementById(
-                                                 "bReceiver"
-                                          ).value,
-                                          content: message,
-                                   };
-                                   socket.send(JSON.stringify(payload));
-                            }
-                     });
-                     // update chatbox when receive message from server
-                     /*     socket.addEventListener("message", (event) => {
-                           view.updatedChatBox()
-                     }); */
-                     socket.onmessage = async (event) => {
-                            console.log("message", event.data);
-                            view.updatedChatBox(JSON.parse(event.data));
-                     };
-                     // update chatbox when click on chage chat name
-                     document
-                            .getElementById("bReceiver")
-                            .addEventListener("change", (event) => {
-                                   view.updatedChatBox();
-                            });
-                     // post content to server
+                     // click on post button will post content
                      document
                             .getElementById("letPost")
                             .addEventListener("click", async (e) => {
@@ -172,13 +131,14 @@ const router = async () => {
                                           }
                                    }
                             });
+                     
               } else if (
                      document.getElementById("activeUserName") !== null &&
                      document.getElementById("activeUserName").textContent ===
                             "guest"
               ) {
                      let postBox = document.getElementById("cPostBox");
-                     postBox.style.display = "none";
+                    postBox.remove()
               }
               // click on post box will show post content
               let allPost = document.querySelectorAll(".pBox");
@@ -191,9 +151,10 @@ const router = async () => {
 
               document.querySelectorAll(".bTopic").forEach((topic) => {
                      topic.addEventListener("click", async () => {
+                            if (topic.className === "bTopic") {
                             view.updatedPostList(
                                    topic.querySelector(".tName").textContent
-                            );
+                            );}
                             allPost = document.querySelectorAll(".pBox");
                             allPost.forEach((box) => {
                                    box.addEventListener("click", async () => {
@@ -290,3 +251,43 @@ async function readForm(address) {
        console.log(json);
        return response;
 }
+
+
+/*  //webSocket connection
+ const socket = new WebSocket("ws://localhost:8080/ws");
+
+ const messageInput =
+        document.getElementById("message-input");
+
+ //  messageinput get event == enter will sent message to server
+ messageInput.addEventListener("keydown", (event) => {
+        if (
+               event.key === "Enter" &&
+               messageInput.value !== ""
+        ) {
+               const message = messageInput.value;
+               messageInput.value = "";
+               const payload = {
+                      sender: document.getElementById(
+                             "activeUserName"
+                      ).textContent,
+                      receiver: document.getElementById(
+                             "bReceiver"
+                      ).value,
+                      content: message,
+               };
+               socket.send(JSON.stringify(payload));
+        }
+ });
+ // update chatbox when receive message from server
+ socket.onmessage = async (event) => {
+        console.log("message", event.data);
+        view.updatedChatBox(JSON.parse(event.data));
+ };
+ // update chatbox when click on chage chat name
+ document
+        .getElementById("bReceiver")
+        .addEventListener("change", (event) => {
+               view.updatedChatBox();
+        });
+  */

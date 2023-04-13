@@ -41,7 +41,7 @@ export default class extends abstract {
                      this.data.NickName = "guest";
               } else if (this.data.NickName !== "guest") {
                      this.activeUserName = this.data.NickName;
-                     this.makeChatBox();
+                     
               }
               this.user = this.findUser(this.data.NickName);
               this.posts = this.findPost("all");
@@ -51,6 +51,9 @@ export default class extends abstract {
               //this.updatedChatBox()
 
               // The rest of your code to retrieve data from the server
+/*  for make chat box
+              this.makeChatBox();
+              this.updatedChatBox(); */
        }
        // getHtml return html code
        async getHtml() {
@@ -71,20 +74,26 @@ export default class extends abstract {
        findUser(uName = "guest") {
               if (uName !== "guest") {
                      return `
-            <div class="bUser">
-                <div class="bUserImg"></div>
-                <div id="activeUserName" class="bUserName">${uName}</div>
-                <div class="bLogout">
-                <a href="/logout" id="logout">Logout</a>
-                </div>
-            </div>`;
+              <div class="bUser">
+                     <div class="userTop">
+                            <div id="activeUserName" class="bUserName">${uName}</div>
+                            <div class="bLogButton">
+                                   <a href="/logout" id="logout">Logout</a>
+                            </div>
+                      </div>
+                     <div class="userBottom">
+                            <div class="bChatButton">Chat</div>
+                     </div>
+               </div>
+                `;
               } else if (uName === "guest") {
                      return `
             <div class="bUser">
-                <div class="bUserImg"></div>
-                <div id="activeUserName" class="bUserName">guest</div>
-                <div class="bLogin">
-                <a href="/login">Login</a>
+                <div class="userTop">
+                     <div id="activeUserName" class="bUserName">guest</div>
+                     <div class="bLogButton">
+                     <a href="/login">Login</a>
+                     </div>
                 </div>
             </div>`;
               }
@@ -225,7 +234,7 @@ export default class extends abstract {
               </div>
               </div>`;
        }
-       updatedChat() {
+       async updatedChat() {
               let chat = "";
               let messages = [];
               if (this.message) {
@@ -238,6 +247,7 @@ export default class extends abstract {
                                           this.message
                                    );
               }
+              let receiver = await document.getElementById("bReceiver").value;
               // Combine send and receive messages into a single array
               if (this.data.Messages.send) {
                      messages = messages.concat(this.data.Messages.send);
@@ -248,19 +258,14 @@ export default class extends abstract {
 
               // Sort messages by time
               messages.sort((a, b) => new Date(a.time) - new Date(b.time));
-              console.log("all messages", messages);
               // Generate chat HTML
+              
               messages.forEach((message) => {
-                     if (
-                            ((message.sender == this.data.NickName &&
-                                   message.receiver ==
-                                          document.getElementById("bReceiver")
-                                                 .value) ||
-                                   (message.receiver == this.data.NickName &&
-                                          message.sender ==
-                                                 document.getElementById(
-                                                        "bReceiver"
-                                                 ).value)) &&
+                     if (receiver == null){
+
+                     
+                     if (((message.sender == this.data.NickName && message.receiver == receiver) ||
+                            (message.receiver == this.data.NickName &&message.sender ==receiver)) &&
                             message.content.length > 39
                      ) {
                             for (
@@ -274,6 +279,7 @@ export default class extends abstract {
                                           message.content.slice(i);
                             }
                      }
+              }
                      if (
                             message.sender == this.data.NickName &&
                             message.receiver ==
@@ -303,29 +309,25 @@ export default class extends abstract {
               this.data = await response.json(); */
               if (
                      this.activeUserName != null &&
-                     this.activeUserName.textContent !== "guest"
+                     this.activeUserName !== "guest"
               ) {
                      if (message != undefined) {
+
                             this.message = message;
-                            console.log(
-                                   "in updatedChatBox sender",
-                                   this.message.sender
-                            );
-                            console.log("in updatedChatBox", this.message);
                             let parent =
                                    document.getElementById("message-list");
                             let children =
                                    document.querySelectorAll(".message");
                             if (children.length > 0) {
                                    children.forEach((child) => child.remove());
-                            }
+                            } 
                             if (
-                                   this.message.sender ===
-                                          this.activeUserName.textContent ||
-                                   this.message.receiver ===
-                                          this.activeUserName.textContent
+                                   this.message.sender ==
+                                          this.activeUserName ||
+                                   this.message.receiver ==
+                                          this.activeUserName
                             ) {
-                                   parent.innerHTML = this.updatedChat();
+                                   parent.innerHTML = await this.updatedChat();
                             }
                      } else {
                             let parent =
@@ -337,9 +339,9 @@ export default class extends abstract {
                             }
                             if (
                                    this.data.NickName ===
-                                   this.activeUserName.textContent
+                                   this.activeUserName
                             ) {
-                                   parent.innerHTML = this.updatedChat();
+                                   parent.innerHTML = await this.updatedChat();
                             }
                      }
               }
