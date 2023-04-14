@@ -83,22 +83,27 @@ const router = async () => {
                      const socket = new WebSocket("ws://localhost:8080/ws");
                      // update chatbox when receive message from server
                      socket.onmessage = async (event) => {
-                            console.log("message", event.data);
                             view.updatedChatBox(JSON.parse(event.data));
                      };
 
  
                      // click on Chat to see contact list
                      document.getElementById("bChatButton").addEventListener("click", (e) => {
-                            console.log("im working on chat")
                             e.preventDefault();
+                            if (document.querySelectorAll(".bChatBox").length > 0){
+                                   document.querySelectorAll(".bChatBox").forEach((box) => {
+                                          box.remove();
+                                   });
+                            }
                             document.getElementById("bRightSideArea").appendChild(view.findContactList());
                             if (document.querySelectorAll(".bChatBox"))
-                            document.querySelectorAll(".bcButton").forEach((button) => {
+                                   document.querySelectorAll(".bcButton").forEach((button) => {
                                    button.addEventListener("click", async () => {
                                           document.getElementById("bRightSideArea").appendChild(view.findChatBox(button.id));
                                           view.updatedChatBox();
-                                          document.getElementById("bContactBox").remove();
+                                          document.querySelectorAll(".bContactBox").forEach((box) => {
+                                                 box.remove();
+                                          });
                                           const messageInput =
                                           document.getElementById("message-input");
               
@@ -120,7 +125,6 @@ const router = async () => {
                                                         ).textContent,
                                                         content: message,
                                                  };
-                                                 console.log("payload", payload)
                                                  socket.send(JSON.stringify(payload));
                                           }
                                    });
@@ -131,9 +135,8 @@ const router = async () => {
                      document
                             .getElementById("letPost")
                             .addEventListener("click", async (e) => {
-                                   console.log("im working on posting");
                                    e.preventDefault();
-                                   const form = document.querySelector("form");
+                                   const form = document.querySelector("#letsBlame");
                                    const data = new FormData(form);
                                    const values = {};
                                    for (let [key, value] of data.entries()) {
@@ -202,7 +205,43 @@ const router = async () => {
               let allPost = document.querySelectorAll(".pBox");
               allPost.forEach((box) => {
                      box.addEventListener("click", async () => {
-                            view.blameContent(box);
+                            await view.blameContent(box);
+                            if (document.getElementById("activeUserName") !== null && document.getElementById("activeUserName").textContent !== "guest"){
+                                   console.log("active user",document.querySelector("#letsComment"));
+                                   document.getElementById("letsComment").addEventListener("click", async (e) => {
+                                          e.preventDefault();
+                                          const form = document.querySelector("#commentForm");
+                                          const data = new FormData(form);
+                                          const values = {};
+                                          for (let [key, value] of data.entries()) {
+                                                 values[key] = value;
+                                          }
+                                          //add id = post id and send it 
+                                          if (
+                                                 values.Content !== "" &&
+                                                 values.Content !== undefined
+                                          ) {
+                                                 console.log(values);
+                                             /*     const response = await fetch(
+                                                        "/blamer",
+                                                        {
+                                                               method: "POST",
+                                                               headers: {
+                                                                      "Content-Type":
+                                                                             "application/json",
+                                                               },
+                                                               body: JSON.stringify(
+                                                                      values
+                                                               ),
+                                                        }
+                                                 );
+                                                 if (response.status === 200) {
+                                                        navigateTo("/blamer");
+                                                 } */
+                                          }
+                                   }
+                                   );
+                            }
                      });
               });
               // click on topic will show only posts belong to that topic

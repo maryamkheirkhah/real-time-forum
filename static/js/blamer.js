@@ -10,6 +10,7 @@ export default class extends abstract {
               this.app = document.querySelector("#app");
               //   this.app.innerHTML += this.style();
               this.data = null;
+              this.setTitle("Blamer");
        }
        async connect() {
               // Create a WebSocket connection and wait for it to open
@@ -30,7 +31,6 @@ export default class extends abstract {
                      await this.getData();
               };
        }
-
        async getData() {
               // Wait until this.data is set before proceeding
               while (!this.data) {
@@ -141,8 +141,6 @@ export default class extends abstract {
               `
               return container;
        }
-       
-
       updatedPostList(topic) {
 
               let postBox = document.querySelectorAll(".bPost")
@@ -333,7 +331,6 @@ export default class extends abstract {
               return chat;
        }
        // updatedChatBox return updated chatbox
-
        async updatedChatBox(message) {
               /* 
               const response = await fetch("/blamer");
@@ -378,6 +375,7 @@ export default class extends abstract {
               }
        }
        async findBlameThing(id) {
+              console.log("findBlameThing",id)
               let blameThing = "";
               // id = username_title
               let username = id.split("_")[0];
@@ -387,7 +385,7 @@ export default class extends abstract {
                      if (post.Username == username && post.Title == title) {
                             blameThing = `
                             <div class="bPost">
-                            <div class="blameContent">
+                            <div id="${id}" class="blameContent">
                                    <div class="pbTop">
                                           <div class="pbTitle">${post.Title}</div>
                                           <div class="pbUsername">${post.Username}</div>
@@ -407,17 +405,20 @@ export default class extends abstract {
               });
               return blameThing;
        }
+       // eventlisterner for blame button = id: letsComment for sent comment
        async createCommentBox(id) {
-              let commentBox = `
+              let container = document.createElement("form");
+              container.id = "commentForm";
+              container.innerHTML += `
               <div class="bPost" >
               <div class="pbCommentBox">
               <div class="pbCommentBoxTitle">Comment:</div>
-              <textarea class="pbCommentBoxContent" id="bCommentBoxContent" placeholder="Comment here"></textarea>
-              <button  class="sendComment" id="letsComment" type="submit" data-link>comment</button>
+              <textarea name="Content" class="pbCommentBoxContent" id="bCommentBoxContent" placeholder="Comment here"></textarea>
+              <div  class="sendComment" id="letsComment">comment</div>
               </div>
               </div>
-              `;
-              return commentBox;
+              `
+              return container;
        }
        async findComments() {
               let comments = "";
@@ -447,7 +448,6 @@ export default class extends abstract {
               `;
               return commentArea;
        }
-
        async blameContent(element) {
               let parents = document.querySelectorAll(".bPost");
               if (parents) {
@@ -457,15 +457,14 @@ export default class extends abstract {
               }
               let parent = document.getElementById("mainPostsBox");
               let blame = await this.findBlameThing(element.id);
-              parent.innerHTML = blame;
-              console.log(this.activeUserName);
+              parent.innerHTML = blame;   
               if (
                      this.activeUserName != null &&
                      this.activeUserName !== "guest"
               ) {
                      console.log("in blameContent", this.activeUserName);
                      let commentBox = await this.createCommentBox(element.id);
-                     parent.innerHTML += commentBox;
+                     parent.appendChild(commentBox);
               }
        }
 }
