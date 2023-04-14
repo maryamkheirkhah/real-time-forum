@@ -50,44 +50,43 @@ func redirectHandler(w http.ResponseWriter, r *http.Request, pageName string, me
 
 func Login(w http.ResponseWriter, r *http.Request) {
 
-	// Check for logged-in session cookie, renew / update if found, return username if found
-
-	/* 	if r.Method != "POST" {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	} */
-
 	var data LoginData
-
-	err := json.NewDecoder(r.Body).Decode(&data)
+	loginMessage, err := WsDataHandler(w, r)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		fmt.Println("error:", err.Error())
 	}
-
+	err = json.Unmarshal(loginMessage, &data)
+	if err != nil {
+		fmt.Println("error:", err.Error())
+	}
+	fmt.Println("data:", data, "nickname", data.NickName, "password", data.Password)
 	user, err := db.SelectDataHandler("users", "NickName", data.NickName)
 	var msg string
 	if err != nil {
 		msg = "The user doesn't exist"
 		fmt.Println("error:", msg)
-		responseData := map[string]string{"nickname": "wrong"}
-		json.NewEncoder(w).Encode(responseData)
+		/* 		responseData := map[string]string{"nickname": "wrong"}
+		   		json.NewEncoder(w).Encode(responseData) */
 	} else if !security.MatchPasswords([]byte(data.Password), user.(db.User).Pass) {
 		fmt.Println("The password is incorrect")
-		responseData := map[string]string{"nickname": ""}
-		json.NewEncoder(w).Encode(responseData)
+		/* 		responseData := map[string]string{"nickname": ""}
+		   		json.NewEncoder(w).Encode(responseData) */
 	} else {
 		keys, err := sessions.CreateSession(w, data.NickName) // Get userName from Login post method data
+
 		fmt.Println("keys", keys)
-		if err != nil {
+
+		activeSessions, exist := sessions.Check(r)
+		fmt.Println("activeSessions", activeSessions)
+		if !exist {
 			msg = "The user doesn't exist"
 			fmt.Println("err", err)
 			//	renderTemplate(w, r, msg, "./frontend/static/login.html")
 		} else {
 			// Redirect to the main page upon successful login
-			/* 			responseData := map[string]string{"nickname": sessions.ActiveSessions.Data[keys]}
-			   			json.NewEncoder(w).Encode(responseData) */
-
+			/* 		responseData := map[string]string{"nickname": keys[0]}
+			json.NewEncoder(w).Encode(responseData)
+			*/
 			redirectHandler(w, r, "/", "You are successfully logged in")
 		}
 	}
