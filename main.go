@@ -12,7 +12,7 @@ func main() {
 	db.Check("./db/forum.db", "./db/createDb.sql")
 
 	// Initialise sessions struct, and start go-routine for periodic sessions cleanup
-	sessions.ActiveSessions.Initialise()
+	//sessions.ActiveSessions.Initialise()
 	//	go sessions.CleanUpRoutine()
 	fmt.Println("sesstions:", sessions.ActiveSessions)
 

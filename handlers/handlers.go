@@ -58,6 +58,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	} */
 
 	var data LoginData
+
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -76,15 +77,16 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		responseData := map[string]string{"nickname": ""}
 		json.NewEncoder(w).Encode(responseData)
 	} else {
-		keys, err := sessions.Login(w, r, data.NickName) // Get userName from Login post method data
+		keys, err := sessions.CreateSession(w, data.NickName) // Get userName from Login post method data
+		fmt.Println("keys", keys)
 		if err != nil {
 			msg = "The user doesn't exist"
 			fmt.Println("err", err)
 			//	renderTemplate(w, r, msg, "./frontend/static/login.html")
 		} else {
 			// Redirect to the main page upon successful login
-			responseData := map[string]string{"nickname": keys[0]}
-			json.NewEncoder(w).Encode(responseData)
+			/* 			responseData := map[string]string{"nickname": sessions.ActiveSessions.Data[keys]}
+			   			json.NewEncoder(w).Encode(responseData) */
 
 			redirectHandler(w, r, "/", "You are successfully logged in")
 		}
@@ -92,23 +94,18 @@ func Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func Register(w http.ResponseWriter, r *http.Request) {
-	userName, err := sessions.Check(w, r)
-	if err != nil {
+	userName, err := sessions.Check(r)
+	if !err {
 		// Reload login page if CheckSessions returns an error
 		//		renderTemplate(w, r, err.Error()+": please try logging in or registering",
 		//			"./frontend/static/login.html")
-		fmt.Println("error is :", err.Error())
+		fmt.Println("error is : no cookie fuck")
 	} else if userName != "" {
 		fmt.Println("user is :", userName)
 		// Redirect to main page if user is logged in
 		//		redirectHandler(w, r, "/main", "You are already logged in")
 	}
 
-	// Check if redirected from other pages or not
-	messageCookie, err := r.Cookie(MESSAGE_COOKIE_NAME)
-	if err == nil {
-		fmt.Println("error is :", messageCookie.Value)
-	}
 	if r.Method == "POST" {
 		var rgData RegisterJsonData
 		err := json.NewDecoder(r.Body).Decode(&rgData)
@@ -144,8 +141,8 @@ var upgrader = websocket.Upgrader{
 
 func Blamer(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("blamer")
-	nickname, err := sessions.Check(w, r)
-	if err != nil {
+	nickname, exist := sessions.Check(r)
+	if !exist {
 
 	} else if nickname != "" {
 
@@ -226,14 +223,15 @@ func websocketEndpoint(w http.ResponseWriter, r *http.Request, mainData MainData
 }
 func Profile(w http.ResponseWriter, r *http.Request) {
 	// Check for logged-in session cookie, renew / update if found, return username if found
-	activeUsername, err := sessions.Check(w, r)
-	if err != nil {
+	activeNickname, exist := sessions.Check(r)
+	if !exist {
+		fmt.Println("no fucking cookie")
 		// Redirect to login page if CheckSessions returns an error
-		redirectHandler(w, r, "/login", err.Error()+": please try logging in or registering")
-	} else if activeUsername == "" {
-		activeUsername = "guest"
+		//redirectHandler(w, r, "/login", err.Error()+": please try logging in or registering")
+	} else if activeNickname == "" {
+		activeNickname = "guest"
 	}
-	if r.Method == "POST" && activeUsername == "guest" {
+	if r.Method == "POST" && activeNickname == "guest" {
 		redirectHandler(w, r, "/", "You must be logged in to post")
 		return
 	}
@@ -241,9 +239,12 @@ func Profile(w http.ResponseWriter, r *http.Request) {
 	// Handle Logout POST request
 	if r.Method == "POST" && r.PostFormValue("Logout") == "Logout" {
 		// Perform cookies and sessions logout
-		sessions.Logout(w, r)
+		//sessions.Logout(w, r)
 		// Redirect to landing page once logged out
-		redirectHandler(w, r, "/", "You have been logged out")
+		err := sessions.DeleteSession(w, activeNickname)
+		if err != nil {
+			fmt.Println("err in logout", err.Error())
+		}
 	}
 
 	// Handle GET request and render profile page
@@ -258,7 +259,7 @@ func Profile(w http.ResponseWriter, r *http.Request) {
 		return
 	} */
 	// Retreive data for profile page
-	profilePageData, err := GetProfileDataStruct(r, activeUsername, username)
+	profilePageData, err := GetProfileDataStruct(r, activeNickname, username)
 	if err != nil {
 		//SendError(w, r, http.StatusInternalServerError, "Internal Server Error:\n"+err.Error())
 		return
@@ -286,8 +287,8 @@ func Profile(w http.ResponseWriter, r *http.Request) {
 
 func WsHandler(w http.ResponseWriter, r *http.Request) {
 	// Upgrade the HTTP connection to a WebSocket connection
-	nickname, err := sessions.Check(w, r)
-	if err != nil {
+	nickname, exist := sessions.Check(r)
+	if !exist {
 
 	} else if nickname == "" {
 
