@@ -79,6 +79,54 @@ const router = async () => {
                      document.getElementById("activeUserName").textContent !==
                             "guest"
               ) {
+                     //webSocket connection
+                     const socket = new WebSocket("ws://localhost:8080/ws");
+                     // update chatbox when receive message from server
+                     socket.onmessage = async (event) => {
+                            console.log("message", event.data);
+                            view.updatedChatBox(JSON.parse(event.data));
+                     };
+
+ 
+                     // click on Chat to see contact list
+                     document.getElementById("bChatButton").addEventListener("click", (e) => {
+                            console.log("im working on chat")
+                            e.preventDefault();
+                            document.getElementById("bRightSideArea").appendChild(view.findContactList());
+                            if (document.querySelectorAll(".bChatBox"))
+                            document.querySelectorAll(".bcButton").forEach((button) => {
+                                   button.addEventListener("click", async () => {
+                                          document.getElementById("bRightSideArea").appendChild(view.findChatBox(button.id));
+                                          view.updatedChatBox();
+                                          document.getElementById("bContactBox").remove();
+                                          const messageInput =
+                                          document.getElementById("message-input");
+              
+                                   //  messageinput get event == enter will sent message to server
+                                   messageInput.addEventListener("keydown", (event) => {
+                                          if (
+                                                 event.key === "Enter" &&
+                                                 messageInput.value !== ""
+                                          ) {
+                                                 
+                                                 const message = messageInput.value;
+                                                 messageInput.value = "";
+                                                 const payload = {
+                                                        sender: document.getElementById(
+                                                               "activeUserName"
+                                                        ).textContent,
+                                                        receiver: document.getElementById(
+                                                               "receiverName"
+                                                        ).textContent,
+                                                        content: message,
+                                                 };
+                                                 console.log("payload", payload)
+                                                 socket.send(JSON.stringify(payload));
+                                          }
+                                   });
+                                   });
+                            });
+                     });
                      // click on post button will post content
                      document
                             .getElementById("letPost")
@@ -91,21 +139,32 @@ const router = async () => {
                                    for (let [key, value] of data.entries()) {
                                           values[key] = value;
                                    }
-                                   if (values.Content !== "" && values.Topics !== "" && values.Title !== "" 
-                                   && values.Content !== undefined && values.Topics !== undefined && values.Title !== undefined) {
+                                   if (
+                                          values.Content !== "" &&
+                                          values.Topics !== "" &&
+                                          values.Title !== "" &&
+                                          values.Content !== undefined &&
+                                          values.Topics !== undefined &&
+                                          values.Title !== undefined
+                                   ) {
                                           console.log(values);
-                                   const response = await fetch("/blamer", {
-                                          method: "POST",
-                                          headers: {
-                                                 "Content-Type":
-                                                        "application/json",
-                                          },
-                                          body: JSON.stringify(values),
-                                   });
-                                   if (response.status === 200) {
-                                          navigateTo("/blamer");
+                                          const response = await fetch(
+                                                 "/blamer",
+                                                 {
+                                                        method: "POST",
+                                                        headers: {
+                                                               "Content-Type":
+                                                                      "application/json",
+                                                        },
+                                                        body: JSON.stringify(
+                                                               values
+                                                        ),
+                                                 }
+                                          );
+                                          if (response.status === 200) {
+                                                 navigateTo("/blamer");
+                                          }
                                    }
-                            }
                             });
 
                      // delete cookie when click logout button
@@ -131,14 +190,13 @@ const router = async () => {
                                           }
                                    }
                             });
-                     
               } else if (
                      document.getElementById("activeUserName") !== null &&
                      document.getElementById("activeUserName").textContent ===
                             "guest"
               ) {
                      let postBox = document.getElementById("cPostBox");
-                    postBox.remove()
+                     postBox.remove();
               }
               // click on post box will show post content
               let allPost = document.querySelectorAll(".pBox");
@@ -152,9 +210,11 @@ const router = async () => {
               document.querySelectorAll(".bTopic").forEach((topic) => {
                      topic.addEventListener("click", async () => {
                             if (topic.className === "bTopic") {
-                            view.updatedPostList(
-                                   topic.querySelector(".tName").textContent
-                            );}
+                                   view.updatedPostList(
+                                          topic.querySelector(".tName")
+                                                 .textContent
+                                   );
+                            }
                             allPost = document.querySelectorAll(".pBox");
                             allPost.forEach((box) => {
                                    box.addEventListener("click", async () => {
@@ -251,43 +311,3 @@ async function readForm(address) {
        console.log(json);
        return response;
 }
-
-
-/*  //webSocket connection
- const socket = new WebSocket("ws://localhost:8080/ws");
-
- const messageInput =
-        document.getElementById("message-input");
-
- //  messageinput get event == enter will sent message to server
- messageInput.addEventListener("keydown", (event) => {
-        if (
-               event.key === "Enter" &&
-               messageInput.value !== ""
-        ) {
-               const message = messageInput.value;
-               messageInput.value = "";
-               const payload = {
-                      sender: document.getElementById(
-                             "activeUserName"
-                      ).textContent,
-                      receiver: document.getElementById(
-                             "bReceiver"
-                      ).value,
-                      content: message,
-               };
-               socket.send(JSON.stringify(payload));
-        }
- });
- // update chatbox when receive message from server
- socket.onmessage = async (event) => {
-        console.log("message", event.data);
-        view.updatedChatBox(JSON.parse(event.data));
- };
- // update chatbox when click on chage chat name
- document
-        .getElementById("bReceiver")
-        .addEventListener("change", (event) => {
-               view.updatedChatBox();
-        });
-  */

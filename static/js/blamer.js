@@ -40,19 +40,19 @@ export default class extends abstract {
               if (this.data.NickName === "") {
                      this.data.NickName = "guest";
               } else if (this.data.NickName !== "guest") {
-                     this.activeUserName = this.data.NickName;
-                     
+                     this.activeUserName = this.data.NickName; 
               }
               this.user = this.findUser(this.data.NickName);
               this.posts = this.findPost("all");
               this.Topics = this.findTopics();
               this.postBox = "";
               this.postBox = this.posting();
+            /*   this.chatBox = this.findChatBox(""); */
               //this.updatedChatBox()
 
               // The rest of your code to retrieve data from the server
 /*  for make chat box
-              this.makeChatBox();
+              this.contactList = this.findContactList();
               this.updatedChatBox(); */
        }
        // getHtml return html code
@@ -63,9 +63,8 @@ export default class extends abstract {
         ${this.postBox}
         ${this.user}
         <div id="mainPostsBox" class="bPosts">${this.posts}</div>
-        <div class="bRightSideArea">
+        <div id="bRightSideArea" class="bRightSideArea">
        ${this.Topics}
-       ${this.chatBox}
         </div>
         </div>
    `;
@@ -82,7 +81,7 @@ export default class extends abstract {
                             </div>
                       </div>
                      <div class="userBottom">
-                            <div class="bChatButton">Chat</div>
+                            <div id="bChatButton"class="bChatButton">Chat</div>
                      </div>
                </div>
                 `;
@@ -98,6 +97,52 @@ export default class extends abstract {
             </div>`;
               }
        }
+       // findcontactList return contact list
+       findContactList() {
+              let list = "";
+              this.data.users.forEach((user) => {
+                     if (user !== this.data.NickName) {
+                            list += `
+                     <div class="bContact">
+                            <div class="bContactName">${user}</div>
+                            <div id="chatWith_${user}" class="bcButton">Chat</div>
+                     </div>
+                     `;
+                     }
+              });
+              let container = document.createElement("div");
+              container.id = "bContactBox";
+              container.className = "bContactBox";
+              container.innerHTML = `
+              <div class="bContactListTitle">Contact List</div>
+              <div class="bContactList">
+                     ${list}
+              </div>
+              `;
+              return container;
+              
+       }
+       findChatBox(receiver){
+       const regex = /(chatWith)_(\w+)/;
+
+       const match = receiver.match(regex);
+      // const chatWith = match[1]; // "chatWith"
+       const id = match[2]; // "testUser7"
+              
+              let container = document.createElement("div");
+              container.id = "bChatBox";
+              container.className = "bChatBox";
+              container.innerHTML = `
+              <div class="cReceiverName"><span id="receiverName">${id}</span></div>
+              <div id="message-list"class="cArea"> </div>
+              <div class="cInput">
+              <input type="text" id="message-input" placeholder="Type your message here">
+              </div>
+              `
+              return container;
+       }
+       
+
       updatedPostList(topic) {
 
               let postBox = document.querySelectorAll(".bPost")
@@ -220,21 +265,8 @@ export default class extends abstract {
               });
               return userList;
        }
-       makeChatBox() {
-              this.userList = this.findAllUser();
-              this.chatBox = ` <div class="bChat">
-              <div class="bChatName">Chat:</div>
-              <select class="bSreachBar" id="bReceiver" >
-              ${this.userList}
-              </select>
-              <div class="bChatBox">
-              <div name="message-list" id="message-list" class="message-list">
-              </div>
-              <input type="text" name="message-input" id="message-input" class="message-input" placeholder="Lets Chat" required>
-              </div>
-              </div>`;
-       }
-       async updatedChat() {
+       async updatedChat(receiver) {
+              console.log("im chating with"+receiver)
               let chat = "";
               let messages = [];
               if (this.message) {
@@ -247,7 +279,6 @@ export default class extends abstract {
                                           this.message
                                    );
               }
-              let receiver = await document.getElementById("bReceiver").value;
               // Combine send and receive messages into a single array
               if (this.data.Messages.send) {
                      messages = messages.concat(this.data.Messages.send);
@@ -262,8 +293,6 @@ export default class extends abstract {
               
               messages.forEach((message) => {
                      if (receiver == null){
-
-                     
                      if (((message.sender == this.data.NickName && message.receiver == receiver) ||
                             (message.receiver == this.data.NickName &&message.sender ==receiver)) &&
                             message.content.length > 39
@@ -282,23 +311,25 @@ export default class extends abstract {
               }
                      if (
                             message.sender == this.data.NickName &&
-                            message.receiver ==
-                                   document.getElementById("bReceiver").value
+                            message.receiver == receiver
                      ) {
                             chat += `
-                    <lu class="message1"><b>Me:</b> ${message.content}</lu><br>
+                            <div class="messageBox" style="justify-items: end;">
+                            <div class="mInfo" style="float:right;"><b>Me:</b> ${message.time}</div>
+                            <div class=" message"><span>${message.content}</span></div>
+                            </div>
                   `;
                      } else if (
                             message.receiver == this.data.NickName &&
-                            message.sender ==
-                                   document.getElementById("bReceiver").value
+                            message.sender == receiver
                      ) {
                             chat += `
-                    <lu class="message2"><b>${message.sender}:</b> ${message.content}</lu><br>
-                  `;
+                            <div class="messageBox" style="justify-items: start;">
+                            <div class="mInfo" style="float:left; "><b>${message.sender}:</b> ${message.time}</div>
+                            <div class=" message"><span>${message.content}</span></div>
+                            </div>`;
                      }
               });
-
               return chat;
        }
        // updatedChatBox return updated chatbox
@@ -327,7 +358,7 @@ export default class extends abstract {
                                    this.message.receiver ==
                                           this.activeUserName
                             ) {
-                                   parent.innerHTML = await this.updatedChat();
+                                   parent.innerHTML = await this.updatedChat(document.getElementById("receiverName").textContent);
                             }
                      } else {
                             let parent =
@@ -341,7 +372,7 @@ export default class extends abstract {
                                    this.data.NickName ===
                                    this.activeUserName
                             ) {
-                                   parent.innerHTML = await this.updatedChat();
+                                   parent.innerHTML = await this.updatedChat(document.getElementById("receiverName").textContent);
                             }
                      }
               }

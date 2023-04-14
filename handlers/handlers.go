@@ -150,6 +150,7 @@ func Blamer(w http.ResponseWriter, r *http.Request) {
 	} else if nickname != "" {
 
 	}
+	fmt.Println("nickname", nickname)
 	msg := ""
 	messageCookie, err := r.Cookie(MESSAGE_COOKIE_NAME)
 	if err == nil {
