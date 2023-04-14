@@ -350,3 +350,49 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+func WsDataHandler(w http.ResponseWriter, r *http.Request) ([]byte, error) {
+	// Upgrade the HTTP connection to a WebSocket connection
+	nickname, exist := sessions.Check(r)
+	if !exist {
+
+	} else if nickname == "" {
+
+	}
+
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	// Add the WebSocket connection to the clients map
+	Clients[nickname] = conn
+	defer func() {
+		// Remove the WebSocket connection from the clients map
+		delete(Clients, nickname)
+		conn.Close()
+	}()
+	// Read messages from the WebSocket connection
+	data, err := ReadData(conn)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	responseBytes, err := json.Marshal("received")
+	if err != nil {
+		log.Println(err)
+	}
+	err = conn.WriteMessage(websocket.TextMessage, responseBytes)
+	if err != nil {
+		log.Println(err)
+	}
+	return data, nil
+}
+func ReadData(conn *websocket.Conn) ([]byte, error) {
+	_, message, err := conn.ReadMessage()
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	return message, nil
+}
