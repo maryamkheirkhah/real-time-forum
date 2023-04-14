@@ -24,12 +24,6 @@ func StartServer() {
 	http.HandleFunc("/ws", handlers.WsHandler)
 	// Serve static assets at "/static/*"
 	http.Handle("/static/", http.StripPrefix("/static/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Set the Content-Type header to "text/javascript" for JavaScript module files
-		/* 		if strings.HasSuffix(r.URL.Path, ".js") {
-		   			w.Header().Set("Content-Type", "application/javascript")
-		   		} else if strings.HasSuffix(r.URL.Path, ".css") {
-		   			w.Header().Set("Content-Type", "text/css")
-		   		} */
 		fileServer.ServeHTTP(w, r)
 	})))
 

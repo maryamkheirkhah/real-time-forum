@@ -242,34 +242,60 @@ const router = async () => {
                      for (let [key, value] of data.entries()) {
                             values[key] = value;
                      }
+                  
+                     
+                     const socket = new WebSocket("ws://localhost:8080/api/loginData");
 
-                     const response = await fetch("/api/loginData", {
-                            method: "POST",
-                            headers: {
-                                   "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify(values),
+                     // Wait for the WebSocket connection to open
+                     await new Promise(resolve => {
+                       socket.addEventListener("open", () => {
+                         console.log("WebSocket connection established.");
+                         resolve();
+                       });
                      });
-                     console.log(response);
-                     if (response.ok) {
-                            const user = await response.json();
-                            console.log("user", user);
-                            if (
-                                   user.nickname !== "" &&
-                                   user.nickname !== "wrong"
-                            ) {
-                                   console.log("user", user.nickname);
-                                   // Set a cookie with the user's username
-                                   document.cookie = `forum_session_id=${user.nickname}; path=/; max-age=3600;`;
-                                   navigateTo("/blamer");
-                            } else if (user.nickname === "") {
-                                   console.log("password or username is wrong");
-                            } else if (user.nickname === "wrong") {
-                                   console.log("password or username is wrong");
-                            }
-                     } else {
-                            alert("Invalid username or password");
-                     }
+                 
+                     // Send the login data as JSON to the backend through the WebSocket
+                     socket.send(JSON.stringify(values));
+                 
+                     // Define a callback function to handle the response from the backend
+                     const handleResponse = (event) => {
+                       // Handle the response from the backend
+                       console.log("Response from backend:", event.data);
+                       
+                       const response = JSON.parse(event.data);
+                       if (response) {
+                         if (
+                            
+                            values["loginusername"] !== "" &&
+                            values["loginusername"] !== "wrong"
+                         ) {
+                           console.log("user", values["loginusername"]);
+                           // Set a cookie with the user's username
+                        //  document.cookie = `forum_session_id=${values["loginusername"]}; path=/; max-age=3600;`;
+                           navigateTo("/blamer");
+                         } else if (values["loginusername"] === "") {
+                           console.log("password or username is wrong");
+                         } else if (values["loginusername"] === "wrong") {
+                           console.log("password or username is wrong");
+                         }
+                       } else {
+                         alert("Invalid username or password");
+                       }
+                     };
+                 
+                     // Wait for a response from the backend and call the callback function
+                     socket.addEventListener("message", handleResponse);
+                 
+                     // Wait for the response and then close the WebSocket connection
+                     await new Promise(resolve => {
+                       socket.addEventListener("close", () => {
+                         console.log("WebSocket connection closed.");
+                         resolve();
+                       });
+                     });
+                 
+                     // Remove the event listener for message to avoid multiple invocations
+                     socket.removeEventListener("message", handleResponse);
               });
        }
 };

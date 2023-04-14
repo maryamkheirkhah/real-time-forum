@@ -49,9 +49,12 @@ func redirectHandler(w http.ResponseWriter, r *http.Request, pageName string, me
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
-
 	var data LoginData
-	loginMessage, err := WsDataHandler(w, r)
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println("error in upgrade", err.Error())
+	}
+	loginMessage, err := WsDataHandler(w, r, conn)
 	if err != nil {
 		fmt.Println("error:", err.Error())
 	}
@@ -59,7 +62,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("error:", err.Error())
 	}
-	fmt.Println("data:", data, "nickname", data.NickName, "password", data.Password)
 	user, err := db.SelectDataHandler("users", "NickName", data.NickName)
 	var msg string
 	if err != nil {
@@ -72,8 +74,15 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		/* 		responseData := map[string]string{"nickname": ""}
 		   		json.NewEncoder(w).Encode(responseData) */
 	} else {
-		keys, err := sessions.CreateSession(w, data.NickName) // Get userName from Login post method data
 
+		keys, err := sessions.CreateSession(w, data.NickName)
+		if err != nil {
+			log.Println("error in create session", err.Error())
+		}
+		_, err = startConn(w, r, data.NickName)
+		if err != nil {
+			log.Println("error in start conn", err.Error())
+		}
 		fmt.Println("keys", keys)
 
 		activeSessions, exist := sessions.Check(r)
@@ -87,6 +96,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			/* 		responseData := map[string]string{"nickname": keys[0]}
 			json.NewEncoder(w).Encode(responseData)
 			*/
+			responseData := map[string]string{"nickname": data.NickName}
+			err = responseConn(responseData, conn)
+			if err != nil {
+				log.Println("error in response conn", err.Error())
+			}
 			redirectHandler(w, r, "/", "You are successfully logged in")
 		}
 	}
@@ -184,17 +198,6 @@ func Blamer(w http.ResponseWriter, r *http.Request) {
 	}
 	// Marshal the MainData struct into a JSON string
 	websocketEndpoint(w, r, mainData)
-	/* 	jsonData, err := json.Marshal(mainData)
-	   	if err != nil {
-	   		http.Error(w, err.Error(), http.StatusInternalServerError)
-	   		return
-	   	}
-	   	json.Unmarshal(jsonData, &mainData)
-
-	   	// Set the content type of the response to JSON
-	   	w.Header().Set("Content-Type", "application/json")
-	   	// Send the JSON string in the response body
-	   	w.Write(jsonData) */
 
 }
 func websocketEndpoint(w http.ResponseWriter, r *http.Request, mainData MainData) {
@@ -350,7 +353,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
-func WsDataHandler(w http.ResponseWriter, r *http.Request) ([]byte, error) {
+func WsDataHandler(w http.ResponseWriter, r *http.Request, conn *websocket.Conn) ([]byte, error) {
 	// Upgrade the HTTP connection to a WebSocket connection
 	nickname, exist := sessions.Check(r)
 	if !exist {
@@ -359,6 +362,49 @@ func WsDataHandler(w http.ResponseWriter, r *http.Request) ([]byte, error) {
 
 	}
 
+	// Read messages from the WebSocket connection
+	data, err := readData(conn)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	defer func() {
+		// Remove the WebSocket connection from the clients map
+		delete(Clients, nickname)
+		conn.Close()
+	}()
+	return data, nil
+}
+func responseConn(response any, conn *websocket.Conn) error {
+	responseBytes, err := json.Marshal("received")
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	err = conn.WriteMessage(websocket.TextMessage, responseBytes)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	defer func() {
+		// Remove the WebSocket connection from the clients map
+		conn.Close()
+	}()
+	return nil
+}
+func readData(conn *websocket.Conn) ([]byte, error) {
+	_, message, err := conn.ReadMessage()
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	defer func() {
+		// Remove the WebSocket connection from the clients map
+		conn.Close()
+	}()
+	return message, nil
+}
+func startConn(w http.ResponseWriter, r *http.Request, nickname string) (*websocket.Conn, error) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
@@ -371,28 +417,5 @@ func WsDataHandler(w http.ResponseWriter, r *http.Request) ([]byte, error) {
 		delete(Clients, nickname)
 		conn.Close()
 	}()
-	// Read messages from the WebSocket connection
-	data, err := ReadData(conn)
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-	responseBytes, err := json.Marshal("received")
-	if err != nil {
-		log.Println(err)
-	}
-	err = conn.WriteMessage(websocket.TextMessage, responseBytes)
-	if err != nil {
-		log.Println(err)
-	}
-	return data, nil
-}
-func ReadData(conn *websocket.Conn) ([]byte, error) {
-	_, message, err := conn.ReadMessage()
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-
-	return message, nil
+	return conn, nil
 }
