@@ -815,15 +815,15 @@ body {
 }
 /* this i just number box */
 
-.pbLike {
+.pbLikeNumb {
        grid-area: pLike;
 }
 
-.pbDislike {
+.pbDislikeNumb {
        grid-area: pDislike;
 }
 
-.pbComment {
+.pbCommentNumb {
        grid-area: pComment;
 }
 
@@ -866,6 +866,96 @@ body {
 }
 .sendComment:hover{
        color: var(--color-secondary);
+}
+.pbCommentArea{
+       grid-area: pBox;
+       z-index: 10;
+       overflow: auto;
+       height: 320px;
+       width: 100%;
+}
+.pbComment{
+       display:grid;
+       grid-template-columns: 1fr;
+       grid-template-rows: 0.2fr 0.6fr 0.2fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-template-areas: 
+       "pbCommentUname" 
+       "pbCommentContent"
+       "pbCommentBotton";
+       margin-top: 10px;
+       position: relative;
+       align-items: center;
+       padding: 10px;
+      
+}
+.pbCommentUname{
+       grid-area: pbCommentUname;
+       font-family: regular;
+       font-size: 15px;
+       color: var(--color-primary);
+       font-weight: 800;
+       text-align: left;
+       transition: all 0.7s ease;
+}
+.pbCommentContent{
+       grid-area: pbCommentContent;
+       font-family: regular;
+       font-size: 15px;
+       color: var(--color-quaternary);
+       font-weight: 800;
+       width: 60%;
+       text-align: left;
+       position:relative;
+       background: white;
+       border-radius: 0% 0% 0% 0% / 0% 0% 0% 0%;
+       box-shadow: 10px 10px rgba(0, 0, 0, 0.15);
+       transition: all 0.7s ease;
+       align-items: center;
+       padding: 10px;
+}
+.pbCommentBotton{
+       padding: 5px;
+       grid-area: pbCommentBotton;
+       font-family: regular;
+       font-size: 18px;
+       color: var(--color-quaternary);
+       font-weight: 800;
+       text-align: left;
+       display: grid;
+       grid-template-columns: 0.2fr 0.2fr 0.6fr;
+       grid-template-rows: 0.2fr;
+       gap: 0px 0px;
+       grid-auto-flow: row;
+       grid-template-areas:
+       "pbCommentLike pbCommentDislike";
+       position: relative;
+       background: white;
+       border-radius: 0% 0% 0% 0% / 0% 0% 0% 0%;
+       box-shadow: 10px 10px rgba(0, 0, 0, 0.15);
+       transition: all 0.7s ease;
+}
+.pbComment:hover .pbCommentContent{
+       border-radius: 0% 0% 50% 50% / 0% 0% 0% 5%;
+       box-shadow: 10px 10px rgba(0, 0, 0, 0.25);
+}
+.pbComment:hover .pbCommentBotton{
+       border-radius: 0% 0% 50% 50% / 0% 0% 10% 5%;
+       box-shadow: 10px 10px rgba(0, 0, 0, 0.25);
+}
+.pbComment:hover .pbCommentUname{
+       color: var(--color-quaternary);
+}
+
+
+.pbCommentLike{
+       font-size: 14px;
+       grid-area: pbCommentLike;
+}
+.pbCommentDislike{
+       font-size: 14px;
+       grid-area: pbCommentDislike;
 }
 
 .pBlamer {

@@ -387,9 +387,9 @@ export default class extends abstract {
                                    <textarea class="pbContent" readonly>${post.Content}</textarea>
                                    <div class="pbBottom">
                                           <div class="pbTopic">${post.Topics}</div>
-                                          <div class="pbLike">${post.Likes}</div>
-                                          <div class="pbDislike">${post.Dislikes}</div>
-                                          <div class="pbComment">${post.TotalComments}</div>
+                                          <div class="pbLikeNumb">${post.Likes}</div>
+                                          <div class="pbDislikeNumb">${post.Dislikes}</div>
+                                          <div class="pbCommentNumb">${post.TotalComments}</div>
                                    </div>
                                    </div>
                                    </div>
@@ -414,32 +414,59 @@ export default class extends abstract {
        }
        async findComments() {
               let comments = "";
-              this.data.Comments.forEach((comment) => {
+              let side = "justify-items: start;";
+              let like = "white"
+              let dislike = "white"
+             this.data.Comments.forEach((comment) => {
                      if (comment.PostId == this.data.PostId) {
+                            if (comment.Username == this.activeUserName){
+                                    side = "justify-items: end;";        
+                            }
+                            if (comment.LikesStatus == "like"){
+                                   like = "green"
+                            }
+                            else if (comment.LikesStatus == "dislike"){
+                                   dislike = "red"
+                            }
                             comments += `
-                            <div class="pbComment">
-                            <div class="pbCommentTop">
-                            <div class="pbCommentUsername">${comment.Username}</div>
-                            <div class="pbCommentTime">${comment.CreationTime}</div>
-                            </div>
-                            <textarea class="pbCommentContent" readonly>${comment.Content}</textarea>
-                            </div>
+                                   <div class="pbComment" style="${side};">
+                                          <div class="pbCommentUname"><b>${comment.Username}</b>${comment.CreationTime}</div>
+                                          <div class="pbCommentContent" >
+                                                 <div class="pbCommentText">${comment.Content}</div>
+                                          </div>
+                                          <div class="pbCommentBotton">
+                                                 <div class="pbCommentLike"><span id="lNumb">${comment.Likes}</span><span id="lButton" style="color :${like}">Like</span></div>
+                                                 <div class="pbCommentDislike"><span id="dNumb">${comment.Dislikes}</span><span id="lButton" style="color :${dislike}">Dislike</span></div>
+                                          </div>
+                                   </div>
                             `;
                      }
-              });
-
-              return comments;
-       }
-       createCommentArea() {
-              let comments = this.findComments();
-              let container = document.createElement("div");
-              container.className = "bPost";
-              container.innerHTML = `
-              <div class="pbCommentArea">
-              ${comments}
+              }); 
+              let dummyComments = `
+              <div class="pbComment" style="justify-items: start;">
+              <div class="pbCommentUname"><b>ME:</b> 2021-05-05 12:00:00</div>
+              <div class="pbCommentContent" >
+              <div class="pbCommentText">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nunc sit amet ultricies lacinia, nunc nisl aliquam nisl, eget aliquam nunc nisl sit amet nisl. Sed euismod, nunc sit amet ultricies lacinia, nunc nisl aliquam nisl, eget aliquam nunc nisl sit amet nisl.</div>
               </div>
-              `;
-              return container;
+              <div class="pbCommentBotton">
+              <div class="pbCommentLike"><span id="lNumb">10</span><span id="lButton">Like</span></div>
+              <div class="pbCommentDislike"><span id="dNumb">888</span><span id="lButton">Dislike</span></div>
+              </div>
+              </div>
+              
+              `
+
+              return dummyComments;
+       }
+      async createCommentArea() {
+              let comments = await this.findComments();
+              let parent = document.createElement("div");
+              parent.className = "bPost";
+              let container = document.createElement("div");
+              container.className = "pbCommentArea";
+              container.innerHTML = `${comments}`;
+              parent.appendChild(container);
+              return parent;
        }
        async blameContent(element) {
               let parents = document.querySelectorAll(".bPost");
@@ -458,6 +485,7 @@ export default class extends abstract {
                      console.log("in blameContent", this.activeUserName);
                      let commentBox = await this.createCommentBox(element.id);
                      parent.appendChild(commentBox);
+                     parent.appendChild(await this.createCommentArea())
               }
        }
 }
