@@ -9,6 +9,7 @@ import (
 func StartServer() {
 	// Set up a file server to serve static assets (e.g. HTML, CSS, JS)
 	fileServer := http.FileServer(http.Dir("./static"))
+	go handlers.SocketHub.Run()
 
 	// Handle requests to the root URL ("/") by serving the index.html file
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +22,7 @@ func StartServer() {
 	http.HandleFunc("/api/loginData", handlers.Login)
 	http.HandleFunc("/blamer", handlers.Blamer)
 	http.HandleFunc("/profile", handlers.Profile)
-	http.HandleFunc("/ws", handlers.WsHandler)
+	http.HandleFunc("/ws", handlers.WebSocketHandler)
 	// Serve static assets at "/static/*"
 	http.Handle("/static/", http.StripPrefix("/static/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fileServer.ServeHTTP(w, r)

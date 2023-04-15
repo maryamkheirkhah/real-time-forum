@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -50,60 +49,66 @@ func redirectHandler(w http.ResponseWriter, r *http.Request, pageName string, me
 
 func Login(w http.ResponseWriter, r *http.Request) {
 	var data LoginData
+	// Upgrade HTTP connection to WebSocket
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println("error in upgrade", err.Error())
+		log.Println("Failed to upgrade connection to WebSocket:", err)
+		return
 	}
-	loginMessage, err := WsDataHandler(w, r, conn)
-	if err != nil {
-		fmt.Println("error:", err.Error())
-	}
-	err = json.Unmarshal(loginMessage, &data)
-	if err != nil {
-		fmt.Println("error:", err.Error())
-	}
-	user, err := db.SelectDataHandler("users", "NickName", data.NickName)
-	var msg string
-	if err != nil {
-		msg = "The user doesn't exist"
-		fmt.Println("error:", msg)
-		/* 		responseData := map[string]string{"nickname": "wrong"}
-		   		json.NewEncoder(w).Encode(responseData) */
-	} else if !security.MatchPasswords([]byte(data.Password), user.(db.User).Pass) {
-		fmt.Println("The password is incorrect")
-		/* 		responseData := map[string]string{"nickname": ""}
-		   		json.NewEncoder(w).Encode(responseData) */
-	} else {
 
-		keys, err := sessions.CreateSession(w, data.NickName)
-		if err != nil {
-			log.Println("error in create session", err.Error())
-		}
-		_, err = startConn(w, r, data.NickName)
-		if err != nil {
-			log.Println("error in start conn", err.Error())
-		}
-		fmt.Println("keys", keys)
+	// Create a new client for the WebSocket connection
+	client := NewClient(SocketHub, conn)
 
-		activeSessions, exist := sessions.Check(r)
-		fmt.Println("activeSessions", activeSessions)
-		if !exist {
+	// Register the client with the hub
+	SocketHub.register <- client
+
+	// Start reading messages from the client
+
+	for {
+		_, message, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("Failed to read message from client:", err)
+			break
+		}
+		err = json.Unmarshal(message, &data)
+		if err != nil {
+			fmt.Println("error:", err.Error())
+			break
+		}
+		fmt.Println("data message:", data)
+
+		user, err := db.SelectDataHandler("users", "NickName", data.NickName)
+		var msg string
+		if err != nil {
 			msg = "The user doesn't exist"
-			fmt.Println("err", err)
-			//	renderTemplate(w, r, msg, "./frontend/static/login.html")
+			fmt.Println("error:", msg)
+			break
+			/* 		responseData := map[string]string{"nickname": "wrong"}
+			   		json.NewEncoder(w).Encode(responseData) */
+		} else if !security.MatchPasswords([]byte(data.Password), user.(db.User).Pass) {
+			fmt.Println("The password is incorrect")
+			/* 		responseData := map[string]string{"nickname": ""}
+			   		json.NewEncoder(w).Encode(responseData) */
 		} else {
-			// Redirect to the main page upon successful login
-			/* 		responseData := map[string]string{"nickname": keys[0]}
-			json.NewEncoder(w).Encode(responseData)
-			*/
-			responseData := map[string]string{"nickname": data.NickName}
-			err = responseConn(responseData, conn)
+			sessionId, err := sessions.CreateSession(w, data.NickName)
+			fmt.Println("w", w)
 			if err != nil {
-				log.Println("error in response conn", err.Error())
+				fmt.Println("error in create session", err.Error())
+				break
 			}
+			response := map[string]string{"nickname": data.NickName, "sessionId": sessionId}
+			responseData, err := json.Marshal(response)
+			if err != nil {
+				fmt.Println("error in marshal", err.Error())
+				break
+			}
+			client.SendMessage(responseData)
 			redirectHandler(w, r, "/", "You are successfully logged in")
+			break
 		}
 	}
+	// Unregister the client from the hub
+	SocketHub.unregister <- client
 }
 
 func Register(w http.ResponseWriter, r *http.Request) {
@@ -147,14 +152,10 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 }
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
-
 func Blamer(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("blamer")
 	nickname, exist := sessions.Check(r)
+	fmt.Println("r", r)
 	if !exist {
 
 	} else if nickname != "" {
@@ -287,72 +288,88 @@ func Profile(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func WsHandler(w http.ResponseWriter, r *http.Request) {
-	// Upgrade the HTTP connection to a WebSocket connection
-	nickname, exist := sessions.Check(r)
-	if !exist {
-
-	} else if nickname == "" {
-
-	}
-
+func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println(err)
+		log.Println("Failed to upgrade connection to WebSocket:", err)
 		return
 	}
 
-	// Add the WebSocket connection to the clients map
-	Clients[nickname] = conn
+	client := NewClient(SocketHub, conn)
+	SocketHub.register <- client
 
-	defer func() {
-		// Remove the WebSocket connection from the clients map
-		delete(Clients, nickname)
-		conn.Close()
-	}()
-	// Add new client to clients map
-	Clients[nickname] = conn
-	// Read messages from the WebSocket connection
-	for {
-		_, message, err := conn.ReadMessage()
-		if err != nil {
-			log.Println(err)
-			break
-		}
-		var messageData MessageData
-		fmt.Println("message", string(message), "from", nickname)
-		err = json.Unmarshal(message, &messageData)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		messageData.Time = time.Now().Format("2006-01-02 15:04:05")
+	go client.Read()
+	go client.Write()
+}
 
-		// encode the data as a JSON string
-		jsonData, err := json.Marshal(messageData)
+/*
+	 func WsHandler(w http.ResponseWriter, r *http.Request) {
+		// Upgrade the HTTP connection to a WebSocket connection
+		nickname, exist := sessions.Check(r)
+		if !exist {
+
+		} else if nickname == "" {
+
+		}
+
+		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			log.Println(err)
 			return
 		}
 
-		err = SaveMessage(messageData)
-		if err != nil {
-			log.Println(errors.New("error saving message"), err)
-			continue
-		}
+		// Add the WebSocket connection to the clients map
+		Clients[nickname] = conn
 
-		// Broadcast message to receiver
-		for cNickname, c := range Clients {
-			if cNickname == messageData.Receiver || cNickname == messageData.Sender {
-				err = c.WriteMessage(websocket.TextMessage, jsonData)
-				if err != nil {
-					log.Println(err)
+		defer func() {
+			// Remove the WebSocket connection from the clients map
+			delete(Clients, nickname)
+			conn.Close()
+		}()
+		// Add new client to clients map
+		Clients[nickname] = conn
+		// Read messages from the WebSocket connection
+		for {
+			_, message, err := conn.ReadMessage()
+			if err != nil {
+				log.Println(err)
+				break
+			}
+			var messageData MessageData
+			fmt.Println("message", string(message), "from", nickname)
+			err = json.Unmarshal(message, &messageData)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			messageData.Time = time.Now().Format("2006-01-02 15:04:05")
+
+			// encode the data as a JSON string
+			jsonData, err := json.Marshal(messageData)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			err = SaveMessage(messageData)
+			if err != nil {
+				log.Println(errors.New("error saving message"), err)
+				continue
+			}
+
+			// Broadcast message to receiver
+			for cNickname, c := range Clients {
+				if cNickname == messageData.Receiver || cNickname == messageData.Sender {
+					err = c.WriteMessage(websocket.TextMessage, jsonData)
+					if err != nil {
+						log.Println(err)
+					}
 				}
 			}
 		}
-	}
 
 }
+*/
 func WsDataHandler(w http.ResponseWriter, r *http.Request, conn *websocket.Conn) ([]byte, error) {
 	// Upgrade the HTTP connection to a WebSocket connection
 	nickname, exist := sessions.Check(r)
@@ -368,11 +385,11 @@ func WsDataHandler(w http.ResponseWriter, r *http.Request, conn *websocket.Conn)
 		log.Println(err)
 		return nil, err
 	}
-	defer func() {
+	/* 	defer func() {
 		// Remove the WebSocket connection from the clients map
 		delete(Clients, nickname)
 		conn.Close()
-	}()
+	}() */
 	return data, nil
 }
 func responseConn(response any, conn *websocket.Conn) error {
@@ -404,7 +421,8 @@ func readData(conn *websocket.Conn) ([]byte, error) {
 	}()
 	return message, nil
 }
-func startConn(w http.ResponseWriter, r *http.Request, nickname string) (*websocket.Conn, error) {
+
+/* func startConn(w http.ResponseWriter, r *http.Request, nickname string) (*websocket.Conn, error) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
@@ -418,4 +436,4 @@ func startConn(w http.ResponseWriter, r *http.Request, nickname string) (*websoc
 		conn.Close()
 	}()
 	return conn, nil
-}
+} */

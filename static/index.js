@@ -260,19 +260,19 @@ const router = async () => {
                      // Define a callback function to handle the response from the backend
                      const handleResponse = (event) => {
                        // Handle the response from the backend
-                       console.log("Response from backend:", event.data);
                        
                        const response = JSON.parse(event.data);
+                       console.log("Response from backend:", response);
                        if (response) {
                          if (
                             
                             values["loginusername"] !== "" &&
                             values["loginusername"] !== "wrong"
                          ) {
-                           console.log("user", values["loginusername"]);
+                           console.log("user", response["nickname"]);
                            // Set a cookie with the user's username
-                        //  document.cookie = `forum_session_id=${values["loginusername"]}; path=/; max-age=3600;`;
-                           navigateTo("/blamer");
+                         document.cookie = `sessionID=${response["sessionId"]}; path=/; max-age=3600;`;
+                          navigateTo("/blamer");
                          } else if (values["loginusername"] === "") {
                            console.log("password or username is wrong");
                          } else if (values["loginusername"] === "wrong") {
