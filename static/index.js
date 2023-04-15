@@ -349,9 +349,48 @@ const router = async () => {
                                                                values.Content !==
                                                                       undefined
                                                         ) {
-                                                               console.log(
-                                                                      values
-                                                               );
+                                                               console.log("comment", values);
+                                                               //send comment to server
+                                                               const socket = new WebSocket("ws://localhost:8080/api/blamer");
+
+                                                               // Wait for the WebSocket connection to open
+                                                               await new Promise(resolve => {
+                                                                 socket.addEventListener("open", () => {
+                                                                   console.log("WebSocket connection established.");
+                                                                   resolve();
+                                                                 });
+                                                               });
+                                                           
+                                                               // Send the login data as JSON to the backend through the WebSocket
+                                                               socket.send(JSON.stringify(values));
+                                                           
+                                                               // Define a callback function to handle the response from the backend
+                                                               const handleResponse = (event) => {
+                                                                 // Handle the response from the backend
+                                                                 
+                                                                 const response = JSON.parse(event.data);
+                                                                 console.log("Response from backend:", response);
+                                                                 if (response) {
+                                                                      console.log("your comment has been sent");
+                                                                 } else {
+                                                                   alert("some problem with your comment");
+                                                                 }
+                                                               };
+                                                           
+                                                               // Wait for a response from the backend and call the callback function
+                                                               socket.addEventListener("message", handleResponse);
+                                                           
+                                                               // Wait for the response and then close the WebSocket connection
+                                                               await new Promise(resolve => {
+                                                                 socket.addEventListener("close", () => {
+                                                                   console.log("WebSocket connection closed.");
+                                                                   resolve();
+                                                                 });
+                                                               });
+                                                           
+                                                               // Remove the event listener for message to avoid multiple invocations
+                                                               socket.removeEventListener("message", handleResponse);
+                     
                                                         }
                                                         form.querySelector(
                                                                'input[name="Content"]'

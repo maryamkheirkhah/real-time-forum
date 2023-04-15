@@ -160,7 +160,7 @@ export default class extends abstract {
                             }
                             posts += `
                                           <div class="bPost">
-                                          <div id="${post.Username}_${post.Title}" class="pBox">
+                                          <div id="${post.PostId}" class="pBox">
                                           <div class="pBlamer">${post.Username}</div>
                                           <div class="pTopic">${post.Topics}</div>
                                           <div class="pComent">${post.TotalComments}</div>
@@ -368,14 +368,9 @@ export default class extends abstract {
               }
        }
        async findBlameThing(id) {
-              console.log("findBlameThing",id)
               let blameThing = "";
-              // id = username_title
-              let username = id.split("_")[0];
-              let title = id.split("_")[1];
-
               this.data.Posts.forEach((post) => {
-                     if (post.Username == username && post.Title == title) {
+                     if (post.PostId == id) {
                             blameThing = `
                             <div class="bPost">
                             <div id="${id}" class="blameContent">
@@ -417,7 +412,8 @@ export default class extends abstract {
               let side = "justify-items: start;";
               let like = "white"
               let dislike = "white"
-             this.data.Comments.forEach((comment) => {
+              if (this.data.comments.length > 0) {
+            this.data.Comments.forEach((comment) => {
                      if (comment.PostId == this.data.PostId) {
                             if (comment.Username == this.activeUserName){
                                     side = "justify-items: end;";        
@@ -441,8 +437,9 @@ export default class extends abstract {
                                    </div>
                             `;
                      }
-              }); 
-              let dummyComments = `
+              });  
+       }
+           /*    let dummyComments = `
               <div class="pbComment" style="justify-items: start;">
               <div class="pbCommentUname"><b>ME:</b> 2021-05-05 12:00:00</div>
               <div class="pbCommentContent" >
@@ -452,11 +449,10 @@ export default class extends abstract {
               <div class="pbCommentLike"><span id="lNumb">10</span><span id="lButton">Like</span></div>
               <div class="pbCommentDislike"><span id="dNumb">888</span><span id="lButton">Dislike</span></div>
               </div>
-              </div>
-              
-              `
+              </div>  
+              ` */
 
-              return dummyComments;
+              return comments;
        }
       async createCommentArea() {
               let comments = await this.findComments();
