@@ -83,58 +83,154 @@ const router = async () => {
                      const socket = new WebSocket("ws://localhost:8080/ws");
                      // update chatbox when receive message from server
                      socket.onmessage = async (event) => {
-                            console.log("message", event.data);
                             view.updatedChatBox(JSON.parse(event.data));
                      };
 
- 
                      // click on Chat to see contact list
-                     document.getElementById("bChatButton").addEventListener("click", (e) => {
-                            console.log("im working on chat")
-                            e.preventDefault();
-                            document.getElementById("bRightSideArea").appendChild(view.findContactList());
-                            if (document.querySelectorAll(".bChatBox"))
-                            document.querySelectorAll(".bcButton").forEach((button) => {
-                                   button.addEventListener("click", async () => {
-                                          document.getElementById("bRightSideArea").appendChild(view.findChatBox(button.id));
-                                          view.updatedChatBox();
-                                          document.getElementById("bContactBox").remove();
-                                          const messageInput =
-                                          document.getElementById("message-input");
-              
-                                   //  messageinput get event == enter will sent message to server
-                                   messageInput.addEventListener("keydown", (event) => {
-                                          if (
-                                                 event.key === "Enter" &&
-                                                 messageInput.value !== ""
-                                          ) {
-                                                 
-                                                 const message = messageInput.value;
-                                                 messageInput.value = "";
-                                                 const payload = {
-                                                        sender: document.getElementById(
-                                                               "activeUserName"
-                                                        ).textContent,
-                                                        receiver: document.getElementById(
-                                                               "receiverName"
-                                                        ).textContent,
-                                                        content: message,
-                                                 };
-                                                 console.log("payload", payload)
-                                                 socket.send(JSON.stringify(payload));
-                                          }
-                                   });
-                                   });
+                     document
+                            .getElementById("bChatButton")
+                            .addEventListener("click", (e) => {
+                                   if (
+                                          document.querySelectorAll(".bChatBox")
+                                                 .length > 0
+                                   ) {
+                                          document
+                                                 .querySelectorAll(".bChatBox")
+                                                 .forEach((box) => {
+                                                        box.remove();
+                                                 });
+                                   }
+                                   if (
+                                          document.querySelectorAll(
+                                                 ".bContactBox"
+                                          ).length === 0
+                                   ) {
+                                          document
+                                                 .querySelectorAll(".bTopic")
+                                                 .forEach((box) => {
+                                                        box.style.height =
+                                                               "25px";
+                                                 });
+                                          document
+                                                 .getElementById(
+                                                        "bRightSideArea"
+                                                 )
+                                                 .appendChild(
+                                                        view.findContactList()
+                                                 );
+                                   } else if (
+                                          document.querySelectorAll(
+                                                 ".bContactBox"
+                                          ).length > 0
+                                   ) {
+                                          document
+                                                 .querySelectorAll(".bTopic")
+                                                 .forEach((box) => {
+                                                        box.style.height =
+                                                               "100px";
+                                                 });
+
+                                          document
+                                                 .querySelectorAll(
+                                                        ".bContactBox"
+                                                 )
+                                                 .forEach((box) => {
+                                                        box.remove();
+                                                 });
+                                   }
+                                   if (document.querySelectorAll(".bChatBox"))
+                                          document
+                                                 .querySelectorAll(".bcButton")
+                                                 .forEach((button) => {
+                                                        button.addEventListener(
+                                                               "click",
+                                                               async () => {
+                                                                      document
+                                                                             .getElementById(
+                                                                                    "bRightSideArea"
+                                                                             )
+                                                                             .appendChild(
+                                                                                    view.findChatBox(
+                                                                                           button.id
+                                                                                    )
+                                                                             );
+                                                                      view.updatedChatBox();
+                                                                      document
+                                                                             .querySelectorAll(
+                                                                                    ".bContactBox"
+                                                                             )
+                                                                             .forEach(
+                                                                                    (
+                                                                                           box
+                                                                                    ) => {
+                                                                                           box.remove();
+                                                                                    }
+                                                                             );
+                                                                      const messageInput =
+                                                                             document.getElementById(
+                                                                                    "message-input"
+                                                                             );
+
+                                                                      //  messageinput get event == enter will sent message to server
+                                                                      messageInput.addEventListener(
+                                                                             "keydown",
+                                                                             (
+                                                                                    event
+                                                                             ) => {
+                                                                                    if (
+                                                                                           event.key ===
+                                                                                                  "Enter" &&
+                                                                                           messageInput.value !==
+                                                                                                  ""
+                                                                                    ) {
+                                                                                           const message =
+                                                                                                  messageInput.value;
+                                                                                           messageInput.value =
+                                                                                                  "";
+                                                                                           const payload =
+                                                                                                  {
+                                                                                                         sender: document.getElementById(
+                                                                                                                "activeUserName"
+                                                                                                         )
+                                                                                                                .textContent,
+                                                                                                         receiver: document.getElementById(
+                                                                                                                "receiverName"
+                                                                                                         )
+                                                                                                                .textContent,
+                                                                                                         content: message,
+                                                                                                  };
+                                                                                           socket.send(
+                                                                                                  JSON.stringify(
+                                                                                                         payload
+                                                                                                  )
+                                                                                           );
+                                                                                    }
+                                                                             }
+                                                                      );
+                                                               }
+                                                        );
+                                                 });
                             });
-                     });
                      // click on post button will post content
                      document
                             .getElementById("letPost")
                             .addEventListener("click", async (e) => {
-                                   console.log("im working on posting");
                                    e.preventDefault();
-                                   const form = document.querySelector("form");
-                                   const data = new FormData(form);
+                                   const form =
+                                          document.querySelector("#letsBlame");
+                                   const data = new FormData();
+                                   const title = document.querySelector(
+                                          "input[name='Title']"
+                                   );
+                                   const content = document.querySelector(
+                                          "textarea[name='Content']"
+                                   );
+                                   const topics = document.querySelector(
+                                          "select[name='Topics']"
+                                   );
+                                   data.append("Title", title.value);
+                                   data.append("Content", content.value);
+                                   data.append("Topics", topics.value);
                                    const values = {};
                                    for (let [key, value] of data.entries()) {
                                           values[key] = value;
@@ -202,7 +298,67 @@ const router = async () => {
               let allPost = document.querySelectorAll(".pBox");
               allPost.forEach((box) => {
                      box.addEventListener("click", async () => {
-                            view.blameContent(box);
+                            await view.blameContent(box);
+                            if (
+                                   document.getElementById("activeUserName") !==
+                                          null &&
+                                   document.getElementById("activeUserName")
+                                          .textContent !== "guest"
+                            ) {
+                                   // click on comment button will send comment to server
+                                   document
+                                          .getElementById("letsComment")
+                                          .addEventListener(
+                                                 "click",
+                                                 async (e) => {
+                                                        e.preventDefault();
+                                                        const form =
+                                                               document.querySelector(
+                                                                      "#commentForm"
+                                                               );
+                                                        const data =
+                                                               new FormData();
+                                                        const Id = form
+                                                               .querySelector(
+                                                                      ".pbCommentBox"
+                                                               )
+                                                               .getAttribute(
+                                                                      "value"
+                                                               );
+                                                        const Content =
+                                                               form.querySelector(
+                                                                      'input[name="Content"]'
+                                                               ).value;
+                                                        data.append("Id", Id);
+                                                        data.append(
+                                                               "Content",
+                                                               Content
+                                                        );
+                                                        const values = {};
+                                                        for (let [
+                                                               key,
+                                                               value,
+                                                        ] of data.entries()) {
+                                                               values[key] =
+                                                                      value;
+                                                        }
+                                                        //add id = post id and send it
+                                                        if (
+                                                               values.Content !==
+                                                                      "" &&
+                                                               values.Content !==
+                                                                      undefined
+                                                        ) {
+                                                               console.log(
+                                                                      values
+                                                               );
+                                                        }
+                                                        form.querySelector(
+                                                               'input[name="Content"]'
+                                                        ).value = "";
+                                                 }
+                                          );
+                            }
                      });
               });
               // click on topic will show only posts belong to that topic
@@ -229,15 +385,72 @@ const router = async () => {
               const button = document.getElementById("register-submit");
               button.addEventListener("click", async (e) => {
                      e.preventDefault();
-                     readForm("/api/registerData");
+                     const form = document.querySelector("#register-form");
+                     const data = new FormData();
+                     data.append(
+                            "nickName",
+                            form.querySelector("input[name='nickName']").value
+                     );
+                     data.append(
+                            "firstName",
+                            form.querySelector("input[name='firstName']").value
+                     );
+                     data.append(
+                            "lastName",
+                            form.querySelector("input[name='lastName']").value
+                     );
+                     data.append(
+                            "gender",
+                            form.querySelector("select[name='gender']").value
+                     );
+                     data.append(
+                            "birthdate",
+                            form.querySelector("input[name='birthdate']").value
+                     );
+                     data.append(
+                            "email",
+                            form.querySelector("input[name='email']").value
+                     );
+                     data.append(
+                            "password",
+                            form.querySelector("input[name='password']").value
+                     );
+                     data.append(
+                            "cpassword",
+                            form.querySelector("input[name='cpassword']").value
+                     );
+                     const values = {};
+                     for (let [key, value] of data.entries()) {
+                            values[key] = value;
+                     }
+                     console.log("values is :", values);
+                     const response = await fetch("/api/registerData", {
+                            method: "POST",
+                            headers: {
+                                   "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify(values),
+                     });
+                     const json = await response.json();
+                     console.log(json);
               });
        }
        if (match.route.view == login) {
               const button = document.getElementById("loginSubmit");
               button.addEventListener("click", async (e) => {
                      e.preventDefault();
-                     const form = document.querySelector("form");
-                     const data = new FormData(form);
+                     const form = document.querySelector("#login-form");
+                     const data = new FormData();
+                     data.append(
+                            "loginusername",
+                            form.querySelector("input[name='loginusername']")
+                                   .value
+                     );
+                     data.append(
+                            "loginpassword",
+                            form.querySelector("input[name='loginpassword']")
+                                   .value
+                     ); 
                      const values = {};
                      for (let [key, value] of data.entries()) {
                             values[key] = value;
@@ -317,10 +530,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
        router();
 });
-
+/* 
 async function readForm(address) {
        const form = document.querySelector("form");
-       const data = new FormData(form);
+       const data = new FormData();
+       data.append(
+              "nickName",
+              form.querySelector("input[name='nickName']").value
+       );
+       data.append(
+              "firstName",
+              form.querySelector("input[name='firstName']").value
+       );
+       data.append(
+              "lastName",
+              form.querySelector("input[name='lastName']").value
+       );
+       data.append("gender", form.querySelector("select[name='gender']").value);
+       data.append(
+              "birthdate",
+              form.querySelector("input[name='birthdate']").value
+       );
+       data.append("email", form.querySelector("input[name='email']").value);
+       data.append(
+              "password",
+              form.querySelector("input[name='password']").value
+       );
+       data.append(
+              "cpassword",
+              form.querySelector("input[name='cpassword']").value
+       );
        const values = {};
        for (let [key, value] of data.entries()) {
               values[key] = value;
@@ -337,3 +576,4 @@ async function readForm(address) {
        console.log(json);
        return response;
 }
+ */

@@ -10,6 +10,7 @@ export default class extends abstract {
               this.app = document.querySelector("#app");
               //   this.app.innerHTML += this.style();
               this.data = null;
+              this.setTitle("Blamer");
        }
        async connect() {
               // Create a WebSocket connection and wait for it to open
@@ -30,7 +31,6 @@ export default class extends abstract {
                      await this.getData();
               };
        }
-
        async getData() {
               // Wait until this.data is set before proceeding
               while (!this.data) {
@@ -47,13 +47,6 @@ export default class extends abstract {
               this.Topics = this.findTopics();
               this.postBox = "";
               this.postBox = this.posting();
-            /*   this.chatBox = this.findChatBox(""); */
-              //this.updatedChatBox()
-
-              // The rest of your code to retrieve data from the server
-/*  for make chat box
-              this.contactList = this.findContactList();
-              this.updatedChatBox(); */
        }
        // getHtml return html code
        async getHtml() {
@@ -81,7 +74,7 @@ export default class extends abstract {
                             </div>
                       </div>
                      <div class="userBottom">
-                            <div id="bChatButton"class="bChatButton">Chat</div>
+                            <div id="bChatButton"class="bChatButton">Contact List</div>
                      </div>
                </div>
                 `;
@@ -141,8 +134,6 @@ export default class extends abstract {
               `
               return container;
        }
-       
-
       updatedPostList(topic) {
 
               let postBox = document.querySelectorAll(".bPost")
@@ -238,7 +229,7 @@ export default class extends abstract {
               let postBox = `
         <div id="cPostBox" class="cPostBox">
         <div class="bPostForm">
-            <form id="letsBlame">
+            <div id="letsBlame">
                 <div class="topSide">
                     <div class="pTitle"><input type="text" name="Title" placeholder="Title"></div>
                     <select class="pTopics" name="Topics">
@@ -248,7 +239,7 @@ export default class extends abstract {
                 <div class="botSide">
                 <textarea name="Content" class="textBox" placeholder="Lets Blame" ></textarea>
                 </div>
-                </form> 
+                </div> 
                 <button  class="sendB" id="letPost" type="submit" >Post</button>
         </div>
         </div>
@@ -333,7 +324,6 @@ export default class extends abstract {
               return chat;
        }
        // updatedChatBox return updated chatbox
-
        async updatedChatBox(message) {
               /* 
               const response = await fetch("/blamer");
@@ -378,6 +368,7 @@ export default class extends abstract {
               }
        }
        async findBlameThing(id) {
+              console.log("findBlameThing",id)
               let blameThing = "";
               // id = username_title
               let username = id.split("_")[0];
@@ -387,7 +378,7 @@ export default class extends abstract {
                      if (post.Username == username && post.Title == title) {
                             blameThing = `
                             <div class="bPost">
-                            <div class="blameContent">
+                            <div id="${id}" class="blameContent">
                                    <div class="pbTop">
                                           <div class="pbTitle">${post.Title}</div>
                                           <div class="pbUsername">${post.Username}</div>
@@ -396,9 +387,9 @@ export default class extends abstract {
                                    <textarea class="pbContent" readonly>${post.Content}</textarea>
                                    <div class="pbBottom">
                                           <div class="pbTopic">${post.Topics}</div>
-                                          <div class="pbLike">${post.Likes}</div>
-                                          <div class="pbDislike">${post.Dislikes}</div>
-                                          <div class="pbComment">${post.TotalComments}</div>
+                                          <div class="pbLikeNumb">${post.Likes}</div>
+                                          <div class="pbDislikeNumb">${post.Dislikes}</div>
+                                          <div class="pbCommentNumb">${post.TotalComments}</div>
                                    </div>
                                    </div>
                                    </div>
@@ -407,47 +398,76 @@ export default class extends abstract {
               });
               return blameThing;
        }
+       // eventlisterner for blame button = id: letsComment for sent comment
        async createCommentBox(id) {
-              let commentBox = `
+              let container = document.createElement("div");
+              container.id = "commentForm";
+              container.innerHTML += `
               <div class="bPost" >
-              <div class="pbCommentBox">
-              <div class="pbCommentBoxTitle">Comment:</div>
-              <textarea class="pbCommentBoxContent" id="bCommentBoxContent" placeholder="Comment here"></textarea>
-              <button  class="sendComment" id="letsComment" type="submit" data-link>comment</button>
+              <div class="pbCommentBox" name="ID" value=${id}>
+              <label id="letsComment" for="bCommentBoxContent" class="sendComment">Comment</label>
+              <input type="text" name="Content" class="pbCommentBoxContent" id="bCommentBoxContent" placeholder="Comment here"></input>
               </div>
               </div>
-              `;
-              return commentBox;
+              `
+              return container;
        }
        async findComments() {
               let comments = "";
-              this.data.Comments.forEach((comment) => {
+              let side = "justify-items: start;";
+              let like = "white"
+              let dislike = "white"
+             this.data.Comments.forEach((comment) => {
                      if (comment.PostId == this.data.PostId) {
+                            if (comment.Username == this.activeUserName){
+                                    side = "justify-items: end;";        
+                            }
+                            if (comment.LikesStatus == "like"){
+                                   like = "green"
+                            }
+                            else if (comment.LikesStatus == "dislike"){
+                                   dislike = "red"
+                            }
                             comments += `
-                            <div class="pbComment">
-                            <div class="pbCommentTop">
-                            <div class="pbCommentUsername">${comment.Username}</div>
-                            <div class="pbCommentTime">${comment.CreationTime}</div>
-                            </div>
-                            <textarea class="pbCommentContent" readonly>${comment.Content}</textarea>
-                            </div>
+                                   <div class="pbComment" style="${side};">
+                                          <div class="pbCommentUname"><b>${comment.Username}</b>${comment.CreationTime}</div>
+                                          <div class="pbCommentContent" >
+                                                 <div class="pbCommentText">${comment.Content}</div>
+                                          </div>
+                                          <div class="pbCommentBotton">
+                                                 <div class="pbCommentLike"><span id="lNumb">${comment.Likes}</span><span id="lButton" style="color :${like}">Like</span></div>
+                                                 <div class="pbCommentDislike"><span id="dNumb">${comment.Dislikes}</span><span id="lButton" style="color :${dislike}">Dislike</span></div>
+                                          </div>
+                                   </div>
                             `;
                      }
-              });
-              return comments;
-       }
-       createCommentArea() {
-              let comments = this.findComments();
-              let commentArea = `
-              <div class="bPost" >
-              <div class="pbCommentArea">
-              ${comments}
+              }); 
+              let dummyComments = `
+              <div class="pbComment" style="justify-items: start;">
+              <div class="pbCommentUname"><b>ME:</b> 2021-05-05 12:00:00</div>
+              <div class="pbCommentContent" >
+              <div class="pbCommentText">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nunc sit amet ultricies lacinia, nunc nisl aliquam nisl, eget aliquam nunc nisl sit amet nisl. Sed euismod, nunc sit amet ultricies lacinia, nunc nisl aliquam nisl, eget aliquam nunc nisl sit amet nisl.</div>
+              </div>
+              <div class="pbCommentBotton">
+              <div class="pbCommentLike"><span id="lNumb">10</span><span id="lButton">Like</span></div>
+              <div class="pbCommentDislike"><span id="dNumb">888</span><span id="lButton">Dislike</span></div>
               </div>
               </div>
-              `;
-              return commentArea;
-       }
+              
+              `
 
+              return dummyComments;
+       }
+      async createCommentArea() {
+              let comments = await this.findComments();
+              let parent = document.createElement("div");
+              parent.className = "bPost";
+              let container = document.createElement("div");
+              container.className = "pbCommentArea";
+              container.innerHTML = `${comments}`;
+              parent.appendChild(container);
+              return parent;
+       }
        async blameContent(element) {
               let parents = document.querySelectorAll(".bPost");
               if (parents) {
@@ -457,15 +477,15 @@ export default class extends abstract {
               }
               let parent = document.getElementById("mainPostsBox");
               let blame = await this.findBlameThing(element.id);
-              parent.innerHTML = blame;
-              console.log(this.activeUserName);
+              parent.innerHTML = blame;   
               if (
                      this.activeUserName != null &&
                      this.activeUserName !== "guest"
               ) {
                      console.log("in blameContent", this.activeUserName);
                      let commentBox = await this.createCommentBox(element.id);
-                     parent.innerHTML += commentBox;
+                     parent.appendChild(commentBox);
+                     parent.appendChild(await this.createCommentArea())
               }
        }
 }

@@ -10,8 +10,8 @@ export default class extends abstact {
        <div class="lContainer">
         <div class="login">
         <div class="login-text">Login</div>
-        <form id="login-form">
-              <div class="login-form" id="login-form">
+        <div id="login-form">
+              <div class="login-form">
               <div class="input">
               <input type="text" name="loginusername" id="loginusername" placeholder="Nickname"/>
               </div>
@@ -22,7 +22,7 @@ export default class extends abstact {
               <button id="loginSubmit" type="submit" href="/blamer" data-link>Login</button>
               </div>
               </div>
-        </form>
+        </div>
         <div class="login-registerlink">
         <p>Don't have an account? <a href="/register" data-link>Register</a></p>
         </div>
