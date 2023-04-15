@@ -11,13 +11,13 @@ export default class extends abstract{
         <div class="rContainer">
         <div class="register">
         <div class="register-text">Register</div>
-        <form id="register-form">
+        <div id="register-form">
         <div class="register-form">
         <div class="input">
         <input type="text" name="nickName" id="nickName" placeholder="Nickname"/>
         </div>
         <div class="input">
-        <input type="text" name="fistName" id="fistName" placeholder="First Name" />
+        <input type="text" name="firstName" id="firstName" placeholder="First Name" />
         </div>
         <div class="input">
         <input type="text" name="lastName" id="lastName" placeholder="Last Name" />
@@ -44,7 +44,7 @@ export default class extends abstract{
         <div class="register-submit">
         <button type="submit" id="register-submit">Register</button>
         </div>
-        </form>
+        </div>
         <div class="register-emptyspace"></div>
         <div class="register-loginlink">
         <p>Already have an account? <a href="/login" data-link>Login</a></p>

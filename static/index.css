@@ -25,7 +25,7 @@ body {
        font-family: regular;
        font-size: 16px;
        font-weight: 400;
-
+       overflow-x:hidden;
        margin: 0;
        padding: 0;
 }
@@ -36,8 +36,9 @@ body {
        flex-direction: column;
        align-items: center;
        justify-content: center;
-       height: 100%;
+       overflow-x:hidden;
        background-color: var(--color-primary);
+
 }
 
 .box {
@@ -240,6 +241,7 @@ body {
 /*>---------------------- Blamer/main -----------------------< */
 
 .bContainer {
+       padding-top: 40px ;
        display: grid;
        grid-template-columns: 0.2fr 1.8fr 1fr;
        grid-template-rows: auto;
@@ -248,7 +250,7 @@ body {
        grid-template-areas:
               ". cPostBox bUser"
               ". bPost bRightSideArea"
-              ". . .";
+              ;
 }
 .cPostBox {
        grid-area: cPostBox;
@@ -435,6 +437,9 @@ body {
        margin-left: 10px;
        margin-bottom: 10px;
 }
+.bChatButton:hover {
+       color: var(--color-secondary);
+}
 
 .bPosts {
        width: 1000px;
@@ -445,7 +450,7 @@ body {
 .bRightSideArea {
        display: grid;
        grid-template-columns: 0.2fr 2.6fr 0.2fr;
-       grid-template-rows: 1fr 2fr;
+       /* grid-template-rows: 0.1fr 1fr; */
        gap: 0px 0px;
        grid-auto-flow: row;
        grid-template-areas:
@@ -472,6 +477,13 @@ body {
        font-size: 20px;
        color: var(--color-quaternary);
        transition: all 0.4s ease;
+       place-self: center;
+}
+.bTopic .tBox .tName{
+       font-family: regular;
+       font-size: 20px;
+       transition: all 0.1  s ease;
+       text-align: center;
 }
 .bTopic:hover {
        border-radius: 0% 0% 50% 50% / 0% 0% 5% 5%;
@@ -510,8 +522,7 @@ body {
        color: var(--color-primary);
        margin-left: 10px;
        margin-top: 10px;
-       place-self: start;
-       text-align: left;
+       place-self: center;
 }
 .bContactList{
        grid-area: bContactList;
@@ -818,44 +829,27 @@ body {
 
 .pbCommentBox{
        grid-area: pBox;
-       display: grid;
-       grid-template-columns: 0.1fr 2.6fr 0.5fr 0.1fr;
-       grid-template-rows: 0.1fr 0.3fr 3.6fr 0.3fr;
-       gap: 0px 0px;
-       grid-auto-flow: row;
-       grid-template-areas:
-              ". . . ."
-              ". pbCommentBoxTitle . ."
-              ". pbCommentBoxContent sendComment ."
-              ". . . .";
-       z-index: 2;
+       padding:  10px;
        position: relative;
        background: var(--color-quaternary);
        border-radius: 0% 0% 0% 0% / 0% 0% 0% 0%;
        box-shadow: 20px 20px rgba(0, 0, 0, 0.15);
-       transition: all 1s ease;
+       transition: all 0.7s ease;
+       align-items: center;
+
+
 }
 .pbCommentBox:hover{
        border-radius: 0% 0% 50% 50% / 0% 0% 5% 5%;
        box-shadow: 10px 10px rgba(0, 0, 0, 0.25);
 }
 
-.pbCommentBoxTitle{
-       grid-area: pbCommentBoxTitle;
-       font-family: regular;
-       font-size: 20px;
-       color: var(--color-primary);
-       font-weight: 800;
-       text-align: left;
-       margin-top: 5px;
-}
 
 .pbCommentBoxContent{
-       grid-area: pbCommentBoxContent;
        background: transparent;
        color: var(--color-primary);
        height: 90%;
-       width: 95%;
+       width: 85%;
        resize: none;
        outline: none;
        border: none;
@@ -863,21 +857,16 @@ body {
        font-size: 18px;
 }
 .sendComment{
-       grid-area: sendComment;
        background: transparent;
        color: var(--color-primary);
-       height: 90%;
-       width: 95%;
-       resize: none;
-       outline: none;
-       border: none;
        font-family: regular;
        font-size: 18px;
+       position: absolute;
+       right: 30px;
 }
 .sendComment:hover{
        color: var(--color-secondary);
 }
-
 
 .pBlamer {
        grid-area: pBlamer;

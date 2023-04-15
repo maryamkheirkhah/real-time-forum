@@ -47,13 +47,6 @@ export default class extends abstract {
               this.Topics = this.findTopics();
               this.postBox = "";
               this.postBox = this.posting();
-            /*   this.chatBox = this.findChatBox(""); */
-              //this.updatedChatBox()
-
-              // The rest of your code to retrieve data from the server
-/*  for make chat box
-              this.contactList = this.findContactList();
-              this.updatedChatBox(); */
        }
        // getHtml return html code
        async getHtml() {
@@ -81,7 +74,7 @@ export default class extends abstract {
                             </div>
                       </div>
                      <div class="userBottom">
-                            <div id="bChatButton"class="bChatButton">Chat</div>
+                            <div id="bChatButton"class="bChatButton">Contact List</div>
                      </div>
                </div>
                 `;
@@ -236,7 +229,7 @@ export default class extends abstract {
               let postBox = `
         <div id="cPostBox" class="cPostBox">
         <div class="bPostForm">
-            <form id="letsBlame">
+            <div id="letsBlame">
                 <div class="topSide">
                     <div class="pTitle"><input type="text" name="Title" placeholder="Title"></div>
                     <select class="pTopics" name="Topics">
@@ -246,7 +239,7 @@ export default class extends abstract {
                 <div class="botSide">
                 <textarea name="Content" class="textBox" placeholder="Lets Blame" ></textarea>
                 </div>
-                </form> 
+                </div> 
                 <button  class="sendB" id="letPost" type="submit" >Post</button>
         </div>
         </div>
@@ -407,14 +400,13 @@ export default class extends abstract {
        }
        // eventlisterner for blame button = id: letsComment for sent comment
        async createCommentBox(id) {
-              let container = document.createElement("form");
+              let container = document.createElement("div");
               container.id = "commentForm";
               container.innerHTML += `
               <div class="bPost" >
-              <div class="pbCommentBox">
-              <div class="pbCommentBoxTitle">Comment:</div>
-              <textarea name="Content" class="pbCommentBoxContent" id="bCommentBoxContent" placeholder="Comment here"></textarea>
-              <div  class="sendComment" id="letsComment">comment</div>
+              <div class="pbCommentBox" name="ID" value=${id}>
+              <label id="letsComment" for="bCommentBoxContent" class="sendComment">Comment</label>
+              <input type="text" name="Content" class="pbCommentBoxContent" id="bCommentBoxContent" placeholder="Comment here"></input>
               </div>
               </div>
               `
@@ -435,18 +427,19 @@ export default class extends abstract {
                             `;
                      }
               });
+
               return comments;
        }
        createCommentArea() {
               let comments = this.findComments();
-              let commentArea = `
-              <div class="bPost" >
+              let container = document.createElement("div");
+              container.className = "bPost";
+              container.innerHTML = `
               <div class="pbCommentArea">
               ${comments}
               </div>
-              </div>
               `;
-              return commentArea;
+              return container;
        }
        async blameContent(element) {
               let parents = document.querySelectorAll(".bPost");
