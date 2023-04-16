@@ -281,8 +281,36 @@ func MainDataHandler(w http.ResponseWriter, r *http.Request, message []byte, nic
 		return nil
 	}
 }
-func DataRoute(w http.ResponseWriter, r *http.Request) {
+func CreatePostHandler(w http.ResponseWriter, r *http.Request, message []byte, nickname string) {
+	if nickname != "" {
+		var post PostJsonData
+		err := json.Unmarshal(message, &post)
+		if err != nil {
+			fmt.Println("create post: error in unmarshaling", err.Error())
+			return
+		}
+		err = insertPostToDB(nickname, post.Title, post.Content, post.AllTopics)
+		if err != nil {
+			fmt.Println("error in insert post to db", err.Error())
+			return
+		}
+		redirectHandler(w, r, "/", "Post created")
+		responseData := map[string]string{"status": "success"}
+		json.NewEncoder(w).Encode(responseData)
+		return
+	}
+	return
+}
 
+/*
+	 func CreateCommentHandler(w http.ResponseWriter, r *http.Request, message []byte, nickname string) []byte {
+		if nickname != "" {
+			return byte("comment created")
+		}
+		return nil
+	}
+*/
+func DataRoute(w http.ResponseWriter, r *http.Request) {
 	nickname, exist := sessions.Check(r)
 	if !exist {
 
@@ -327,6 +355,10 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 				RegisterHandler(w, r, message)
 			case "mainData-start":
 				client.SendMessage(MainDataHandler(w, r, message, nickname))
+			case "createPost-start":
+				CreatePostHandler(w, r, message, nickname)
+				/* case "createCommnet-start":
+				CreateCommentHandler(w, r, message, nickname) */
 			}
 			break
 		}

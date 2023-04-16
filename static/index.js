@@ -3,7 +3,8 @@ import register from "./js/register.js";
 import blamer from "./js/blamer.js";
 import profile from "./js/profile.js";
 import logout from "./js/logout.js";
-import { sendLoginData, sendRegisterData, dataGathering } from "./js/datahandler.js";
+import { navigateTo } from "./js/teleport.js";
+import { sendLoginData, sendRegisterData,sendNewPostData, dataGathering } from "./js/datahandler.js";
 const pathToRegex = (path) =>
        new RegExp(
               "^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$"
@@ -22,12 +23,7 @@ const getParams = (match) => {
        );
 };
 
-const navigateTo = (url) => {
-       history.pushState(null, null, url);
-       router();
-};
-
-const router = async () => {
+export const router = async () => {
        const routes = [
               //    { path: "/", view: Dashboard },
               {
@@ -134,7 +130,7 @@ const router = async () => {
                             .getElementById("letPost")
                             .addEventListener("click", async (e) => {
                                    e.preventDefault();
-                                  console.log("im try to get post data",await dataGathering("blameP"))
+                                   sendNewPostData("ws://localhost:8080/api/data-route",await dataGathering("blameP"))
                             });
 
                      // delete cookie when click logout button
@@ -237,11 +233,6 @@ window.addEventListener("popstate", router);
 document.addEventListener("DOMContentLoaded", () => {
        document.body.addEventListener("click", (e) => {
               if (e.target.matches("[data-link]")) {
-                     /*   console.log(
-                            "link",
-                            e.target,
-                            e.target.matches("[data-link]")
-                     ); */
                      e.preventDefault();
                      navigateTo(e.target.href);
               }

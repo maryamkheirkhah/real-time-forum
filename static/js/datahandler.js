@@ -1,5 +1,5 @@
 
-
+import { navigateTo } from "./teleport.js";
 // Login handler
 export async function sendLoginData(location = "ws://localhost:8080/api/data-route", data) {
               const socket = new WebSocket(location);
@@ -53,6 +53,7 @@ export async function sendLoginData(location = "ws://localhost:8080/api/data-rou
                      
                      // Remove the event listener for message to avoid multiple invocations
                      socket.removeEventListener("message", handleResponse);
+                     navigateTo("/blamer");
 }
 export async function sendRegisterData(location ="ws://localhost:8080/api/data-route" ,  data) {
        const socket = new WebSocket(location);
@@ -84,7 +85,7 @@ export async function dataGathering(location) {
       }
      return obj;
 }
-export function requestMainData(location="ws://localhost:8080/api/data-route") {
+export async function requestMainData(location="ws://localhost:8080/api/data-route") {
   return new Promise((resolve, reject) => {
     const socket = new WebSocket(location);
 
@@ -110,5 +111,33 @@ export function requestMainData(location="ws://localhost:8080/api/data-route") {
     });
   });
 }
-export function sendNewPostData(location="ws://localhost:8080/api/data-route", data) {
+export async function sendNewPostData(location="ws://localhost:8080/api/data-route", data) {
+  const socket = new WebSocket(location);
+  // Wait for the WebSocket connection to open
+  await new Promise(resolve => {
+    socket.addEventListener("open", () => {
+      console.log("WebSocket connection established.");
+      resolve();
+    });
+  });
+
+  // Send the login data as JSON to the backend through the WebSocket
+  socket.send("createPost-start");
+  socket.send(JSON.stringify(data));
+  navigateTo("/blamer");
+  // Define a callback function to handle the response from the backend
+  
+}
+export async function sendNewCommentData(location="ws://localhost:8080/api/data-route", data) {
+  const socket = new WebSocket(location);
+  // Wait for the WebSocket connection to open
+  await new Promise(resolve => {
+    socket.addEventListener("open", () => {
+      console.log("WebSocket connection established.");
+      resolve();
+    });
+  });
+  // Send the login data as JSON to the backend through the WebSocket
+  socket.send("createCommnet-start");
+  socket.send(JSON.stringify(data));
 }
