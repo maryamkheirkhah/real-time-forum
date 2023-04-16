@@ -48,75 +48,6 @@ func redirectHandler(w http.ResponseWriter, r *http.Request, pageName string, me
 	//http.Redirect(w, r, pageName, http.StatusMovedPermanently)
 }
 
-func Blamer(w http.ResponseWriter, r *http.Request) {
-	nickname, exist := sessions.Check(r)
-	if !exist {
-
-	} else if nickname != "" {
-
-	}
-	msg := ""
-	messageCookie, err := r.Cookie(MESSAGE_COOKIE_NAME)
-	if err == nil {
-		msg = messageCookie.Value
-		fmt.Println("msg", msg)
-
-	}
-
-	if r.Method == "POST" {
-		var post PostJsonData
-		err := json.NewDecoder(r.Body).Decode(&post)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		// insert post into database
-		err = insertPostToDB(nickname, post.Title, post.Content, post.AllTopics)
-		if err != nil {
-			fmt.Println("error reg", err)
-		}
-		// Redirect to the login page upon successful registration
-		redirectHandler(w, r, "/login", "Your account has been created")
-
-		//response success
-		responseData := map[string]string{"status": "success"}
-		json.NewEncoder(w).Encode(responseData)
-
-	}
-
-	// Call the GetMainDataStruct function to get the data
-	mainData, err := GetMainDataStruct(r, nickname)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	// Marshal the MainData struct into a JSON string
-	websocketEndpoint(w, r, mainData)
-
-}
-func websocketEndpoint(w http.ResponseWriter, r *http.Request, mainData MainData) {
-	fmt.Println("websocketEndpoint")
-	// upgrade the connection
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	// encode the data as a JSON string
-	jsonData, err := json.Marshal(mainData)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	// send the JSON string to the client
-	err = conn.WriteMessage(websocket.TextMessage, jsonData)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-}
 func Profile(w http.ResponseWriter, r *http.Request) {
 	// Check for logged-in session cookie, renew / update if found, return username if found
 	activeNickname, exist := sessions.Check(r)
@@ -541,4 +472,74 @@ func Login(w http.ResponseWriter, r *http.Request) {
 				// Unregister the client from the hub
 				SocketHub.unregister <- client
 			}
+
+func Blamer(w http.ResponseWriter, r *http.Request) {
+	nickname, exist := sessions.Check(r)
+	if !exist {
+
+	} else if nickname != "" {
+
+	}
+	msg := ""
+	messageCookie, err := r.Cookie(MESSAGE_COOKIE_NAME)
+	if err == nil {
+		msg = messageCookie.Value
+		fmt.Println("msg", msg)
+
+	}
+
+	if r.Method == "POST" {
+		var post PostJsonData
+		err := json.NewDecoder(r.Body).Decode(&post)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		// insert post into database
+		err = insertPostToDB(nickname, post.Title, post.Content, post.AllTopics)
+		if err != nil {
+			fmt.Println("error reg", err)
+		}
+		// Redirect to the login page upon successful registration
+		redirectHandler(w, r, "/login", "Your account has been created")
+
+		//response success
+		responseData := map[string]string{"status": "success"}
+		json.NewEncoder(w).Encode(responseData)
+
+	}
+
+	// Call the GetMainDataStruct function to get the data
+	mainData, err := GetMainDataStruct(r, nickname)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// Marshal the MainData struct into a JSON string
+	websocketEndpoint(w, r, mainData)
+
+}
+func websocketEndpoint(w http.ResponseWriter, r *http.Request, mainData MainData) {
+	fmt.Println("websocketEndpoint")
+	// upgrade the connection
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	// encode the data as a JSON string
+	jsonData, err := json.Marshal(mainData)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	// send the JSON string to the client
+	err = conn.WriteMessage(websocket.TextMessage, jsonData)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+}
 */
