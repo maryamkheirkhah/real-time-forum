@@ -1,37 +1,15 @@
 import abstract from "./abstract.js";
+import { requestMainData } from "./datahandler.js";
 export default class extends abstract {
        constructor() {
               super();
-              this.connect().then(() => {
-                     this.getData().then(() => {
-                      /*       console.log("this data", this.data); */
-                     });
-              });
               this.app = document.querySelector("#app");
               //   this.app.innerHTML += this.style();
-              this.data = null;
               this.setTitle("Blamer");
        }
-       async connect() {
-              // Create a WebSocket connection and wait for it to open
-              this.socket = new WebSocket("ws://localhost:8080/blamer");
-              await new Promise((resolve) => {
-                     this.socket.onopen = () => {
-                            console.log("WebSocket connection established.");
-                            // send a message to the server
-                            this.socket.send("Hello from client!");
-                            resolve();
-                     };
-              });
-
-              // Receive messages from the server and update this.data
-              this.socket.onmessage = async (event) => {
-                     this.data = await JSON.parse(event.data);
-                     // Now that this.data is set, call getData()
-                     await this.getData();
-              };
-       }
+     
        async getData() {
+              this.data = await JSON.parse((await requestMainData("ws://localhost:8080/api/data-route")));
               // Wait until this.data is set before proceeding
               while (!this.data) {
                      await new Promise((resolve) => setTimeout(resolve, 100));
@@ -229,15 +207,15 @@ export default class extends abstract {
               let postBox = `
         <div id="cPostBox" class="cPostBox">
         <div class="bPostForm">
-            <div id="letsBlame">
+            <div id="blameP-form">
                 <div class="topSide">
-                    <div class="pTitle"><input type="text" name="Title" placeholder="Title"></div>
-                    <select class="pTopics" name="Topics">
+                    <div class="pTitle"><input type="text" name="blameP-Title" placeholder="Title"></div>
+                    <select class="pTopics" name="blameP-Topics">
                     ${topicList}
                     </select>
                 </div>
                 <div class="botSide">
-                <textarea name="Content" class="textBox" placeholder="Lets Blame" ></textarea>
+                <textarea name="blameP-Content" class="textBox" placeholder="Lets Blame" ></textarea>
                 </div>
                 </div> 
                 <button  class="sendB" id="letPost" type="submit" >Post</button>
@@ -396,12 +374,12 @@ export default class extends abstract {
        // eventlisterner for blame button = id: letsComment for sent comment
        async createCommentBox(id) {
               let container = document.createElement("div");
-              container.id = "commentForm";
+              container.id = "blameC-form";
               container.innerHTML += `
               <div class="bPost" >
-              <div class="pbCommentBox" name="ID" value=${id}>
+              <div class="pbCommentBox">
               <label id="letsComment" for="bCommentBoxContent" class="sendComment">Comment</label>
-              <input type="text" name="Content" class="pbCommentBoxContent" id="bCommentBoxContent" placeholder="Comment here"></input>
+              <input type="text" name="blameC-Content" class="pbCommentBoxContent" id="bCommentBoxContent" placeholder="Comment here"></input>
               </div>
               </div>
               `

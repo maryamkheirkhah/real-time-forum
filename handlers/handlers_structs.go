@@ -87,10 +87,10 @@ type ContentData struct {
 }
 type RegisterJsonData struct {
 	NickName  string `json:"nickName"`
-	FistName  string `json:"fistName"`
+	FistName  string `json:"firstName"`
 	LastName  string `json:"lastName"`
 	Gender    string `json:"gender"`
-	Bd        string `json:"birthdate"`
+	Bd        string `json:"birthday"`
 	Email     string `json:"email"`
 	Password  string `json:"password"`
 	CPassword string `json:"cpassword"`

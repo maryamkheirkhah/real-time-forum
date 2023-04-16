@@ -15,14 +15,9 @@ func StartServer() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./static/index.html")
 	})
-	// test
-	//http.HandleFunc("/login", handlers.Login)
-	http.HandleFunc("/register", handlers.Register)
-	http.HandleFunc("/api/registerData", handlers.Register)
-	http.HandleFunc("/api/loginData", handlers.Login)
-	http.HandleFunc("/blamer", handlers.Blamer)
 	http.HandleFunc("/profile", handlers.Profile)
 	http.HandleFunc("/ws", handlers.WebSocketHandler)
+	http.HandleFunc("/api/data-route", handlers.DataRoute)
 	// Serve static assets at "/static/*"
 	http.Handle("/static/", http.StripPrefix("/static/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fileServer.ServeHTTP(w, r)

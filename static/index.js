@@ -3,6 +3,7 @@ import register from "./js/register.js";
 import blamer from "./js/blamer.js";
 import profile from "./js/profile.js";
 import logout from "./js/logout.js";
+import { sendLoginData, sendRegisterData, dataGathering } from "./js/datahandler.js";
 const pathToRegex = (path) =>
        new RegExp(
               "^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$"
@@ -71,7 +72,7 @@ const router = async () => {
        }
 
        const view = new match.route.view(getParams(match));
-
+       
        document.querySelector("#app").innerHTML = await view.getHtml();
        if (match.route.view == blamer) {
               if (
@@ -87,180 +88,53 @@ const router = async () => {
                      };
 
                      // click on Chat to see contact list
-                     document
-                            .getElementById("bChatButton")
-                            .addEventListener("click", (e) => {
-                                   if (
-                                          document.querySelectorAll(".bChatBox")
-                                                 .length > 0
-                                   ) {
-                                          document
-                                                 .querySelectorAll(".bChatBox")
-                                                 .forEach((box) => {
-                                                        box.remove();
-                                                 });
+                     document.getElementById("bChatButton").addEventListener("click", (e) => {
+                                   if (document.querySelectorAll(".bChatBox").length > 0) {
+                                          document.querySelectorAll(".bChatBox").forEach((box) => {box.remove();});
                                    }
-                                   if (
-                                          document.querySelectorAll(
-                                                 ".bContactBox"
-                                          ).length === 0
+                                   if (document.querySelectorAll(".bContactBox").length === 0
                                    ) {
-                                          document
-                                                 .querySelectorAll(".bTopic")
-                                                 .forEach((box) => {
-                                                        box.style.height =
-                                                               "25px";
-                                                 });
-                                          document
-                                                 .getElementById(
-                                                        "bRightSideArea"
-                                                 )
-                                                 .appendChild(
-                                                        view.findContactList()
-                                                 );
-                                   } else if (
-                                          document.querySelectorAll(
-                                                 ".bContactBox"
-                                          ).length > 0
+                                          document.querySelectorAll(".bTopic").forEach((box) => {box.style.height ="25px";});
+                                          document.getElementById("bRightSideArea").appendChild( view.findContactList());
+                                   } else if (document.querySelectorAll(".bContactBox").length > 0
                                    ) {
-                                          document
-                                                 .querySelectorAll(".bTopic")
-                                                 .forEach((box) => {
-                                                        box.style.height =
-                                                               "100px";
+                                          document.querySelectorAll(".bTopic").forEach((box) => {
+                                          box.style.height ="100px";
                                                  });
 
-                                          document
-                                                 .querySelectorAll(
-                                                        ".bContactBox"
-                                                 )
-                                                 .forEach((box) => {
-                                                        box.remove();
-                                                 });
+                                          document.querySelectorAll(".bContactBox").forEach((box) => {box.remove()});
                                    }
                                    if (document.querySelectorAll(".bChatBox"))
-                                          document
-                                                 .querySelectorAll(".bcButton")
-                                                 .forEach((button) => {
-                                                        button.addEventListener(
-                                                               "click",
-                                                               async () => {
-                                                                      document
-                                                                             .getElementById(
-                                                                                    "bRightSideArea"
-                                                                             )
-                                                                             .appendChild(
-                                                                                    view.findChatBox(
-                                                                                           button.id
-                                                                                    )
-                                                                             );
+                                          document.querySelectorAll(".bcButton").forEach((button) => {
+                                                        button.addEventListener("click",async () => {
+                                                                      document.getElementById("bRightSideArea").appendChild(view.findChatBox(button.id));
                                                                       view.updatedChatBox();
-                                                                      document
-                                                                             .querySelectorAll(
-                                                                                    ".bContactBox"
-                                                                             )
-                                                                             .forEach(
-                                                                                    (
-                                                                                           box
-                                                                                    ) => {
-                                                                                           box.remove();
-                                                                                    }
-                                                                             );
-                                                                      const messageInput =
-                                                                             document.getElementById(
-                                                                                    "message-input"
-                                                                             );
-
+                                                                      document.querySelectorAll(".bContactBox").forEach((box) => {box.remove()});
+                                                                      const messageInput =document.getElementById("message-input");
                                                                       //  messageinput get event == enter will sent message to server
-                                                                      messageInput.addEventListener(
-                                                                             "keydown",
-                                                                             (
-                                                                                    event
-                                                                             ) => {
-                                                                                    if (
-                                                                                           event.key ===
-                                                                                                  "Enter" &&
-                                                                                           messageInput.value !==
-                                                                                                  ""
-                                                                                    ) {
-                                                                                           const message =
-                                                                                                  messageInput.value;
-                                                                                           messageInput.value =
-                                                                                                  "";
-                                                                                           const payload =
-                                                                                                  {
-                                                                                                         sender: document.getElementById(
-                                                                                                                "activeUserName"
-                                                                                                         )
-                                                                                                                .textContent,
-                                                                                                         receiver: document.getElementById(
-                                                                                                                "receiverName"
-                                                                                                         )
-                                                                                                                .textContent,
-                                                                                                         content: message,
-                                                                                                  };
-                                                                                           socket.send(
-                                                                                                  JSON.stringify(
-                                                                                                         payload
-                                                                                                  )
-                                                                                           );
+                                                                      messageInput.addEventListener("keydown",(event) => {
+                                                                             if (event.key ==="Enter" &&messageInput.value !=="") {
+                                                                                    const message = messageInput.value;
+                                                                                    messageInput.value ="";
+                                                                                    const payload ={
+                                                                                    sender: document.getElementById("activeUserName").textContent,
+                                                                                    receiver: document.getElementById("receiverName").textContent,
+                                                                                    content: message,
+                                                                                    };
+                                                                                    socket.send(JSON.stringify(payload));
                                                                                     }
                                                                              }
-                                                                      );
-                                                               }
+                                                                             );
+                                                                      }
                                                         );
-                                                 });
+                                          });
                             });
                      // click on post button will post content
                      document
                             .getElementById("letPost")
                             .addEventListener("click", async (e) => {
                                    e.preventDefault();
-                                   const form =
-                                          document.querySelector("#letsBlame");
-                                   const data = new FormData();
-                                   const title = document.querySelector(
-                                          "input[name='Title']"
-                                   );
-                                   const content = document.querySelector(
-                                          "textarea[name='Content']"
-                                   );
-                                   const topics = document.querySelector(
-                                          "select[name='Topics']"
-                                   );
-                                   data.append("Title", title.value);
-                                   data.append("Content", content.value);
-                                   data.append("Topics", topics.value);
-                                   const values = {};
-                                   for (let [key, value] of data.entries()) {
-                                          values[key] = value;
-                                   }
-                                   if (
-                                          values.Content !== "" &&
-                                          values.Topics !== "" &&
-                                          values.Title !== "" &&
-                                          values.Content !== undefined &&
-                                          values.Topics !== undefined &&
-                                          values.Title !== undefined
-                                   ) {
-                                          console.log(values);
-                                          const response = await fetch(
-                                                 "/blamer",
-                                                 {
-                                                        method: "POST",
-                                                        headers: {
-                                                               "Content-Type":
-                                                                      "application/json",
-                                                        },
-                                                        body: JSON.stringify(
-                                                               values
-                                                        ),
-                                                 }
-                                          );
-                                          if (response.status === 200) {
-                                                 navigateTo("/blamer");
-                                          }
-                                   }
+                                  console.log("im try to get post data",await dataGathering("blameP"))
                             });
 
                      // delete cookie when click logout button
@@ -312,89 +186,10 @@ const router = async () => {
                                                  "click",
                                                  async (e) => {
                                                         e.preventDefault();
-                                                        const form =
-                                                               document.querySelector(
-                                                                      "#commentForm"
-                                                               );
-                                                        const data =
-                                                               new FormData();
-                                                        const Id = form
-                                                               .querySelector(
-                                                                      ".pbCommentBox"
-                                                               )
-                                                               .getAttribute(
-                                                                      "value"
-                                                               );
-                                                        const Content =
-                                                               form.querySelector(
-                                                                      'input[name="Content"]'
-                                                               ).value;
-                                                        data.append("Id", Id);
-                                                        data.append(
-                                                               "Content",
-                                                               Content
-                                                        );
-                                                        const values = {};
-                                                        for (let [
-                                                               key,
-                                                               value,
-                                                        ] of data.entries()) {
-                                                               values[key] =
-                                                                      value;
-                                                        }
-                                                        //add id = post id and send it
-                                                        if (
-                                                               values.Content !==
-                                                                      "" &&
-                                                               values.Content !==
-                                                                      undefined
-                                                        ) {
-                                                               console.log("comment", values);
-                                                               //send comment to server
-                                                               const socket = new WebSocket("ws://localhost:8080/api/blamer");
-
-                                                               // Wait for the WebSocket connection to open
-                                                               await new Promise(resolve => {
-                                                                 socket.addEventListener("open", () => {
-                                                                   console.log("WebSocket connection established.");
-                                                                   resolve();
-                                                                 });
-                                                               });
-                                                           
-                                                               // Send the login data as JSON to the backend through the WebSocket
-                                                               socket.send(JSON.stringify(values));
-                                                           
-                                                               // Define a callback function to handle the response from the backend
-                                                               const handleResponse = (event) => {
-                                                                 // Handle the response from the backend
-                                                                 
-                                                                 const response = JSON.parse(event.data);
-                                                                 console.log("Response from backend:", response);
-                                                                 if (response) {
-                                                                      console.log("your comment has been sent");
-                                                                 } else {
-                                                                   alert("some problem with your comment");
-                                                                 }
-                                                               };
-                                                           
-                                                               // Wait for a response from the backend and call the callback function
-                                                               socket.addEventListener("message", handleResponse);
-                                                           
-                                                               // Wait for the response and then close the WebSocket connection
-                                                               await new Promise(resolve => {
-                                                                 socket.addEventListener("close", () => {
-                                                                   console.log("WebSocket connection closed.");
-                                                                   resolve();
-                                                                 });
-                                                               });
-                                                           
-                                                               // Remove the event listener for message to avoid multiple invocations
-                                                               socket.removeEventListener("message", handleResponse);
-                     
-                                                        }
-                                                        form.querySelector(
-                                                               'input[name="Content"]'
-                                                        ).value = "";
+                                                        let data = await dataGathering("blameC")
+                                                        let ID = document.querySelector(".blameContent").id
+                                                        data["PostId"] = ID
+                                                        console.log("im try to get comment data",data)        
                                                  }
                                           );
                             }
@@ -423,7 +218,7 @@ const router = async () => {
               const button = document.getElementById("register-submit");
               button.addEventListener("click", async (e) => {
                      e.preventDefault();
-                     await sendRegisterData("/api/registerData" , await dataGathering("register"))
+                     await sendRegisterData("ws://localhost:8080/api/data-route" , await dataGathering("register"))
        });
             
        }
@@ -432,7 +227,7 @@ const router = async () => {
               button.addEventListener("click", async (e) => {
                      e.preventDefault();
                      e.preventDefault();
-                      sendLoginData("ws://localhost:8080/api/loginData", await dataGathering("login"));
+                      sendLoginData("ws://localhost:8080/api/data-route", await dataGathering("login"));
               });
        }
 };
@@ -455,91 +250,3 @@ document.addEventListener("DOMContentLoaded", () => {
        router();
 });
 
-
-
-// Login handler
-async function sendLoginData(location = "ws://localhost:8080/api/loginData", data) {
-              const socket = new WebSocket(location);
-                     // Wait for the WebSocket connection to open
-                     await new Promise(resolve => {
-                       socket.addEventListener("open", () => {
-                         console.log("WebSocket connection established.");
-                         resolve();
-                       });
-                     });
-                 
-                     // Send the login data as JSON to the backend through the WebSocket
-                     socket.send(JSON.stringify(data));
-                 
-                     // Define a callback function to handle the response from the backend
-                     const handleResponse = (event) => {
-                       // Handle the response from the backend
-                       
-                       const response = JSON.parse(event.data);
-                       console.log("Response from backend:", response);
-                       if (response) {
-                         if (
-                            
-                            data["loginusername"] !== "" &&
-                            data["loginusername"] !== "wrong"
-                         ) {
-                           console.log("user", response["nickname"]);
-                           // Set a cookie with the user's username
-                         document.cookie = `sessionID=${response["sessionId"]}; path=/; max-age=3600;`;
-                          navigateTo("/blamer");
-                         } else if (data["loginusername"] === "") {
-                           console.log("password or username is wrong");
-                         } else if (data["loginusername"] === "wrong") {
-                           console.log("password or username is wrong");
-                         }
-                       } else {
-                         alert("Invalid username or password");
-                       }
-                     };
-                 
-                     // Wait for a response from the backend and call the callback function
-                     socket.addEventListener("message", handleResponse);
-                 
-                     // Wait for the response and then close the WebSocket connection
-                     await new Promise(resolve => {
-                       socket.addEventListener("close", () => {
-                         console.log("WebSocket connection closed.");
-                         resolve();
-                       });
-                     });
-                 
-                     // Remove the event listener for message to avoid multiple invocations
-                     socket.removeEventListener("message", handleResponse);
-}
- async function dataGathering(location) {
-       const parent = document.querySelector(`#${location}-form`);
-       const inputs = parent.querySelectorAll(`[name^="${location}-"]`);
-       const obj = {};
-       const fdata = new FormData();
-       inputs.forEach((input) => {
-              console.log(input);
-              const { name, value } = input;
-              const nameEnd = name.split('-')[1];
-              fdata.append(nameEnd, value);
-       });
-       for (let [key, value] of fdata.entries()) {
-              obj[key] = value;
-       }
-      return obj;
-}
-
-async function sendRegisterData(location ,  data) {
-                     const values = {};
-                     for (let [key, value] of data.entries()) {
-                            values[key] = value;
-                     }
-                     const response = await fetch("/api/registerData", {
-                            method: "POST",
-                            headers: {
-                                   "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify(values),
-                     });
-                     const json = await response.json();
-                     console.log(json);
-}
