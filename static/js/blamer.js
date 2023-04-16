@@ -382,9 +382,9 @@ export default class extends abstract {
                                    <textarea class="pbContent" readonly>${post.Content}</textarea>
                                    <div class="pbBottom">
                                           <div class="pbTopic">${post.Topics}</div>
-                                          <div class="pbLikeNumb">${post.Likes}</div>
-                                          <div class="pbDislikeNumb">${post.Dislikes}</div>
-                                          <div class="pbCommentNumb">${post.TotalComments}</div>
+                                          <div class="pbLikeNumb"><span>${post.Likes}</span><span id="like-${id}">LIKE</span></div>
+                                          <div class="pbDislikeNumb"><span>${post.Dislikes}</span><span id="dislike-${id}">DISLIKE</span></div>
+                                          <div class="pbCommentNumb"><span>${post.TotalComments}</span><span>COMMENTS</span></div>
                                    </div>
                                    </div>
                                    </div>
@@ -407,12 +407,14 @@ export default class extends abstract {
               `
               return container;
        }
+
+       // search for comments
        async findComments(data,id) {
               let comments = "";
               let side = "justify-items: start;";
               let like = "white"
               let dislike = "white"
-              if (this.data.comments.length > 0) {
+             /*  if (this.data.comments.length > 0) {
               data.forEach((comment) => {
                      if (comment.PostId == id) {
                             if (comment.Username == this.activeUserName){
@@ -439,7 +441,7 @@ export default class extends abstract {
                      }
                      
               });  
-       }
+       } */
               return comments;
        }
       async createCommentArea(id) {

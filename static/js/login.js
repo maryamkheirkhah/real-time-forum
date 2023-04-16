@@ -13,10 +13,10 @@ export default class extends abstact {
         <div id="login-form">
               <div class="login-form">
               <div class="input">
-              <input type="text" name="loginusername" id="loginusername" placeholder="Nickname"/>
+              <input type="text" name="login-loginusername" id="loginusername" placeholder="Nickname"/>
               </div>
               <div class="input">
-              <input type="password" name="loginpassword" id="loginpassword" placeholder="Password" />
+              <input type="password" name="login-loginpassword" id="loginpassword" placeholder="Password" />
               </div>
               <div class="login-submit">
               <button id="loginSubmit" type="submit" href="/blamer" data-link>Login</button>

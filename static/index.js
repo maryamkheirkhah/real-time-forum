@@ -420,134 +420,19 @@ const router = async () => {
               });
        }
        if (match.route.view == register) {
-              console.log("register js");
               const button = document.getElementById("register-submit");
               button.addEventListener("click", async (e) => {
                      e.preventDefault();
-                     const form = document.querySelector("#register-form");
-                     const data = new FormData();
-                     data.append(
-                            "nickName",
-                            form.querySelector("input[name='nickName']").value
-                     );
-                     data.append(
-                            "firstName",
-                            form.querySelector("input[name='firstName']").value
-                     );
-                     data.append(
-                            "lastName",
-                            form.querySelector("input[name='lastName']").value
-                     );
-                     data.append(
-                            "gender",
-                            form.querySelector("select[name='gender']").value
-                     );
-                     data.append(
-                            "birthdate",
-                            form.querySelector("input[name='birthdate']").value
-                     );
-                     data.append(
-                            "email",
-                            form.querySelector("input[name='email']").value
-                     );
-                     data.append(
-                            "password",
-                            form.querySelector("input[name='password']").value
-                     );
-                     data.append(
-                            "cpassword",
-                            form.querySelector("input[name='cpassword']").value
-                     );
-                     const values = {};
-                     for (let [key, value] of data.entries()) {
-                            values[key] = value;
-                     }
-                     console.log("values is :", values);
-                     const response = await fetch("/api/registerData", {
-                            method: "POST",
-                            headers: {
-                                   "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify(values),
-                     });
-                     const json = await response.json();
-                     console.log(json);
-              });
+                     await sendRegisterData("/api/registerData" , await dataGathering("register"))
+       });
+            
        }
        if (match.route.view == login) {
               const button = document.getElementById("loginSubmit");
               button.addEventListener("click", async (e) => {
                      e.preventDefault();
-                     const form = document.querySelector("#login-form");
-                     const data = new FormData();
-                     data.append(
-                            "loginusername",
-                            form.querySelector("input[name='loginusername']")
-                                   .value
-                     );
-                     data.append(
-                            "loginpassword",
-                            form.querySelector("input[name='loginpassword']")
-                                   .value
-                     ); 
-                     const values = {};
-                     for (let [key, value] of data.entries()) {
-                            values[key] = value;
-                     }
-                  
-                     
-                     const socket = new WebSocket("ws://localhost:8080/api/loginData");
-
-                     // Wait for the WebSocket connection to open
-                     await new Promise(resolve => {
-                       socket.addEventListener("open", () => {
-                         console.log("WebSocket connection established.");
-                         resolve();
-                       });
-                     });
-                 
-                     // Send the login data as JSON to the backend through the WebSocket
-                     socket.send(JSON.stringify(values));
-                 
-                     // Define a callback function to handle the response from the backend
-                     const handleResponse = (event) => {
-                       // Handle the response from the backend
-                       
-                       const response = JSON.parse(event.data);
-                       console.log("Response from backend:", response);
-                       if (response) {
-                         if (
-                            
-                            values["loginusername"] !== "" &&
-                            values["loginusername"] !== "wrong"
-                         ) {
-                           console.log("user", response["nickname"]);
-                           // Set a cookie with the user's username
-                         document.cookie = `sessionID=${response["sessionId"]}; path=/; max-age=3600;`;
-                          navigateTo("/blamer");
-                         } else if (values["loginusername"] === "") {
-                           console.log("password or username is wrong");
-                         } else if (values["loginusername"] === "wrong") {
-                           console.log("password or username is wrong");
-                         }
-                       } else {
-                         alert("Invalid username or password");
-                       }
-                     };
-                 
-                     // Wait for a response from the backend and call the callback function
-                     socket.addEventListener("message", handleResponse);
-                 
-                     // Wait for the response and then close the WebSocket connection
-                     await new Promise(resolve => {
-                       socket.addEventListener("close", () => {
-                         console.log("WebSocket connection closed.");
-                         resolve();
-                       });
-                     });
-                 
-                     // Remove the event listener for message to avoid multiple invocations
-                     socket.removeEventListener("message", handleResponse);
+                     e.preventDefault();
+                      sendLoginData("ws://localhost:8080/api/loginData", await dataGathering("login"));
               });
        }
 };
@@ -569,50 +454,92 @@ document.addEventListener("DOMContentLoaded", () => {
 
        router();
 });
-/* 
-async function readForm(address) {
-       const form = document.querySelector("form");
-       const data = new FormData();
-       data.append(
-              "nickName",
-              form.querySelector("input[name='nickName']").value
-       );
-       data.append(
-              "firstName",
-              form.querySelector("input[name='firstName']").value
-       );
-       data.append(
-              "lastName",
-              form.querySelector("input[name='lastName']").value
-       );
-       data.append("gender", form.querySelector("select[name='gender']").value);
-       data.append(
-              "birthdate",
-              form.querySelector("input[name='birthdate']").value
-       );
-       data.append("email", form.querySelector("input[name='email']").value);
-       data.append(
-              "password",
-              form.querySelector("input[name='password']").value
-       );
-       data.append(
-              "cpassword",
-              form.querySelector("input[name='cpassword']").value
-       );
-       const values = {};
-       for (let [key, value] of data.entries()) {
-              values[key] = value;
-       }
-       console.log("values is :", values);
-       const response = await fetch(address, {
-              method: "POST",
-              headers: {
-                     "Content-Type": "application/json",
-              },
-              body: JSON.stringify(values),
-       });
-       const json = await response.json();
-       console.log(json);
-       return response;
+
+
+
+// Login handler
+async function sendLoginData(location = "ws://localhost:8080/api/loginData", data) {
+              const socket = new WebSocket(location);
+                     // Wait for the WebSocket connection to open
+                     await new Promise(resolve => {
+                       socket.addEventListener("open", () => {
+                         console.log("WebSocket connection established.");
+                         resolve();
+                       });
+                     });
+                 
+                     // Send the login data as JSON to the backend through the WebSocket
+                     socket.send(JSON.stringify(data));
+                 
+                     // Define a callback function to handle the response from the backend
+                     const handleResponse = (event) => {
+                       // Handle the response from the backend
+                       
+                       const response = JSON.parse(event.data);
+                       console.log("Response from backend:", response);
+                       if (response) {
+                         if (
+                            
+                            data["loginusername"] !== "" &&
+                            data["loginusername"] !== "wrong"
+                         ) {
+                           console.log("user", response["nickname"]);
+                           // Set a cookie with the user's username
+                         document.cookie = `sessionID=${response["sessionId"]}; path=/; max-age=3600;`;
+                          navigateTo("/blamer");
+                         } else if (data["loginusername"] === "") {
+                           console.log("password or username is wrong");
+                         } else if (data["loginusername"] === "wrong") {
+                           console.log("password or username is wrong");
+                         }
+                       } else {
+                         alert("Invalid username or password");
+                       }
+                     };
+                 
+                     // Wait for a response from the backend and call the callback function
+                     socket.addEventListener("message", handleResponse);
+                 
+                     // Wait for the response and then close the WebSocket connection
+                     await new Promise(resolve => {
+                       socket.addEventListener("close", () => {
+                         console.log("WebSocket connection closed.");
+                         resolve();
+                       });
+                     });
+                 
+                     // Remove the event listener for message to avoid multiple invocations
+                     socket.removeEventListener("message", handleResponse);
 }
- */
+ async function dataGathering(location) {
+       const parent = document.querySelector(`#${location}-form`);
+       const inputs = parent.querySelectorAll(`[name^="${location}-"]`);
+       const obj = {};
+       const fdata = new FormData();
+       inputs.forEach((input) => {
+              console.log(input);
+              const { name, value } = input;
+              const nameEnd = name.split('-')[1];
+              fdata.append(nameEnd, value);
+       });
+       for (let [key, value] of fdata.entries()) {
+              obj[key] = value;
+       }
+      return obj;
+}
+
+async function sendRegisterData(location ,  data) {
+                     const values = {};
+                     for (let [key, value] of data.entries()) {
+                            values[key] = value;
+                     }
+                     const response = await fetch("/api/registerData", {
+                            method: "POST",
+                            headers: {
+                                   "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify(values),
+                     });
+                     const json = await response.json();
+                     console.log(json);
+}
