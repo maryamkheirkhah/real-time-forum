@@ -300,37 +300,64 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 				/* case "createCommnet-start":
 				CreateCommentHandler(w, r, message, nickname) */
 
-			case "chat":
+			case "createChat-start":
 				chatHandle(w, r, conn)
 
 				break
 			}
-			index++
-
 		}
+		index++
+
 	}
 }
 
 func chatHandle(w http.ResponseWriter, r *http.Request, conn *websocket.Conn) error {
 	// Upgrade the HTTP connection to a WebSocket connection
+	fmt.Println("chat handle")
 	nickname, exist := sessions.Check(r)
 	if !exist || nickname == "" {
 		return errors.New("you are not logged in")
 	}
-	/*
-		// Read messages from the WebSocket connection
-		data, err := readData(conn)
+
+	for {
+		_, message, err := conn.ReadMessage()
 		if err != nil {
 			log.Println(err)
-			return nil, err
+			break
 		}
-			defer func() {
-			// Remove the WebSocket connection from the clients map
-			delete(Clients, nickname)
-			conn.Close()
-		}()
-		return data, nil
-	*/
+		var messageData MessageData
+		fmt.Println("message", string(message), "from", nickname)
+		err = json.Unmarshal(message, &messageData)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		messageData.Time = time.Now().Format("2006-01-02 15:04:05")
+
+		// encode the data as a JSON string
+		jsonData, err := json.Marshal(messageData)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+
+		err = SaveMessage(messageData)
+		if err != nil {
+			log.Println(errors.New("error saving message"), err)
+			continue
+		}
+
+		// Broadcast message to receiver
+		for cNickname, c := range Clients {
+			fmt.Println("cNickname", cNickname)
+			if cNickname == messageData.Receiver || cNickname == messageData.Sender {
+				err = c.WriteMessage(websocket.TextMessage, jsonData)
+				if err != nil {
+					log.Println(err)
+				}
+			}
+		}
+	}
 	return nil
 }
 func responseConn(response any, conn *websocket.Conn) error {

@@ -151,7 +151,6 @@ export async function sendNewCommentData(socket, location = "ws://localhost:8080
 }
 export async function sendChatData(socket, data) {
   // Wait for the WebSocket connection to open
-   
   new Promise(resolve => {
     socket.addEventListener("open", () => {
       console.log("WebSocket connection established.");
