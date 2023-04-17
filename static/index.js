@@ -68,8 +68,10 @@ export const router = async () => {
        }
 
        const view = new match.route.view(getParams(match));
-       
-       document.querySelector("#app").innerHTML = await view.getHtml();
+       const loc="ws://localhost:8080/api/data-route";
+       const socket = new WebSocket(loc);
+      
+       document.querySelector("#app").innerHTML = await view.getHtml(socket);
        if (match.route.view == blamer) {
               if (
                      document.getElementById("activeUserName") !== null &&
@@ -220,12 +222,18 @@ export const router = async () => {
        }
        if (match.route.view == login) {
               const button = document.getElementById("loginSubmit");
+             
+
               button.addEventListener("click", async (e) => {
                      e.preventDefault();
                      e.preventDefault();
-                      sendLoginData("ws://localhost:8080/api/data-route", await dataGathering("login"));
+                      sendLoginData(socket, await dataGathering("login"));
               });
        }
+
+       socket.addEventListener("close", (event) => {
+              console.log("WebSocket connection closed:", event);
+            });
 };
 
 window.addEventListener("popstate", router);

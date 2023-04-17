@@ -242,6 +242,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request, message []byte, n
 	}
 */
 func DataRoute(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("data route")
 	nickname, exist := sessions.Check(r)
 	if !exist {
 
@@ -264,16 +265,23 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 
 	client := NewClient(SocketHub, conn)
 	SocketHub.register <- client
+	defer func() {
+		SocketHub.unregister <- client
+		conn.Close()
+	}()
+	/* go client.SendMessage([]byte("ping"))
+	go client.Read() */
 
 	index := 0
 	var goTo = ""
 	for {
 		fmt.Println("index is :", index, "goTo is :", goTo)
-		_, message, err := conn.ReadMessage()
+		Mtype, message, err := conn.ReadMessage()
 		if err != nil {
 			log.Println("Failed to read message from WebSocket:", err)
 			break
 		}
+		fmt.Println("message type is :", Mtype, "message", string(message))
 		if index == 0 {
 			goTo = string(message)
 		}

@@ -8,8 +8,8 @@ export default class extends abstract {
               this.setTitle("Blamer");
        }
      
-       async getData() {
-              this.data = await JSON.parse((await requestMainData("ws://localhost:8080/api/data-route")));
+       async getData(socket) {
+              this.data = await JSON.parse((await requestMainData(socket)));
               // Wait until this.data is set before proceeding
               while (!this.data) {
                      await new Promise((resolve) => setTimeout(resolve, 100));
@@ -27,8 +27,8 @@ export default class extends abstract {
               this.postBox = this.posting();
        }
        // getHtml return html code
-       async getHtml() {
-              await this.getData();
+       async getHtml(socket) {
+              await this.getData(socket);
               return `
         <div class="bContainer">
         ${this.postBox}

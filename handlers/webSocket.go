@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"sync"
 
@@ -30,13 +31,16 @@ func NewHub() *Hub {
 }
 
 func (h *Hub) Run() {
+	fmt.Println("Starting WebSocket Hub")
 	for {
 		select {
 		case client := <-h.register:
+			fmt.Println("Registering client")
 			h.mutex.Lock()
 			h.clients[client] = true
 			h.mutex.Unlock()
 		case client := <-h.unregister:
+			fmt.Println("Unregistering client")
 			h.mutex.Lock()
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
@@ -44,11 +48,13 @@ func (h *Hub) Run() {
 			}
 			h.mutex.Unlock()
 		case message := <-h.broadcast:
+			fmt.Println("Broadcasting message")
 			h.mutex.RLock()
 			for client := range h.clients {
 				select {
 				case client.send <- message:
 				default:
+					fmt.Println("Failed to send message to client in this fucking hub")
 					close(client.send)
 					delete(h.clients, client)
 				}
@@ -77,10 +83,6 @@ func NewClient(hub *Hub, conn *websocket.Conn) *Client {
 }
 
 func (c *Client) Read() ([]byte, error) {
-	defer func() {
-		c.hub.unregister <- c
-		c.conn.Close()
-	}()
 
 	for {
 		_, message, err := c.conn.ReadMessage()
@@ -88,15 +90,10 @@ func (c *Client) Read() ([]byte, error) {
 			return nil, err
 		}
 		return message, nil
-		// Handle the received message as needed
-		// e.g., parse as JSON, process, and send to appropriate handlers/functions
 	}
 
 }
 func (c *Client) Write() {
-	defer func() {
-		c.conn.Close()
-	}()
 
 	for message := range c.send {
 		err := c.conn.WriteMessage(websocket.TextMessage, message)

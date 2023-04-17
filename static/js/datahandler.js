@@ -1,16 +1,25 @@
 
 import { navigateTo } from "./teleport.js";
 // Login handler
-export async function sendLoginData(location = "ws://localhost:8080/api/data-route", data) {
-              const socket = new WebSocket(location);
+
+
+export async function sendLoginData(socket,data) {
+
+    console.log("there it is", data);
+              //const socket = new WebSocket(location);
                      // Wait for the WebSocket connection to open
+                     console.log("socket", socket);
+                     socket.addEventListener("open", () => {
+                        console.log("WebSocket connection established.");
+                      });
+                     /*  
                      await new Promise(resolve => {
                        socket.addEventListener("open", () => {
                          console.log("WebSocket connection established.");
                          resolve();
                        });
-                     });
-                 
+                     }); */
+                     console.log("sendLoginData");
                      // Send the login data as JSON to the backend through the WebSocket
                      socket.send("login-start")
                      socket.send(JSON.stringify(data));
@@ -43,7 +52,7 @@ export async function sendLoginData(location = "ws://localhost:8080/api/data-rou
                      // Wait for a response from the backend and call the callback function
                      socket.addEventListener("message", handleResponse);
                  
-                     // Wait for the response and then close the WebSocket connection
+/*                      // Wait for the response and then close the WebSocket connection
                      await new Promise(resolve => {
                        socket.addEventListener("close", () => {
                          console.log("WebSocket connection closed.");
@@ -52,11 +61,11 @@ export async function sendLoginData(location = "ws://localhost:8080/api/data-rou
                      });
                      
                      // Remove the event listener for message to avoid multiple invocations
-                     socket.removeEventListener("message", handleResponse);
+                     socket.removeEventListener("message", handleResponse); */
                      navigateTo("/blamer");
 }
-export async function sendRegisterData(location ="ws://localhost:8080/api/data-route" ,  data) {
-       const socket = new WebSocket(location);
+export async function sendRegisterData(socket,location ="ws://localhost:8080/api/data-route" ,  data) {
+      // const socket = new WebSocket(location);
                      // Wait for the WebSocket connection to open
                      await new Promise(resolve => {
                        socket.addEventListener("open", () => {
@@ -85,9 +94,9 @@ export async function dataGathering(location) {
       }
      return obj;
 }
-export async function requestMainData(location="ws://localhost:8080/api/data-route") {
+export async function requestMainData(socket) {
   return new Promise((resolve, reject) => {
-    const socket = new WebSocket(location);
+   // const socket = new WebSocket(location);
 
     socket.addEventListener("open", () => {
       console.log("WebSocket connection established.");
@@ -106,13 +115,11 @@ export async function requestMainData(location="ws://localhost:8080/api/data-rou
       socket.close();
     });
 
-    socket.addEventListener("close", (event) => {
-      console.log("WebSocket connection closed:", event);
-    });
+
   });
 }
-export async function sendNewPostData(location="ws://localhost:8080/api/data-route", data) {
-  const socket = new WebSocket(location);
+export async function sendNewPostData(socket,location="ws://localhost:8080/api/data-route", data) {
+ // const socket = new WebSocket(location);
   // Wait for the WebSocket connection to open
   await new Promise(resolve => {
     socket.addEventListener("open", () => {
@@ -128,8 +135,8 @@ export async function sendNewPostData(location="ws://localhost:8080/api/data-rou
   // Define a callback function to handle the response from the backend
   
 }
-export async function sendNewCommentData(location="ws://localhost:8080/api/data-route", data) {
-  const socket = new WebSocket(location);
+export async function sendNewCommentData(socket,location="ws://localhost:8080/api/data-route", data) {
+ // const socket = new WebSocket(location);
   // Wait for the WebSocket connection to open
   await new Promise(resolve => {
     socket.addEventListener("open", () => {
