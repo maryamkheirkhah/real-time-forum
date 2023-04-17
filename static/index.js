@@ -70,7 +70,19 @@ export const router = async () => {
        const view = new match.route.view(getParams(match));
        const loc="ws://localhost:8080/api/data-route";
        const socket = new WebSocket(loc);
-      
+       socket.addEventListener("open", () => {
+              console.log("WebSocket connection established.");
+       });
+       socket.addEventListener("error", (event) => {
+              console.error("WebSocket error:", event);
+       });
+       socket.addEventListener("close", (event) => {
+              console.log("WebSocket connection closed:", event);
+            }); 
+       socket.addEventListener("message", (event) => {
+              console.log("WebSocket message:", event);
+              console.log("this the messsssssage",event.data);
+       });
        document.querySelector("#app").innerHTML = await view.getHtml(socket);
        if (match.route.view == blamer) {
               if (
@@ -78,13 +90,6 @@ export const router = async () => {
                      document.getElementById("activeUserName").textContent !==
                             "guest"
               ) {
-                     //webSocket connection
-                     const socket = new WebSocket("ws://localhost:8080/ws");
-                     // update chatbox when receive message from server
-                     socket.onmessage = async (event) => {
-                            view.updatedChatBox(JSON.parse(event.data));
-                     };
-
                      // click on Chat to see contact list
                      document.getElementById("bChatButton").addEventListener("click", (e) => {
                                    if (document.querySelectorAll(".bChatBox").length > 0) {
@@ -217,24 +222,22 @@ export const router = async () => {
               const button = document.getElementById("register-submit");
               button.addEventListener("click", async (e) => {
                      e.preventDefault();
-                     await sendRegisterData("ws://localhost:8080/api/data-route" , await dataGathering("register"))
+                     await sendRegisterData(socket,"ws://localhost:8080/api/data-route" , await dataGathering("register"))
        });
             
        }
        if (match.route.view == login) {
               const button = document.getElementById("loginSubmit");
-             
-
               button.addEventListener("click", async (e) => {
                      e.preventDefault();
                      e.preventDefault();
-                      sendLoginData(socket, await dataGathering("login"));
+                     sendLoginData(socket, await dataGathering("login"));
               });
        }
 
        socket.addEventListener("close", (event) => {
               console.log("WebSocket connection closed:", event);
-            });
+            }); 
 };
 
 window.addEventListener("popstate", router);

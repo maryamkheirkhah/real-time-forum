@@ -49,7 +49,9 @@ export async function sendLoginData(socket, data) {
 
   // Wait for a response from the backend and call the callback function
   socket.addEventListener("message", handleResponse);
-
+  socket.addEventListener("close", (event) => {
+    console.log("WebSocket connection closed:", event);
+  }); 
   /*                      // Wait for the response and then close the WebSocket connection
                        await new Promise(resolve => {
                          socket.addEventListener("close", () => {
@@ -107,7 +109,6 @@ export async function requestMainData(socket) {
 
     socket.addEventListener("message", (event) => {
       resolve(event.data);
-      socket.close();
     });
 
     socket.addEventListener("error", (event) => {
@@ -115,6 +116,9 @@ export async function requestMainData(socket) {
       reject(event);
       socket.close();
     });
+    socket.addEventListener("close", (event) => {
+      console.log("WebSocket connection closed:", event);
+    }); 
 
 
   });
@@ -133,6 +137,9 @@ export async function sendNewPostData(socket, location = "ws://localhost:8080/ap
   socket.send("createPost-start");
   socket.send(JSON.stringify(data));
   navigateTo("/blamer");
+  socket.addEventListener("close", (event) => {
+    console.log("WebSocket connection closed:", event);
+  }); 
   // Define a callback function to handle the response from the backend
 
 }
@@ -150,30 +157,21 @@ export async function sendNewCommentData(socket, location = "ws://localhost:8080
   socket.send(JSON.stringify(data));
 }
 export async function sendChatData(socket, data) {
-  // Wait for the WebSocket connection to open
-  new Promise(resolve => {
-    socket.addEventListener("open", () => {
-      console.log("WebSocket connection established.");
-      resolve();
-    });
+  
+  socket.addEventListener("open", () => {
+    console.log("WebSocket connection established.");
   });
+  socket.addEventListener("close", (event) => {
+    console.log("WebSocket connection closed:", event);
+  }); 
+  socket.addEventListener("error", (event) => {
+    console.error("WebSocket error:", event);
+  });
+  // Wait for the socket to open to resolve before proceeding
+  console.log("sendChatData socket is", socket);
   // Send the login data as JSON to the backend through the WebSocket
   socket.send("createChat-start");
-  console.log("chat message", JSON.stringify(data),{type: "chat"});
-  socket.send(JSON.stringify(data),{type: "chat"});
-  
-  const handleResponse = (event) => {
-    // Handle the response from the backend
-    const response = JSON.parse(event.data);
-    console.log("Response from backend:", response);
-    if (response) {
-      console.log("response", response);
-    } else {
-      alert("Invalid username or password");
-    }
-  };
-
-  // Wait for a response from the backend and call the callback function
-  socket.addEventListener("message", handleResponse);
-
-} 
+  socket.send(JSON.stringify(data), { type: "chat" });
+  // TODO:Define a callback function to handle the response from the backend
+  console.log("sendChatData");
+}

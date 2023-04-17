@@ -266,16 +266,22 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 
 	client := NewClient(SocketHub, conn)
 	SocketHub.register <- client
-	defer func() {
+	/* 	defer func() {
 		SocketHub.unregister <- client
 		conn.Close()
-	}()
+	}() */
 	/* go client.SendMessage([]byte("ping"))
 	go client.Read() */
-
 	index := 0
 	var goTo = ""
+	//go func() {
 	for {
+		fmt.Println("here in for just checking conn is :")
+		err = conn.WriteMessage(websocket.PingMessage, []byte{})
+		if err != nil {
+			log.Println("WebSocket connection closed:", err)
+			break
+		}
 		fmt.Println("index is :", index, "goTo is :", goTo)
 		Mtype, message, err := conn.ReadMessage()
 		if err != nil {
@@ -299,16 +305,18 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 				CreatePostHandler(w, r, message, nickname)
 				/* case "createCommnet-start":
 				CreateCommentHandler(w, r, message, nickname) */
-
 			case "createChat-start":
 				chatHandle(w, r, conn)
 
-				break
 			}
+			break
 		}
 		index++
-
+		fmt.Println("index is :", index, "goTo is :", goTo)
 	}
+	fmt.Println("here out of for just checking conn is :")
+	//}()
+	fmt.Println("here out side go func just checking conn is")
 }
 
 func chatHandle(w http.ResponseWriter, r *http.Request, conn *websocket.Conn) error {
