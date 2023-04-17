@@ -1,102 +1,103 @@
-
-import { navigateTo } from "./teleport.js";
+import {
+  navigateTo
+} from "./teleport.js";
 // Login handler
 
 
-export async function sendLoginData(socket,data) {
+export async function sendLoginData(socket, data) {
+  //const socket = new WebSocket(location);
+  // Wait for the WebSocket connection to open
+  socket.addEventListener("open", () => {
+    console.log("WebSocket connection established.");
+  });
+  /*  
+  await new Promise(resolve => {
+    socket.addEventListener("open", () => {
+      console.log("WebSocket connection established.");
+      resolve();
+    });
+  }); */
+  console.log("sendLoginData");
+  // Send the login data as JSON to the backend through the WebSocket
+  socket.send("login-start")
+  socket.send(JSON.stringify(data));
 
-    console.log("there it is", data);
-              //const socket = new WebSocket(location);
-                     // Wait for the WebSocket connection to open
-                     console.log("socket", socket);
-                     socket.addEventListener("open", () => {
-                        console.log("WebSocket connection established.");
-                      });
-                     /*  
-                     await new Promise(resolve => {
-                       socket.addEventListener("open", () => {
-                         console.log("WebSocket connection established.");
-                         resolve();
+  // Define a callback function to handle the response from the backend
+  const handleResponse = (event) => {
+    // Handle the response from the backend
+
+    const response = JSON.parse(event.data);
+    console.log("Response from backend:", response);
+    if (response) {
+      if (
+        data["loginusername"] !== "" &&
+        data["loginusername"] !== "wrong"
+      ) {
+        console.log("user", response["nickname"]);
+        // Set a cookie with the user's username
+        document.cookie = `sessionID=${response["sessionId"]}; path=/; max-age=3600;`;
+        navigateTo("/blamer");
+      } else if (data["loginusername"] === "") {
+        console.log("password or username is wrong");
+      } else if (data["loginusername"] === "wrong") {
+        console.log("password or username is wrong");
+      }
+    } else {
+      alert("Invalid username or password");
+    }
+  };
+
+  // Wait for a response from the backend and call the callback function
+  socket.addEventListener("message", handleResponse);
+
+  /*                      // Wait for the response and then close the WebSocket connection
+                       await new Promise(resolve => {
+                         socket.addEventListener("close", () => {
+                           console.log("WebSocket connection closed.");
+                           resolve();
+                         });
                        });
-                     }); */
-                     console.log("sendLoginData");
-                     // Send the login data as JSON to the backend through the WebSocket
-                     socket.send("login-start")
-                     socket.send(JSON.stringify(data));
-                 
-                     // Define a callback function to handle the response from the backend
-                     const handleResponse = (event) => {
-                       // Handle the response from the backend
                        
-                       const response = JSON.parse(event.data);
-                       console.log("Response from backend:", response);
-                       if (response) {
-                         if ( 
-                            data["loginusername"] !== "" &&
-                            data["loginusername"] !== "wrong"
-                         ) {
-                           console.log("user", response["nickname"]);
-                           // Set a cookie with the user's username
-                         document.cookie = `sessionID=${response["sessionId"]}; path=/; max-age=3600;`;
-                          navigateTo("/blamer");
-                         } else if (data["loginusername"] === "") {
-                           console.log("password or username is wrong");
-                         } else if (data["loginusername"] === "wrong") {
-                           console.log("password or username is wrong");
-                         }
-                       } else {
-                         alert("Invalid username or password");
-                       }
-                     };
-                 
-                     // Wait for a response from the backend and call the callback function
-                     socket.addEventListener("message", handleResponse);
-                 
-/*                      // Wait for the response and then close the WebSocket connection
-                     await new Promise(resolve => {
-                       socket.addEventListener("close", () => {
-                         console.log("WebSocket connection closed.");
-                         resolve();
-                       });
-                     });
-                     
-                     // Remove the event listener for message to avoid multiple invocations
-                     socket.removeEventListener("message", handleResponse); */
-                     navigateTo("/blamer");
+                       // Remove the event listener for message to avoid multiple invocations
+                       socket.removeEventListener("message", handleResponse); */
+  navigateTo("/blamer");
 }
-export async function sendRegisterData(socket,location ="ws://localhost:8080/api/data-route" ,  data) {
-      // const socket = new WebSocket(location);
-                     // Wait for the WebSocket connection to open
-                     await new Promise(resolve => {
-                       socket.addEventListener("open", () => {
-                         console.log("WebSocket connection established.");
-                         resolve();
-                       });
-                     });
-                 
-                     // Send the login data as JSON to the backend through the WebSocket
-                     socket.send("register-start");
-                     socket.send(JSON.stringify(data));
+export async function sendRegisterData(socket, location = "ws://localhost:8080/api/data-route", data) {
+  // const socket = new WebSocket(location);
+  // Wait for the WebSocket connection to open
+  await new Promise(resolve => {
+    socket.addEventListener("open", () => {
+      console.log("WebSocket connection established.");
+      resolve();
+    });
+  });
+
+  // Send the login data as JSON to the backend through the WebSocket
+  socket.send("register-start");
+  socket.send(JSON.stringify(data));
 }
 export async function dataGathering(location) {
-      const parent = document.querySelector(`#${location}-form`);
-      const inputs = parent.querySelectorAll(`[name^="${location}-"]`);
-      const obj = {};
-      const fdata = new FormData();
-      inputs.forEach((input) => {
-             console.log(input);
-             const { name, value } = input;
-             const nameEnd = name.split('-')[1];
-             fdata.append(nameEnd, value);
-      });
-      for (let [key, value] of fdata.entries()) {
-             obj[key] = value;
-      }
-     return obj;
+  const parent = document.querySelector(`#${location}-form`);
+  const inputs = parent.querySelectorAll(`[name^="${location}-"]`);
+  const obj = {};
+  const fdata = new FormData();
+  inputs.forEach((input) => {
+    console.log(input);
+    const {
+      name,
+      value
+    } = input;
+    const nameEnd = name.split('-')[1];
+    fdata.append(nameEnd, value);
+  });
+  for (let [key, value] of fdata.entries()) {
+    obj[key] = value;
+  }
+  return obj;
 }
 export async function requestMainData(socket) {
   return new Promise((resolve, reject) => {
-   // const socket = new WebSocket(location);
+    // const socket = new WebSocket(location);
 
     socket.addEventListener("open", () => {
       console.log("WebSocket connection established.");
@@ -118,8 +119,8 @@ export async function requestMainData(socket) {
 
   });
 }
-export async function sendNewPostData(socket,location="ws://localhost:8080/api/data-route", data) {
- // const socket = new WebSocket(location);
+export async function sendNewPostData(socket, location = "ws://localhost:8080/api/data-route", data) {
+  // const socket = new WebSocket(location);
   // Wait for the WebSocket connection to open
   await new Promise(resolve => {
     socket.addEventListener("open", () => {
@@ -133,10 +134,10 @@ export async function sendNewPostData(socket,location="ws://localhost:8080/api/d
   socket.send(JSON.stringify(data));
   navigateTo("/blamer");
   // Define a callback function to handle the response from the backend
-  
+
 }
-export async function sendNewCommentData(socket,location="ws://localhost:8080/api/data-route", data) {
- // const socket = new WebSocket(location);
+export async function sendNewCommentData(socket, location = "ws://localhost:8080/api/data-route", data) {
+  // const socket = new WebSocket(location);
   // Wait for the WebSocket connection to open
   await new Promise(resolve => {
     socket.addEventListener("open", () => {
@@ -148,3 +149,32 @@ export async function sendNewCommentData(socket,location="ws://localhost:8080/ap
   socket.send("createCommnet-start");
   socket.send(JSON.stringify(data));
 }
+export async function sendChatData(socket, data) {
+  // Wait for the WebSocket connection to open
+   
+  new Promise(resolve => {
+    socket.addEventListener("open", () => {
+      console.log("WebSocket connection established.");
+      resolve();
+    });
+  });
+  // Send the login data as JSON to the backend through the WebSocket
+  socket.send("createChat-start");
+  console.log("chat message", JSON.stringify(data),{type: "chat"});
+  socket.send(JSON.stringify(data),{type: "chat"});
+  
+  const handleResponse = (event) => {
+    // Handle the response from the backend
+    const response = JSON.parse(event.data);
+    console.log("Response from backend:", response);
+    if (response) {
+      console.log("response", response);
+    } else {
+      alert("Invalid username or password");
+    }
+  };
+
+  // Wait for a response from the backend and call the callback function
+  socket.addEventListener("message", handleResponse);
+
+} 

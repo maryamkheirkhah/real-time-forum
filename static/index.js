@@ -4,7 +4,7 @@ import blamer from "./js/blamer.js";
 import profile from "./js/profile.js";
 import logout from "./js/logout.js";
 import { navigateTo } from "./js/teleport.js";
-import { sendLoginData, sendRegisterData,sendNewPostData, dataGathering } from "./js/datahandler.js";
+import { sendLoginData, sendRegisterData,sendNewPostData, dataGathering, sendChatData } from "./js/datahandler.js";
 const pathToRegex = (path) =>
        new RegExp(
               "^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$"
@@ -119,7 +119,8 @@ export const router = async () => {
                                                                                     receiver: document.getElementById("receiverName").textContent,
                                                                                     content: message,
                                                                                     };
-                                                                                    socket.send(JSON.stringify(payload));
+                                                                                    console.log("its the message",payload);
+                                                                                    sendChatData(socket,payload);
                                                                                     }
                                                                              }
                                                                              );
@@ -132,7 +133,7 @@ export const router = async () => {
                             .getElementById("letPost")
                             .addEventListener("click", async (e) => {
                                    e.preventDefault();
-                                   sendNewPostData("ws://localhost:8080/api/data-route",await dataGathering("blameP"))
+                                   sendNewPostData(socket,"ws://localhost:8080/api/data-route",await dataGathering("blameP"))
                             });
 
                      // delete cookie when click logout button

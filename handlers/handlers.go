@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -298,35 +299,39 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 				CreatePostHandler(w, r, message, nickname)
 				/* case "createCommnet-start":
 				CreateCommentHandler(w, r, message, nickname) */
-			}
-			break
-		}
-		index++
 
+			case "chat":
+				chatHandle(w, r, conn)
+
+				break
+			}
+			index++
+
+		}
 	}
 }
 
-func WsDataHandler(w http.ResponseWriter, r *http.Request, conn *websocket.Conn) ([]byte, error) {
+func chatHandle(w http.ResponseWriter, r *http.Request, conn *websocket.Conn) error {
 	// Upgrade the HTTP connection to a WebSocket connection
 	nickname, exist := sessions.Check(r)
-	if !exist {
-
-	} else if nickname == "" {
-
+	if !exist || nickname == "" {
+		return errors.New("you are not logged in")
 	}
-
-	// Read messages from the WebSocket connection
-	data, err := readData(conn)
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-	/* 	defer func() {
-		// Remove the WebSocket connection from the clients map
-		delete(Clients, nickname)
-		conn.Close()
-	}() */
-	return data, nil
+	/*
+		// Read messages from the WebSocket connection
+		data, err := readData(conn)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+			defer func() {
+			// Remove the WebSocket connection from the clients map
+			delete(Clients, nickname)
+			conn.Close()
+		}()
+		return data, nil
+	*/
+	return nil
 }
 func responseConn(response any, conn *websocket.Conn) error {
 	responseBytes, err := json.Marshal("received")
