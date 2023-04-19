@@ -895,7 +895,7 @@ error value is non-nil if an error was encountered in any of the database querie
 */
 func GetContentDataStruct(r *http.Request, userName string, postId int) (ContentData, error) {
 	// Initialise output struct
-	cd := ContentData{ActiveUsername: userName}
+	var cd ContentData
 	// Get post data
 	var post Post
 	dbPost, err := db.SelectDataHandler("posts", "postId", postId)
@@ -908,20 +908,6 @@ func GetContentDataStruct(r *http.Request, userName string, postId int) (Content
 			return cd, errors.New("error in casting post to Post struct:" + err.Error())
 		}
 	}
-
-	// Check for message-cookie, add message to output struct if it exists
-	cookie, err := r.Cookie(MESSAGE_COOKIE_NAME)
-	if err == nil {
-		cd.CookieMessage = cookie.Value
-	} else {
-		cd.CookieMessage = ""
-	}
-	// Assign values to output struct
-	cd.CreatorUsername = post.Username
-	cd.Title = post.Title
-	cd.Topics = sortStringSlice(post.Topics)
-	cd.CreationTime = post.CreationTime
-	cd.Content = post.Content
 	cd.Likes = post.Likes
 	cd.Dislikes = post.Dislikes
 	if userName == "guest" {

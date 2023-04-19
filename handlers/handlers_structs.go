@@ -77,17 +77,17 @@ type ProfileData struct {
 }
 
 type ContentData struct {
-	ActiveUsername  string    `json:"activeUserName"` // Username of user who is currently logged in
-	CreatorUsername string    `json:"creatorUsername"`
-	Title           string    `json:"title"`         // Title of post
-	Topics          []string  `json:"topics"`        // Topics of post
-	CreationTime    string    `json:"creationTime"`  // Time post was created
-	Content         string    `json:"content"`       // Content of post
-	Likes           int       `json:"likes"`         // Total likes
-	Dislikes        int       `json:"dislikes"`      // Total dislikes
-	LikeStatus      int       `json:"likeStatus"`    // 0 for not liked, 1 for liked, -1 for disliked
-	Comments        []Comment `json:"comments"`      // Comments on post
-	CookieMessage   string    `json:"cookieMessage"` // Message to be displayed to user if forum-message cookie is set
+	//ActiveUsername  string    `json:"activeUserName"` // Username of user who is currently logged in
+	//CreatorUsername string    `json:"creatorUsername"`
+	//Title           string    `json:"title"`         // Title of post
+	//Topics          []string  `json:"topics"`        // Topics of post
+	//CreationTime    string    `json:"creationTime"`  // Time post was created
+	//Content         string    `json:"content"`       // Content of post
+	Likes      int       `json:"likes"`      // Total likes
+	Dislikes   int       `json:"dislikes"`   // Total dislikes
+	LikeStatus int       `json:"likeStatus"` // 0 for not liked, 1 for liked, -1 for disliked
+	Comments   []Comment `json:"comments"`   // Comments on post
+	//CookieMessage string    `json:"cookieMessage"` // Message to be displayed to user if forum-message cookie is set
 }
 type RegisterJsonData struct {
 	NickName  string `json:"nickName"`
@@ -127,4 +127,3 @@ type ChatData struct {
 
 // TO-DO:
 // Fill ProfileData struct
-// Main handler filter by topic

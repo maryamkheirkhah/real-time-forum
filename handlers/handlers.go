@@ -121,10 +121,10 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	go client.Write()
 }
 
-func RegisterHandler(w http.ResponseWriter, r *http.Request, message []byte) {
+func RegisterHandler(w http.ResponseWriter, r *http.Request, message map[string]interface{}) {
 	var rgData RegisterJsonData
-	userName, err := sessions.Check(r)
-	if !err {
+	userName, exist := sessions.Check(r)
+	if !exist {
 		// Reload login page if CheckSessions returns an error
 		//		renderTemplate(w, r, err.Error()+": please try logging in or registering",
 		//			"./frontend/static/login.html")
@@ -134,8 +134,11 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request, message []byte) {
 		// Redirect to main page if user is logged in
 		//		redirectHandler(w, r, "/main", "You are already logged in")
 	}
-
-	buffer := bytes.NewBuffer(message)
+	jsonData, err := json.Marshal(message)
+	if err != nil {
+		log.Println("MainData: Failed to marshal JSON:", err)
+	}
+	buffer := bytes.NewBuffer(jsonData)
 	decoder := json.NewDecoder(buffer)
 	if err := decoder.Decode(&rgData); err != nil {
 		log.Println("Failed to unmarshal JSON:", err)
@@ -278,7 +281,7 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 		case "login":
 			client.SendMessage(LoginHandler(w, r, data.Message))
 		case "register":
-			RegisterHandler(w, r, message)
+			RegisterHandler(w, r, data.Message)
 		case "mainData":
 			client.SendMessage(MainDataHandler(w, r, nickname))
 		case "blameP":
@@ -287,13 +290,42 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			CreateCommentHandler(w, r, message, nickname) */
 		case "blameC":
 			//chatHandle(w, r, conn)
-
+			/* 		case "content":
+			//get the post id from message
+			//data.Message["id"].(string)
+			fmt.Println("id is ", data.Message["id"].(string))
+			var id int
+			id, err := strconv.Atoi(data.Message["id"].(string))
+			if err != nil {
+				// ... handle error
+				panic(err)
+			}
+			fmt.Println("int id is ", id)
+			GetContentDataStruct(r, nickname, id)
+			//send content data to client
+			client.SendMessage(contentHandler(r, nickname, 1))
+			break */
+		default:
+			fmt.Println("default")
 		}
 		//(break
 	}
 	fmt.Println("here out of for just checking conn is :")
 	//}()
 	fmt.Println("here out side go func just checking conn is")
+}
+func contentHandler(r *http.Request, nickname string, postId int) []byte {
+	fmt.Println("content handler")
+	ContentData, err := GetContentDataStruct(r, nickname, postId)
+	if err != nil {
+		fmt.Println(err.Error(), http.StatusInternalServerError)
+		return nil
+	}
+	jsonData, err := json.Marshal(ContentData)
+	if err != nil {
+		log.Println("MainData: Failed to marshal JSON:", err)
+	}
+	return jsonData
 }
 
 /*
