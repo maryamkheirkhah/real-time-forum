@@ -197,12 +197,14 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, message map[string]int
 func MainDataHandler(w http.ResponseWriter, r *http.Request, nickname string) []byte {
 	mainData, err := GetMainDataStruct(r, nickname)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("error in get main data struct", err.Error())
+		//http.Error(w, err.Error(), http.StatusInternalServerError)
 		return nil
 	}
 	jsonData, err := json.Marshal(mainData)
 	if err != nil {
-		log.Println("MainData: Failed to marshal JSON:", err)
+		fmt.Println("error in marshal", err.Error())
+		//log.Println("MainData: Failed to marshal JSON:", err)
 	}
 	return jsonData
 
