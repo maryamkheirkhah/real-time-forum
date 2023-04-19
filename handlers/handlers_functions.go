@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"real-time-forum/db"
@@ -546,6 +547,7 @@ collection of inputs, to the database. The returned error value is nil if no err
 calling other functions etc., otherwise the first error encountered is returned.
 */
 func insertPostToDB(username string, title string, content string, topicStr string) error {
+	fmt.Println("topics", topicStr)
 	topics := strings.Split(topicStr, " and ")
 	var topicIds []int
 	dt := time.Now()
@@ -560,6 +562,7 @@ func insertPostToDB(username string, title string, content string, topicStr stri
 	for _, topic := range topics {
 		topicId := -1
 		for tId, t := range topicMap.(map[int]string) {
+			fmt.Println("testing topics", "tId:", tId, "t:", t, "topic:", topic)
 			if t == topic {
 				topicId = tId
 				topicIds = append(topicIds, tId)
@@ -789,7 +792,7 @@ func GetAllUsersNickName() ([]string, error) {
 	return userSlice, nil
 }
 
-func SaveMessage(msgData MessageData) error {
+func SaveMessage(msgData ChatData) error {
 	userId, err := getUserId(msgData.Sender)
 	if err != nil {
 		return errors.New("error in getting user id from database:" + err.Error())
@@ -805,7 +808,7 @@ func SaveMessage(msgData MessageData) error {
 	return nil
 }
 
-func GetMessages(nickname string) (map[string][]MessageData, error) {
+func GetMessages(nickname string) (map[string][]ChatData, error) {
 	senderId, err := getUserId(nickname)
 	if err != nil {
 		return nil, errors.New("error in getting user id from database:" + err.Error())
@@ -819,7 +822,7 @@ func GetMessages(nickname string) (map[string][]MessageData, error) {
 	if err != nil && err.Error() != "message doesn't exist in messages table" {
 		return nil, errors.New("error in getting messages from database:" + err.Error())
 	}
-	var messages map[string][]MessageData = make(map[string][]MessageData)
+	var messages map[string][]ChatData = make(map[string][]ChatData)
 	if SendMessages != nil {
 
 		for _, message := range SendMessages.(map[int]db.Message) {
@@ -843,8 +846,8 @@ func GetMessages(nickname string) (map[string][]MessageData, error) {
 	return messages, nil
 
 }
-func changeDBMessageToMessage(message db.Message) (MessageData, error) {
-	var msgData MessageData
+func changeDBMessageToMessage(message db.Message) (ChatData, error) {
+	var msgData ChatData
 	sender, err := getUserName(message.SenderId)
 	if err != nil {
 		return msgData, errors.New("error in getting user id from database:" + err.Error())
@@ -853,7 +856,7 @@ func changeDBMessageToMessage(message db.Message) (MessageData, error) {
 	if err != nil {
 		return msgData, errors.New("error in getting user id from database:" + err.Error())
 	}
-	return MessageData{Sender: sender, Receiver: receiver, Msg: message.Message, Time: message.SendTime}, nil
+	return ChatData{Sender: sender, Receiver: receiver, Msg: message.Message, Time: message.SendTime}, nil
 }
 
 /*

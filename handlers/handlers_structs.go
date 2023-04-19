@@ -10,6 +10,10 @@ type StatusData struct {
 	Msg  string
 }
 
+type MessageData struct {
+	Message     map[string]interface{} `json:"message"`
+	MessageType string                 `json:"type"`
+}
 type User struct {
 	Username  string
 	UserRank  string
@@ -102,7 +106,7 @@ type MainData struct {
 	Topics        []string // All topics
 	CookieMessage string   // Message to be displayed to user if forum-message cookie is set
 	UserNicknames []string `json:"users"`
-	Messages      map[string][]MessageData
+	Messages      map[string][]ChatData
 }
 type PostData struct {
 	Username      string
@@ -114,7 +118,7 @@ type PostJsonData struct {
 	AllTopics string `json:"Topics"`
 	Content   string `json:"Content"`
 }
-type MessageData struct {
+type ChatData struct {
 	Receiver string `json:"receiver"`
 	Sender   string `json:"sender"`
 	Msg      string `json:"content"`

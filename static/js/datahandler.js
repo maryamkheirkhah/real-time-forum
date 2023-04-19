@@ -19,7 +19,6 @@ export async function sendLoginData(socket, data) {
   }); */
   console.log("sendLoginData");
   // Send the login data as JSON to the backend through the WebSocket
-  socket.send("login-start")
   socket.send(JSON.stringify(data));
 
   // Define a callback function to handle the response from the backend
@@ -64,7 +63,7 @@ export async function sendLoginData(socket, data) {
                        socket.removeEventListener("message", handleResponse); */
   navigateTo("/blamer");
 }
-export async function sendRegisterData(socket, location = "ws://localhost:8080/api/data-route", data) {
+export async function sendRegisterData(socket, data) {
   // const socket = new WebSocket(location);
   // Wait for the WebSocket connection to open
   await new Promise(resolve => {
@@ -95,7 +94,11 @@ export async function dataGathering(location) {
   for (let [key, value] of fdata.entries()) {
     obj[key] = value;
   }
-  return obj;
+  var obj2 ={};
+  obj2["message"] = obj;
+  obj2["type"] = location;
+  console.log("obj2", obj2);
+  return obj2;
 }
 export async function requestMainData(socket) {
   return new Promise((resolve, reject) => {
@@ -103,8 +106,7 @@ export async function requestMainData(socket) {
 
     socket.addEventListener("open", () => {
       console.log("WebSocket connection established.");
-      socket.send("mainData-start");
-      socket.send("I want to get main data");
+      socket.send(JSON.stringify({"type":"mainData", "message":{}}));
     });
 
     socket.addEventListener("message", (event) => {
@@ -123,18 +125,18 @@ export async function requestMainData(socket) {
 
   });
 }
-export async function sendNewPostData(socket, location = "ws://localhost:8080/api/data-route", data) {
+export async function sendNewPostData(socket, data) {
+  console.log("sendNewPostData", data);
   // const socket = new WebSocket(location);
   // Wait for the WebSocket connection to open
-  await new Promise(resolve => {
+ /*  await new Promise(resolve => {
     socket.addEventListener("open", () => {
-      console.log("WebSocket connection established.");
+      console.log("WebSocket connection established. in post data");
       resolve();
     });
-  });
-
+  }); */
   // Send the login data as JSON to the backend through the WebSocket
-  socket.send("createPost-start");
+
   socket.send(JSON.stringify(data));
   navigateTo("/blamer");
   socket.addEventListener("close", (event) => {
@@ -143,7 +145,7 @@ export async function sendNewPostData(socket, location = "ws://localhost:8080/ap
   // Define a callback function to handle the response from the backend
 
 }
-export async function sendNewCommentData(socket, location = "ws://localhost:8080/api/data-route", data) {
+export async function sendNewCommentData(socket, data) {
   // const socket = new WebSocket(location);
   // Wait for the WebSocket connection to open
   await new Promise(resolve => {
@@ -153,7 +155,6 @@ export async function sendNewCommentData(socket, location = "ws://localhost:8080
     });
   });
   // Send the login data as JSON to the backend through the WebSocket
-  socket.send("createCommnet-start");
   socket.send(JSON.stringify(data));
 }
 export async function sendChatData(socket, data) {
@@ -170,8 +171,7 @@ export async function sendChatData(socket, data) {
   // Wait for the socket to open to resolve before proceeding
   console.log("sendChatData socket is", socket);
   // Send the login data as JSON to the backend through the WebSocket
-  socket.send("createChat-start");
-  socket.send(JSON.stringify(data), { type: "chat" });
+  socket.send(JSON.stringify(data));
   // TODO:Define a callback function to handle the response from the backend
   console.log("sendChatData");
 }

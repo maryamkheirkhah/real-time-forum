@@ -3,7 +3,6 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -162,15 +161,10 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request, message []byte) {
 	json.NewEncoder(w).Encode(responseData)
 
 }
-func LoginHandler(w http.ResponseWriter, r *http.Request, message []byte) []byte {
+func LoginHandler(w http.ResponseWriter, r *http.Request, message map[string]interface{}) []byte {
 	var data LoginData
-
-	err := json.Unmarshal(message, &data)
-	if err != nil {
-		fmt.Println("login: error in unmarshaling", err.Error())
-		return nil
-	}
-
+	data.NickName = message["loginusername"].(string)
+	data.Password = message["loginpassword"].(string)
 	user, err := db.SelectDataHandler("users", "NickName", data.NickName)
 	var msg string
 	if err != nil {
@@ -197,31 +191,27 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, message []byte) []byte
 	}
 	return nil
 }
-func MainDataHandler(w http.ResponseWriter, r *http.Request, message []byte, nickname string) []byte {
-	if string(message) == "I want to get main data" {
-		mainData, err := GetMainDataStruct(r, nickname)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return nil
-		}
-		jsonData, err := json.Marshal(mainData)
-		if err != nil {
-			log.Println("MainData: Failed to marshal JSON:", err)
-		}
-		return jsonData
-	} else {
+func MainDataHandler(w http.ResponseWriter, r *http.Request, nickname string) []byte {
+	mainData, err := GetMainDataStruct(r, nickname)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return nil
 	}
+	jsonData, err := json.Marshal(mainData)
+	if err != nil {
+		log.Println("MainData: Failed to marshal JSON:", err)
+	}
+	return jsonData
+
 }
-func CreatePostHandler(w http.ResponseWriter, r *http.Request, message []byte, nickname string) {
+func CreatePostHandler(w http.ResponseWriter, r *http.Request, message map[string]interface{}, nickname string) {
 	if nickname != "" {
+		fmt.Println("create post: nickname", nickname)
 		var post PostJsonData
-		err := json.Unmarshal(message, &post)
-		if err != nil {
-			fmt.Println("create post: error in unmarshaling", err.Error())
-			return
-		}
-		err = insertPostToDB(nickname, post.Title, post.Content, post.AllTopics)
+		post.Title = message["Title"].(string)
+		post.Content = message["Content"].(string)
+		post.AllTopics = message["Topics"].(string)
+		err := insertPostToDB(nickname, post.Title, post.Content, post.AllTopics)
 		if err != nil {
 			fmt.Println("error in insert post to db", err.Error())
 			return
@@ -233,15 +223,6 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request, message []byte, n
 	}
 	return
 }
-
-/*
-	 func CreateCommentHandler(w http.ResponseWriter, r *http.Request, message []byte, nickname string) []byte {
-		if nickname != "" {
-			return byte("comment created")
-		}
-		return nil
-	}
-*/
 func DataRoute(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("data route")
 	nickname, exist := sessions.Check(r)
@@ -272,8 +253,6 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 	}() */
 	/* go client.SendMessage([]byte("ping"))
 	go client.Read() */
-	index := 0
-	var goTo = ""
 	//go func() {
 	for {
 		fmt.Println("here in for just checking conn is :")
@@ -282,92 +261,92 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			log.Println("WebSocket connection closed:", err)
 			break
 		}
-		fmt.Println("index is :", index, "goTo is :", goTo)
-		Mtype, message, err := conn.ReadMessage()
+		_, message, err := conn.ReadMessage()
 		if err != nil {
 			log.Println("Failed to read message from WebSocket:", err)
 			break
 		}
-		fmt.Println("message type is :", Mtype, "message", string(message))
-		if index == 0 {
-			goTo = string(message)
-		}
-		if index == 1 {
-			fmt.Println("what is goTo", goTo)
-			switch goTo {
-			case "login-start":
-				client.SendMessage(LoginHandler(w, r, message))
-			case "register-start":
-				RegisterHandler(w, r, message)
-			case "mainData-start":
-				client.SendMessage(MainDataHandler(w, r, message, nickname))
-			case "createPost-start":
-				CreatePostHandler(w, r, message, nickname)
-				/* case "createCommnet-start":
-				CreateCommentHandler(w, r, message, nickname) */
-			case "createChat-start":
-				chatHandle(w, r, conn)
+		fmt.Println("message", string(message))
+		var data MessageData
 
-			}
-			break
+		err = json.Unmarshal(message, &data)
+		fmt.Println("unmarshaled message type", data)
+		if err != nil {
+			fmt.Println("login: error in unmarshaling", err.Error())
 		}
-		index++
-		fmt.Println("index is :", index, "goTo is :", goTo)
+		switch data.MessageType {
+		case "login":
+			client.SendMessage(LoginHandler(w, r, data.Message))
+		case "register":
+			RegisterHandler(w, r, message)
+		case "mainData":
+			client.SendMessage(MainDataHandler(w, r, nickname))
+		case "blameP":
+			CreatePostHandler(w, r, data.Message, nickname)
+			/* case "createCommnet-start":
+			CreateCommentHandler(w, r, message, nickname) */
+		case "blameC":
+			//chatHandle(w, r, conn)
+
+		}
+		//(break
 	}
 	fmt.Println("here out of for just checking conn is :")
 	//}()
 	fmt.Println("here out side go func just checking conn is")
 }
 
-func chatHandle(w http.ResponseWriter, r *http.Request, conn *websocket.Conn) error {
-	// Upgrade the HTTP connection to a WebSocket connection
-	fmt.Println("chat handle")
-	nickname, exist := sessions.Check(r)
-	if !exist || nickname == "" {
-		return errors.New("you are not logged in")
-	}
-
-	for {
-		_, message, err := conn.ReadMessage()
-		if err != nil {
-			log.Println(err)
-			break
-		}
-		var messageData MessageData
-		fmt.Println("message", string(message), "from", nickname)
-		err = json.Unmarshal(message, &messageData)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		messageData.Time = time.Now().Format("2006-01-02 15:04:05")
-
-		// encode the data as a JSON string
-		jsonData, err := json.Marshal(messageData)
-		if err != nil {
-			log.Println(err)
-			return err
+/*
+	 func chatHandle(w http.ResponseWriter, r *http.Request, conn *websocket.Conn) error {
+		// Upgrade the HTTP connection to a WebSocket connection
+		fmt.Println("chat handle")
+		nickname, exist := sessions.Check(r)
+		if !exist || nickname == "" {
+			return errors.New("you are not logged in")
 		}
 
-		err = SaveMessage(messageData)
-		if err != nil {
-			log.Println(errors.New("error saving message"), err)
-			continue
-		}
+		for {
+			_, message, err := conn.ReadMessage()
+			if err != nil {
+				log.Println(err)
+				break
+			}
+			var messageData MessageData
+			fmt.Println("message", string(message), "from", nickname)
+			err = json.Unmarshal(message, &messageData)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			messageData.Time = time.Now().Format("2006-01-02 15:04:05")
 
-		// Broadcast message to receiver
-		for cNickname, c := range Clients {
-			fmt.Println("cNickname", cNickname)
-			if cNickname == messageData.Receiver || cNickname == messageData.Sender {
-				err = c.WriteMessage(websocket.TextMessage, jsonData)
-				if err != nil {
-					log.Println(err)
+			// encode the data as a JSON string
+			jsonData, err := json.Marshal(messageData)
+			if err != nil {
+				log.Println(err)
+				return err
+			}
+
+			err = SaveMessage(messageData)
+			if err != nil {
+				log.Println(errors.New("error saving message"), err)
+				continue
+			}
+
+			// Broadcast message to receiver
+			for cNickname, c := range Clients {
+				fmt.Println("cNickname", cNickname)
+				if cNickname == messageData.Receiver || cNickname == messageData.Sender {
+					err = c.WriteMessage(websocket.TextMessage, jsonData)
+					if err != nil {
+						log.Println(err)
+					}
 				}
 			}
 		}
+		return nil
 	}
-	return nil
-}
+*/
 func responseConn(response any, conn *websocket.Conn) error {
 	responseBytes, err := json.Marshal("received")
 	if err != nil {

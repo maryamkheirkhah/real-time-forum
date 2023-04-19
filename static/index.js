@@ -80,8 +80,9 @@ export const router = async () => {
               console.log("WebSocket connection closed:", event);
             }); 
        socket.addEventListener("message", (event) => {
-              console.log("WebSocket message:", event);
-              console.log("this the messsssssage",event.data);
+              /* console.log("WebSocket message:", event);
+              console.log("this the messsssssage",event.data); */
+              console.log("sendMessage line:85")
        });
        document.querySelector("#app").innerHTML = await view.getHtml(socket);
        if (match.route.view == blamer) {
@@ -138,7 +139,8 @@ export const router = async () => {
                             .getElementById("letPost")
                             .addEventListener("click", async (e) => {
                                    e.preventDefault();
-                                   sendNewPostData(socket,"ws://localhost:8080/api/data-route",await dataGathering("blameP"))
+                                   console.log("post button clicked");
+                                   sendNewPostData(socket,await dataGathering("blameP"));
                             });
 
                      // delete cookie when click logout button
@@ -222,7 +224,7 @@ export const router = async () => {
               const button = document.getElementById("register-submit");
               button.addEventListener("click", async (e) => {
                      e.preventDefault();
-                     await sendRegisterData(socket,"ws://localhost:8080/api/data-route" , await dataGathering("register"))
+                     await sendRegisterData(socket , await dataGathering("register"))
        });
             
        }
