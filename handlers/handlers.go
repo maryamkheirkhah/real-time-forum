@@ -9,6 +9,7 @@ import (
 	"real-time-forum/db"
 	"real-time-forum/security"
 	"real-time-forum/sessions"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -291,8 +292,8 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			/* case "createCommnet-start":
 			CreateCommentHandler(w, r, message, nickname) */
 		case "blameC":
-			//chatHandle(w, r, conn)
-			/* 		case "content":
+		//chatHandle(w, r, conn)
+		case "content":
 			//get the post id from message
 			//data.Message["id"].(string)
 			fmt.Println("id is ", data.Message["id"].(string))
@@ -300,13 +301,13 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			id, err := strconv.Atoi(data.Message["id"].(string))
 			if err != nil {
 				// ... handle error
-				panic(err)
+				fmt.Println("error in converting string to int", err.Error())
 			}
 			fmt.Println("int id is ", id)
-			GetContentDataStruct(r, nickname, id)
+			fmt.Println(GetContentDataStruct(r, nickname, id))
 			//send content data to client
-			client.SendMessage(contentHandler(r, nickname, 1))
-			break */
+			client.SendMessage(contentHandler(r, nickname, 2))
+			break
 		default:
 			fmt.Println("default")
 		}

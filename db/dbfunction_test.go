@@ -19,14 +19,7 @@ func TestInsertData(t *testing.T) {
 		//{"posts", "testuser2", "first post", "hello world!", "12.12.2022"},
 		//test missing table
 		//
-
-		{"topics", "music"},
-		{"topics", "programming"},
-		{"topics", "weather"},
-		{"topics", "bullshit"},
-		{"topics", "news"},
-		{"topics", "sport"},
-		{"topics", "coffiee"},
+		{"reactions", 1, 2, -1, "like"},
 	}
 	//{"posts", 1, "first post", "hello world!", dt.Format("01-02-2006 15:04:05")},
 	//{"comments", userId, postId, "first comment", "12.12.2022"}, ////////////////adding later
