@@ -168,65 +168,62 @@ export const router = async () => {
                                                  sendNewPostData(socket, await dataGathering("blameP"));
                                           });
 
-                                          // delete cookie when click logout button
-                                          document
-                                          .getElementById("logout")
-                                          .addEventListener("click", async (e) => {
-                                                 e.preventDefault();
-                                                 const logout =
-                                                        document.querySelector("#logout");
-                                                 if (e) {
-                                                        const response = await fetch(
-                                                               "/logout", {
-                                                                      method: "POST",
-                                                               }
-                                                        );
-                                                        //delete cookie
-                                                        document.cookie =
-                                                               "forum_session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                                                        console.log(response);
-                                                        if (response.status === 200) {
-                                                               navigateTo("/blamer");
-                                                        }
+                     // delete cookie when click logout button
+                     document
+                            .getElementById("logout")
+                            .addEventListener("click", async (e) => {
+                                   e.preventDefault();
+                                   const logout =
+                                          document.querySelector("#logout");
+                                   if (e) {
+                                          const response = await fetch(
+                                                 "/logout",
+                                                 {
+                                                        method: "POST",
                                                  }
-                                          });
+                                          );
+                                          //delete cookie
+                                          document.cookie =
+                                                 "forum_session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                                          console.log(response);
+                                          if (response.status === 200) {
+                                                 navigateTo("/blamer");
+                                          }
                                    }
-                                   else if (
-                                          document.getElementById("activeUserName") !== null &&
-                                          document.getElementById("activeUserName").textContent ===
-                                          "guest"
-                                   ) {
-                                          let postBox = document.getElementById("cPostBox");
-                                          postBox.remove();
-                                   }
-                                   // click on post box will show post content
-                                   let allPost = document.querySelectorAll(".pBox");
-                                   allPost.forEach((box) => {
-                                          box.addEventListener("click", async () => {
-                                                 await view.blameContent(box);
-                                                 if (
-                                                        document.getElementById("activeUserName") !==
-                                                        null &&
-                                                        document.getElementById("activeUserName")
-                                                        .textContent !== "guest"
-                                                 ) {
-                                                        // click on comment button will send comment to server
-                                                        document
-                                                               .getElementById("letsComment")
-                                                               .addEventListener(
-                                                                      "click",
-                                                                      async (e) => {
-                                                                             e.preventDefault();
-                                                                             let data = await dataGathering("blameC")
-                                                                             let ID = document.querySelector(".blameContent").id
-                                                                             data["PostId"] = ID
-                                                                             console.log("im try to get comment data", data)
-                                                                      }
-                                                               );
+                            });
+              } else if (
+                     document.getElementById("activeUserName") !== null &&
+                     document.getElementById("activeUserName").textContent ===
+                            "guest"
+              ) {
+                     let postBox = document.getElementById("cPostBox");
+                     postBox.remove();
+              }
+              // click on post box will show post content
+              let allPost = document.querySelectorAll(".pBox");
+              allPost.forEach((element) => {
+                     element.addEventListener("click", async () => {
+                            console.log("post box clicked",await requestPostData(socket,element.id));
+                            await view.blameContent(element,JSON.parse(await requestPostData(socket,element.id)));
+                            if ( document.getElementById("activeUserName") !== null && document.getElementById("activeUserName").textContent !== "guest"
+                            ) {
+                                   // click on comment button will send comment to server
+                                   document
+                                          .getElementById("letsComment")
+                                          .addEventListener(
+                                                 "click",
+                                                 async (e) => {
+                                                        e.preventDefault();
+                                                        let data = await dataGathering("blameC")
+                                                        let ID = document.querySelector(".blameContent").id
+                                                        data["PostId"] = ID
+                                                        console.log("im try to get comment data",data)        
                                                  }
-                                          });
-                                   });
-                                   // click on topic will show only posts belong to that topic
+                                          );
+                            }
+                     });
+              });
+              // click on topic will show only posts belong to that topic
 
                                    document.querySelectorAll(".bTopic").forEach((topic) => {
                                           topic.addEventListener("click", async () => {

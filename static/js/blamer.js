@@ -346,8 +346,14 @@ export default class extends abstract {
                      }
               }
        }
-       async findBlameThing(id) {
+       async findBlameThing(id,reactionData) {
+              console.log(reactionData.likeStatus)
               let blameThing = "";
+              let comments = 0;
+              if (reactionData.comments) {
+                     comments = reactionData.comments.length;
+              }
+            
               this.data.Posts.forEach((post) => {
                      if (post.PostId == id) {
                             blameThing = `
@@ -361,9 +367,9 @@ export default class extends abstract {
                                    <textarea class="pbContent" readonly>${post.Content}</textarea>
                                    <div class="pbBottom">
                                           <div class="pbTopic">${post.Topics}</div>
-                                          <div class="pbLikeNumb"><span>${post.Likes}</span><span id="like-${id}">LIKE</span></div>
-                                          <div class="pbDislikeNumb"><span>${post.Dislikes}</span><span id="dislike-${id}">DISLIKE</span></div>
-                                          <div class="pbCommentNumb"><span>${post.TotalComments}</span><span>COMMENTS</span></div>
+                                          <div class="pbLikeNumb"><span>${reactionData["likes"]} </span><span id="like-${id}">LIKE</span></div>
+                                          <div class="pbDislikeNumb"><span>${reactionData["dislikes"]} </span><span id="dislike-${id}">DISLIKE</span></div>
+                                          <div class="pbCommentNumb"><span>${comments} </span><span>COMMENTS</span></div>
                                    </div>
                                    </div>
                                    </div>
@@ -388,13 +394,13 @@ export default class extends abstract {
        }
 
        // search for comments
-       async findComments(data,id) {
+       async findComments(commentData) {
               let comments = "";
               let side = "justify-items: start;";
               let like = "white"
               let dislike = "white"
-             /*  if (this.data.comments.length > 0) {
-              data.forEach((comment) => {
+            
+              commentData.forEach((comment) => {
                      if (comment.PostId == id) {
                             if (comment.Username == this.activeUserName){
                                     side = "justify-items: end;";        
@@ -420,13 +426,11 @@ export default class extends abstract {
                      }
                      
               });  
-       } */
               return comments;
        }
-      async createCommentArea(id) {
-              let postData = await this.data.Posts.find((post) => post.PostId == id);
-              console.log("looking for commentID",postData)
-              let comments = await this.findComments(postData,id);
+      async createCommentArea(id,commentData) {
+              console.log("looking for commentID",id,commentData)
+              let comments = await this.findComments(commentData);
               let parent = document.createElement("div");
               parent.className = "bPost";
               let container = document.createElement("div");
@@ -435,7 +439,7 @@ export default class extends abstract {
               parent.appendChild(container);
               return parent;
        }
-       async blameContent(element) {
+       async blameContent(element, reactionData) {
               let parents = document.querySelectorAll(".bPost");
               if (parents) {
                      parents.forEach((parent) => {
@@ -443,7 +447,7 @@ export default class extends abstract {
                      });
               }
               let parent = document.getElementById("mainPostsBox");
-              let blame = await this.findBlameThing(element.id);
+              let blame = await this.findBlameThing(element.id, reactionData);
               parent.innerHTML = blame;   
               if (
                      this.activeUserName != null &&
@@ -452,7 +456,9 @@ export default class extends abstract {
                      console.log("in blameContent", this.activeUserName);
                      let commentBox = await this.createCommentBox(element.id);
                      parent.appendChild(commentBox);
-                     parent.appendChild(await this.createCommentArea(element.id))
+                     if (reactionData.comments!=null){
+                     parent.appendChild(await this.createCommentArea(element.id, reactionData.comments));
+                     }
               }
        }
 }

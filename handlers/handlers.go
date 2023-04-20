@@ -10,6 +10,7 @@ import (
 	"real-time-forum/db"
 	"real-time-forum/security"
 	"real-time-forum/sessions"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -294,13 +295,12 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			//get the post id from message
 			//data.Message["id"].(string)
 			fmt.Println("id is ", data.Message["id"].(string))
-			var id int
 			id, err := strconv.Atoi(data.Message["id"].(string))
 			if err != nil {
 				// ... handle error
 				fmt.Println("error in converting string to int", err.Error())
 			}
-			fmt.Println("int id is ", id)
+			fmt.Println("int id is ", reflect.TypeOf(id).Kind())
 			fmt.Println(GetContentDataStruct(r, nickname, id))
 			//send content data to client
 			client.SendMessage(contentHandler(r, nickname, 2))

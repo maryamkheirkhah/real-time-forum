@@ -808,23 +808,40 @@ body {
        grid-auto-flow: row;
        grid-template-areas: "pTopic pLike pDislike pComment";
        grid-area: pBottom;
+       font-size: 13px;
 }
 
 .pbTopic {
        grid-area: pTopic;
+       transition: all 1s ease;
+}
+.pbTopic:hover {
+       color: var(--color-quaternary);
 }
 /* this i just number box */
 
 .pbLikeNumb {
        grid-area: pLike;
+       transition: all 0.7s ease;
+}
+.pbLikeNumb:hover {
+       color: var(--color-quaternary);
 }
 
 .pbDislikeNumb {
        grid-area: pDislike;
+       transition: all 0.7s ease;
+}
+.pbDislikeNumb:hover {
+       color: var(--color-quaternary);
 }
 
 .pbCommentNumb {
        grid-area: pComment;
+       transition: all 0.7 ease;
+}
+.pbCommentNumb:hover {
+       color: var(--color-quaternary);
 }
 
 .pbCommentBox{
