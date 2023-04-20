@@ -11,6 +11,7 @@ import {
        sendRegisterData,
        sendNewPostData,
        dataGathering,
+       requestPostData,
        sendChatData
 } from "./js/datahandler.js";
 const pathToRegex = (path) =>
@@ -203,8 +204,8 @@ export const router = async () => {
               let allPost = document.querySelectorAll(".pBox");
               allPost.forEach((element) => {
                      element.addEventListener("click", async () => {
-                            console.log("post box clicked",await requestPostData(socket,element.id));
-                            await view.blameContent(element,JSON.parse(await requestPostData(socket,element.id)));
+                            console.log("post box clicked", await requestPostData(socket,element.id));
+                            await view.blameContent(element, JSON.parse(await requestPostData(socket,element.id)));
                             if ( document.getElementById("activeUserName") !== null && document.getElementById("activeUserName").textContent !== "guest"
                             ) {
                                    // click on comment button will send comment to server

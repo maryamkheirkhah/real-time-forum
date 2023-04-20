@@ -440,6 +440,8 @@ export default class extends abstract {
               return parent;
        }
        async blameContent(element, reactionData) {
+              
+              console.log("reactionData",reactionData)
               let parents = document.querySelectorAll(".bPost");
               if (parents) {
                      parents.forEach((parent) => {

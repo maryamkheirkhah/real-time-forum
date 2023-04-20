@@ -169,11 +169,12 @@ export async function requestMainData(socket) {
 
 // requestPostData try to get post data from server
 // that return likeStatus, likenumb, dislikenub, []comments table
-export function requestPostData(socket, id) {
+export async function requestPostData(socket, id) {
   
   return new Promise((resolve, reject) => {
     socket.send(JSON.stringify({"type":"content", "message":{"id":id}}));
     socket.addEventListener("message", (event) => {
+      console.log("WebSocket message:", event.data);
       resolve(event.data);
     });
     socket.addEventListener("close", (event) => {
