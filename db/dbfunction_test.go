@@ -90,7 +90,10 @@ func TestDeleteData(t *testing.T) {
 		//	{"users", "marikh"},
 
 		//test missing data
-		{"PostTopics", 1},
+		/* 		{"PostTopics", 4},
+		   		{"PostTopics", 5}, */
+		{"posts", 4},
+		{"posts", 5},
 		//test missing table
 		//	{"users121", "marikh3"},
 		/* 	{"topics", "art"},
