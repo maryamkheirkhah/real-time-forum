@@ -162,16 +162,21 @@ export async function sendChatData(socket, data) {
   socket.addEventListener("open", () => {
     console.log("WebSocket connection established.");
   });
+  socket.send(JSON.stringify({"message":data, "type":"chat"}));
+
   socket.addEventListener("close", (event) => {
     console.log("WebSocket connection closed:", event);
   }); 
   socket.addEventListener("error", (event) => {
     console.error("WebSocket error:", event);
   });
-  // Wait for the socket to open to resolve before proceeding
-  console.log("sendChatData socket is", socket);
+   
+  socket.addEventListener("message", (event) => {
+    console.log("WebSocket message:", event.data);
+   return event.data;
+  });
+ 
+  // Wait for the WebSocket connection to ope
   // Send the login data as JSON to the backend through the WebSocket
-  socket.send(JSON.stringify(data));
   // TODO:Define a callback function to handle the response from the backend
-  console.log("sendChatData");
 }

@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -250,6 +251,7 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 		log.Println("Failed to upgrade connection to WebSocket:", err)
 		return
 	}
+	Clients[nickname] = conn
 
 	client := NewClient(SocketHub, conn)
 	SocketHub.register <- client
@@ -261,7 +263,6 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 	go client.Read() */
 	//go func() {
 	for {
-		fmt.Println("here in for just checking conn is :")
 		err = conn.WriteMessage(websocket.PingMessage, []byte{})
 		if err != nil {
 			log.Println("WebSocket connection closed:", err)
@@ -272,13 +273,11 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			log.Println("Failed to read message from WebSocket:", err)
 			break
 		}
-		fmt.Println("message", string(message))
 		var data MessageData
 
 		err = json.Unmarshal(message, &data)
-		fmt.Println("unmarshaled message type", data)
 		if err != nil {
-			fmt.Println("login: error in unmarshaling", err.Error())
+			fmt.Println("error in unmarshaling", err.Error())
 		}
 		switch data.MessageType {
 		case "login":
@@ -287,10 +286,10 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			RegisterHandler(w, r, data.Message)
 		case "mainData":
 			client.SendMessage(MainDataHandler(w, r, nickname))
+		case "chat":
+			client.SendMessage(chatHandle(w, r, conn, data.Message))
 		case "blameP":
 			CreatePostHandler(w, r, data.Message, nickname)
-			/* case "createCommnet-start":
-			CreateCommentHandler(w, r, message, nickname) */
 		case "blameC":
 		//chatHandle(w, r, conn)
 		case "content":
@@ -331,57 +330,49 @@ func contentHandler(r *http.Request, nickname string, postId int) []byte {
 	return jsonData
 }
 
-/*
-	 func chatHandle(w http.ResponseWriter, r *http.Request, conn *websocket.Conn) error {
-		// Upgrade the HTTP connection to a WebSocket connection
-		fmt.Println("chat handle")
-		nickname, exist := sessions.Check(r)
-		if !exist || nickname == "" {
-			return errors.New("you are not logged in")
-		}
-
-		for {
-			_, message, err := conn.ReadMessage()
-			if err != nil {
-				log.Println(err)
-				break
-			}
-			var messageData MessageData
-			fmt.Println("message", string(message), "from", nickname)
-			err = json.Unmarshal(message, &messageData)
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-			messageData.Time = time.Now().Format("2006-01-02 15:04:05")
-
-			// encode the data as a JSON string
-			jsonData, err := json.Marshal(messageData)
-			if err != nil {
-				log.Println(err)
-				return err
-			}
-
-			err = SaveMessage(messageData)
-			if err != nil {
-				log.Println(errors.New("error saving message"), err)
-				continue
-			}
-
-			// Broadcast message to receiver
-			for cNickname, c := range Clients {
-				fmt.Println("cNickname", cNickname)
-				if cNickname == messageData.Receiver || cNickname == messageData.Sender {
-					err = c.WriteMessage(websocket.TextMessage, jsonData)
-					if err != nil {
-						log.Println(err)
-					}
-				}
-			}
-		}
-		return nil
+func chatHandle(w http.ResponseWriter, r *http.Request, conn *websocket.Conn, data map[string]interface{}) []byte {
+	// Upgrade the HTTP connection to a WebSocket connection
+	fmt.Println("chat handle")
+	nickname, exist := sessions.Check(r)
+	if !exist || nickname == "" {
+		fmt.Println(errors.New("you are not logged in"))
 	}
-*/
+
+	// encode the data as a JSON string
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		log.Println(err)
+	}
+	var messageData ChatData
+
+	err = json.Unmarshal(jsonData, &messageData)
+	if err != nil {
+		log.Println(err)
+	}
+	messageData.Time = time.Now().Format("2006-01-02 15:04:05")
+	fmt.Println("messageData with time:", messageData)
+	jsonData, err = json.Marshal(messageData)
+	if err != nil {
+		log.Println(err)
+	}
+	err = SaveMessage(messageData)
+	if err != nil {
+		log.Println(errors.New("error saving message"), err)
+	}
+	// Broadcast message to receiver
+	for cNickname, c := range Clients {
+		fmt.Println("cNickname", cNickname)
+		if cNickname == messageData.Receiver || cNickname == messageData.Sender {
+			err = c.WriteMessage(websocket.TextMessage, jsonData)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+	}
+
+	return jsonData
+}
+
 func responseConn(response any, conn *websocket.Conn) error {
 	responseBytes, err := json.Marshal("received")
 	if err != nil {
@@ -410,6 +401,70 @@ func readData(conn *websocket.Conn) ([]byte, error) {
 		conn.Close()
 	}()
 	return message, nil
+}
+
+func WsHandler(w http.ResponseWriter, r *http.Request) {
+	// Upgrade the HTTP connection to a WebSocket connection
+	nickname, exist := sessions.Check(r)
+	if !exist {
+
+	} else if nickname == "" {
+
+	}
+
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	// Add the WebSocket connection to the clients map
+	Clients[nickname] = conn
+
+	defer func() {
+		// Remove the WebSocket connection from the clients map
+		delete(Clients, nickname)
+		conn.Close()
+	}()
+	// Read messages from the WebSocket connection
+	for {
+		_, message, err := conn.ReadMessage()
+		if err != nil {
+			log.Println(err)
+			break
+		}
+		var messageData ChatData
+		fmt.Println("message", string(message), "from", nickname)
+		err = json.Unmarshal(message, &messageData)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		messageData.Time = time.Now().Format("2006-01-02 15:04:05")
+
+		// encode the data as a JSON string
+		jsonData, err := json.Marshal(messageData)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		err = SaveMessage(messageData)
+		if err != nil {
+			log.Println(errors.New("error saving message"), err)
+			continue
+		}
+
+		// Broadcast message to receiver
+		for cNickname, c := range Clients {
+			if cNickname == messageData.Receiver || cNickname == messageData.Sender {
+				err = c.WriteMessage(websocket.TextMessage, jsonData)
+				if err != nil {
+					log.Println(err)
+				}
+			}
+		}
+	}
 }
 
 /* func startConn(w http.ResponseWriter, r *http.Request, nickname string) (*websocket.Conn, error) {

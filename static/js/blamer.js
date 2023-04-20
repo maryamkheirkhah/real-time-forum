@@ -306,6 +306,7 @@ export default class extends abstract {
               /* 
               const response = await fetch("/blamer");
               this.data = await response.json(); */
+              console.log("see=?")
               if (
                      this.activeUserName != null &&
                      this.activeUserName !== "guest"

@@ -16,7 +16,8 @@ func StartServer() {
 		http.ServeFile(w, r, "./static/index.html")
 	})
 	http.HandleFunc("/profile", handlers.Profile)
-	http.HandleFunc("/ws", handlers.WebSocketHandler)
+	http.HandleFunc("/api/chat", handlers.WsHandler)
+
 	http.HandleFunc("/api/data-route", handlers.DataRoute)
 	// Serve static assets at "/static/*"
 	http.Handle("/static/", http.StripPrefix("/static/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
