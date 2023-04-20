@@ -286,8 +286,6 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			RegisterHandler(w, r, data.Message)
 		case "mainData":
 			client.SendMessage(MainDataHandler(w, r, nickname))
-		case "chat":
-			client.SendMessage(chatHandle(w, r, conn, data.Message))
 		case "blameP":
 			CreatePostHandler(w, r, data.Message, nickname)
 		case "blameC":
@@ -328,79 +326,6 @@ func contentHandler(r *http.Request, nickname string, postId int) []byte {
 		log.Println("MainData: Failed to marshal JSON:", err)
 	}
 	return jsonData
-}
-
-func chatHandle(w http.ResponseWriter, r *http.Request, conn *websocket.Conn, data map[string]interface{}) []byte {
-	// Upgrade the HTTP connection to a WebSocket connection
-	fmt.Println("chat handle")
-	nickname, exist := sessions.Check(r)
-	if !exist || nickname == "" {
-		fmt.Println(errors.New("you are not logged in"))
-	}
-
-	// encode the data as a JSON string
-	jsonData, err := json.Marshal(data)
-	if err != nil {
-		log.Println(err)
-	}
-	var messageData ChatData
-
-	err = json.Unmarshal(jsonData, &messageData)
-	if err != nil {
-		log.Println(err)
-	}
-	messageData.Time = time.Now().Format("2006-01-02 15:04:05")
-	fmt.Println("messageData with time:", messageData)
-	jsonData, err = json.Marshal(messageData)
-	if err != nil {
-		log.Println(err)
-	}
-	err = SaveMessage(messageData)
-	if err != nil {
-		log.Println(errors.New("error saving message"), err)
-	}
-	// Broadcast message to receiver
-	for cNickname, c := range Clients {
-		fmt.Println("cNickname", cNickname)
-		if cNickname == messageData.Receiver || cNickname == messageData.Sender {
-			err = c.WriteMessage(websocket.TextMessage, jsonData)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-	}
-
-	return jsonData
-}
-
-func responseConn(response any, conn *websocket.Conn) error {
-	responseBytes, err := json.Marshal("received")
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	err = conn.WriteMessage(websocket.TextMessage, responseBytes)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	defer func() {
-		// Remove the WebSocket connection from the clients map
-		conn.Close()
-	}()
-	return nil
-}
-func readData(conn *websocket.Conn) ([]byte, error) {
-	_, message, err := conn.ReadMessage()
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-	defer func() {
-		// Remove the WebSocket connection from the clients map
-		conn.Close()
-	}()
-	return message, nil
 }
 
 func WsHandler(w http.ResponseWriter, r *http.Request) {
