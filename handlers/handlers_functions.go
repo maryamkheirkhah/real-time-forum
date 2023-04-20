@@ -160,9 +160,10 @@ calling other functions etc., otherwise the first error encountered is returned 
 a -1 integer as the userId.
 */
 func getUserId(userName string) (int, error) {
+	fmt.Println("userName: ", userName)
 	user, err := db.SelectDataHandler("users", "Nickname", userName)
 	if err != nil {
-		return -1, errors.New("error in getting userId")
+		return -1, errors.New("error in getting userId" + err.Error() + "userName: " + userName)
 	}
 	if user != nil {
 		return user.(db.User).UserId, nil

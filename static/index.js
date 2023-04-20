@@ -4,7 +4,7 @@ import blamer from "./js/blamer.js";
 import profile from "./js/profile.js";
 import logout from "./js/logout.js";
 import { navigateTo } from "./js/teleport.js";
-import { sendLoginData, sendRegisterData,sendNewPostData, dataGathering, sendChatData } from "./js/datahandler.js";
+import { sendLoginData, sendRegisterData,sendNewPostData, dataGathering, sendChatData,requestPostData } from "./js/datahandler.js";
 const pathToRegex = (path) =>
        new RegExp(
               "^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$"
@@ -176,14 +176,11 @@ export const router = async () => {
               }
               // click on post box will show post content
               let allPost = document.querySelectorAll(".pBox");
-              allPost.forEach((box) => {
-                     box.addEventListener("click", async () => {
-                            await view.blameContent(box);
-                            if (
-                                   document.getElementById("activeUserName") !==
-                                          null &&
-                                   document.getElementById("activeUserName")
-                                          .textContent !== "guest"
+              allPost.forEach((element) => {
+                     element.addEventListener("click", async () => {
+                            console.log("post box clicked",await requestPostData(socket,element.id));
+                            await view.blameContent(element,JSON.parse(await requestPostData(socket,element.id)));
+                            if ( document.getElementById("activeUserName") !== null && document.getElementById("activeUserName").textContent !== "guest"
                             ) {
                                    // click on comment button will send comment to server
                                    document

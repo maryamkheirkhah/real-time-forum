@@ -4,19 +4,36 @@ import {
 // Login handler
 
 
+export async function dataGathering(location) {
+  const parent = document.querySelector(`#${location}-form`);
+  const inputs = parent.querySelectorAll(`[name^="${location}-"]`);
+  const obj = {};
+  const fdata = new FormData();
+  inputs.forEach((input) => {
+    console.log(input);
+    const {
+      name,
+      value
+    } = input;
+    const nameEnd = name.split('-')[1];
+    fdata.append(nameEnd, value);
+  });
+  for (let [key, value] of fdata.entries()) {
+    obj[key] = value;
+  }
+  var obj2 ={};
+  obj2["message"] = obj;
+  obj2["type"] = location;
+  console.log("obj2", obj2);
+  return obj2;
+}
 export async function sendLoginData(socket, data) {
   //const socket = new WebSocket(location);
   // Wait for the WebSocket connection to open
   socket.addEventListener("open", () => {
     console.log("WebSocket connection established.");
   });
-  /*  
-  await new Promise(resolve => {
-    socket.addEventListener("open", () => {
-      console.log("WebSocket connection established.");
-      resolve();
-    });
-  }); */
+  
   console.log("sendLoginData");
   // Send the login data as JSON to the backend through the WebSocket
   socket.send(JSON.stringify(data));
@@ -44,6 +61,7 @@ export async function sendLoginData(socket, data) {
     } else {
       alert("Invalid username or password");
     }
+    socket.close();
   };
 
   // Wait for a response from the backend and call the callback function
@@ -77,66 +95,8 @@ export async function sendRegisterData(socket, data) {
   socket.send("register-start");
   socket.send(JSON.stringify(data));
 }
-export async function dataGathering(location) {
-  const parent = document.querySelector(`#${location}-form`);
-  const inputs = parent.querySelectorAll(`[name^="${location}-"]`);
-  const obj = {};
-  const fdata = new FormData();
-  inputs.forEach((input) => {
-    console.log(input);
-    const {
-      name,
-      value
-    } = input;
-    const nameEnd = name.split('-')[1];
-    fdata.append(nameEnd, value);
-  });
-  for (let [key, value] of fdata.entries()) {
-    obj[key] = value;
-  }
-  var obj2 ={};
-  obj2["message"] = obj;
-  obj2["type"] = location;
-  console.log("obj2", obj2);
-  return obj2;
-}
-export async function requestMainData(socket) {
-  return new Promise((resolve, reject) => {
-    // const socket = new WebSocket(location);
-
-    socket.addEventListener("open", () => {
-      console.log("WebSocket connection established.");
-      socket.send(JSON.stringify({"type":"mainData", "message":{}}));
-    });
-
-    socket.addEventListener("message", (event) => {
-      resolve(event.data);
-    });
-
-    socket.addEventListener("error", (event) => {
-      console.error("WebSocket error:", event);
-      reject(event);
-      socket.close();
-    });
-    socket.addEventListener("close", (event) => {
-      console.log("WebSocket connection closed:", event);
-    }); 
-
-
-  });
-}
 export async function sendNewPostData(socket, data) {
   console.log("sendNewPostData", data);
-  // const socket = new WebSocket(location);
-  // Wait for the WebSocket connection to open
- /*  await new Promise(resolve => {
-    socket.addEventListener("open", () => {
-      console.log("WebSocket connection established. in post data");
-      resolve();
-    });
-  }); */
-  // Send the login data as JSON to the backend through the WebSocket
-
   socket.send(JSON.stringify(data));
   navigateTo("/blamer");
   socket.addEventListener("close", (event) => {
@@ -174,4 +134,49 @@ export async function sendChatData(socket, data) {
   socket.send(JSON.stringify(data));
   // TODO:Define a callback function to handle the response from the backend
   console.log("sendChatData");
+}
+export async function requestMainData(socket) {
+  return new Promise((resolve, reject) => {
+    // const socket = new WebSocket(location);
+
+    socket.addEventListener("open", () => {
+      console.log("WebSocket connection established.");
+      socket.send(JSON.stringify({"type":"mainData", "message":{}}));
+    });
+
+    socket.addEventListener("message", (event) => {
+      resolve(event.data);
+    });
+
+    socket.addEventListener("error", (event) => {
+      console.error("WebSocket error:", event);
+      reject(event);
+      socket.close();
+    });
+    socket.addEventListener("close", (event) => {
+      console.log("WebSocket connection closed:", event);
+    }); 
+
+
+  });
+}
+
+// requestPostData try to get post data from server
+// that return likeStatus, likenumb, dislikenub, []comments table
+export function requestPostData(socket, id) {
+  
+  return new Promise((resolve, reject) => {
+    socket.send(JSON.stringify({"type":"content", "message":{"id":id}}));
+    socket.addEventListener("message", (event) => {
+      resolve(event.data);
+    });
+    socket.addEventListener("close", (event) => {
+      console.log("WebSocket connection closed:", event);
+      reject(event);
+    });
+    socket.addEventListener("error", (event) => {
+      console.error("WebSocket error:", event);
+      reject(event);
+    });
+  });
 }
