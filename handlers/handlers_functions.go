@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"real-time-forum/db"
+	"reflect"
 	"strings"
 	"time"
 )
@@ -594,6 +595,7 @@ inputs, to the database. The returned error value is nil if no error occurs whil
 other functions etc., otherwise the first error encountered is returned.
 */
 func insertComment(userName string, postId int, content string) error {
+	fmt.Println("inserting comment", userName, postId, content)
 	userId, err := getUserId(userName)
 	if err != nil {
 		return errors.New("error in getting userId:" + err.Error())
@@ -923,7 +925,10 @@ func GetContentDataStruct(r *http.Request, userName string, postId int) (Content
 
 	// Retrieve comments for the post, and fill the comments slice of the
 	// ContentData struct
+	fmt.Println("postId type: ", reflect.TypeOf(postId).Kind())
 	comments, err := db.SelectDataHandler("comments", "postId", postId)
+	fmt.Println("comments: ", comments)
+
 	if err != nil && err.Error() != "data doesn't exist" {
 		return cd, errors.New("error in getting comments from database" + err.Error())
 	} else if err == nil {
@@ -942,6 +947,7 @@ func GetContentDataStruct(r *http.Request, userName string, postId int) (Content
 	}
 	// Sort comments in descending order of creation time
 	cd.Comments = sortCommentSlice(cd.Comments)
+	fmt.Println("comments: ", cd.Comments)
 	return cd, nil
 }
 

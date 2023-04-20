@@ -108,12 +108,10 @@ export async function sendNewPostData(socket, data) {
 export async function sendNewCommentData(socket, data) {
   // const socket = new WebSocket(location);
   // Wait for the WebSocket connection to open
-  await new Promise(resolve => {
     socket.addEventListener("open", () => {
       console.log("WebSocket connection established.");
       resolve();
     });
-  });
   // Send the login data as JSON to the backend through the WebSocket
   socket.send(JSON.stringify(data));
 }

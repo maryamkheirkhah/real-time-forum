@@ -7,6 +7,7 @@ import {
        navigateTo
 } from "./js/teleport.js";
 import {
+       sendNewCommentData,
        sendLoginData,
        sendRegisterData,
        sendNewPostData,
@@ -185,10 +186,10 @@ export const router = async () => {
                                           );
                                           //delete cookie
                                           document.cookie =
-                                                 "forum_session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                                                 "sessionID=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                                           console.log(response);
                                           if (response.status === 200) {
-                                                 navigateTo("/blamer");
+                                                 navigateTo("/login");
                                           }
                                    }
                             });
@@ -217,7 +218,8 @@ export const router = async () => {
                                                         e.preventDefault();
                                                         let data = await dataGathering("blameC")
                                                         let ID = document.querySelector(".blameContent").id
-                                                        data["PostId"] = ID
+                                                        data["message"]["PostId"] = ID
+                                                        await sendNewCommentData(socket, data)
                                                         console.log("im try to get comment data",data)        
                                                  }
                                           );

@@ -401,7 +401,7 @@ export default class extends abstract {
               let dislike = "white"
             
               commentData.forEach((comment) => {
-                     if (comment.PostId == id) {
+                
                             if (comment.Username == this.activeUserName){
                                     side = "justify-items: end;";        
                             }
@@ -423,13 +423,14 @@ export default class extends abstract {
                                           </div>
                                    </div>
                             `;
-                     }
+
                      
               });  
               return comments;
        }
       async createCommentArea(id,commentData) {
               console.log("looking for commentID",id,commentData)
+
               let comments = await this.findComments(commentData);
               let parent = document.createElement("div");
               parent.className = "bPost";

@@ -275,11 +275,12 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		var data MessageData
-
+		fmt.Println("message", string(message))
 		err = json.Unmarshal(message, &data)
 		if err != nil {
 			fmt.Println("error in unmarshaling", err.Error())
 		}
+		fmt.Println("data", data)
 		switch data.MessageType {
 		case "login":
 			client.SendMessage(LoginHandler(w, r, data.Message))
@@ -290,6 +291,13 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 		case "blameP":
 			CreatePostHandler(w, r, data.Message, nickname)
 		case "blameC":
+			content := data.Message["Content"]
+			id, err := strconv.Atoi(data.Message["PostId"].(string))
+			if err != nil {
+				// ... handle error
+				fmt.Println("error in converting string to int", err.Error())
+			}
+			insertComment(nickname, id, content.(string))
 		//chatHandle(w, r, conn)
 		case "content":
 			//get the post id from message
@@ -303,7 +311,7 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("int id is ", reflect.TypeOf(id).Kind())
 			fmt.Println(GetContentDataStruct(r, nickname, id))
 			//send content data to client
-			client.SendMessage(contentHandler(r, nickname, 2))
+			client.SendMessage(contentHandler(r, nickname, id))
 			break
 		default:
 			fmt.Println("default")
