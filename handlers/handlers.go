@@ -207,8 +207,10 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request, message map[strin
 	}
 	return
 }
+
+var newProfile string
+
 func DataRoute(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("data route")
 	nickname, exist := sessions.Check(r)
 	if !exist {
 
@@ -239,6 +241,7 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 	/* go client.SendMessage([]byte("ping"))
 	go client.Read() */
 	//go func() {
+
 	for {
 		err = conn.WriteMessage(websocket.PingMessage, []byte{})
 		if err != nil {
@@ -257,7 +260,6 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("error in unmarshaling", err.Error())
 		}
 		fmt.Println("data", data)
-		profileHandler(r, nickname, nickname)
 		switch data.MessageType {
 		case "login":
 			client.SendMessage(LoginHandler(w, r, data.Message))
@@ -285,8 +287,10 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			client.SendMessage(contentHandler(r, nickname, id))
 			break
 		case "profile":
-			//profileNickname := data.Message["nickname"]
-			client.SendMessage(profileHandler(r, nickname, nickname))
+			newProfile = data.Message["nickname"].(string)
+		case "getProfile":
+			fmt.Println("getProfile", newProfile)
+			client.SendMessage(profileHandler(r, nickname, newProfile))
 		default:
 			fmt.Println("default")
 		}

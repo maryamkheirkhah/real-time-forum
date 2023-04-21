@@ -15,10 +15,6 @@ import {
     requestPostData,
     sendChatData
 } from "./js/datahandler.js";
-import {
-    ContentReaction,
-
-} from "./js/mainpage.js"
 const pathToRegex = (path) =>
     new RegExp(
         "^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$"
@@ -98,9 +94,8 @@ export const router = async() => {
     socket.addEventListener("message", (event) => {
         console.log("WebSocket message:");
     });
-
+    // make page
     document.querySelector("#app").innerHTML = await view.getHtml(socket);
-
     if (match.route.view == blamer) {
         if (
             document.getElementById("activeUserName") !== null &&
@@ -165,7 +160,16 @@ export const router = async() => {
                             });
                         });
                     });
+                    document.querySelectorAll(".bContactName").forEach((button) => {
+                        button.addEventListener("click", async() => {
+                            socket.send(JSON.stringify({"type":"profile","message":{"nickname":button.textContent}}))
+                            navigateTo("/profile");
+                        })
+
+                  } );
+
                 }
+
             });
             // click on post button will post content
             document
@@ -312,7 +316,6 @@ export const router = async() => {
 
 
     }
-
     socket.addEventListener("close", (event) => {
         console.log("WebSocket connection closed:", event);
     });
@@ -330,3 +333,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
     router();
 });
+

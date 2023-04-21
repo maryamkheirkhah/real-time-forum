@@ -185,11 +185,11 @@ export async function requestPostData(socket, id) {
     });
   });
 }
-export async function requestProfileData(socket){
+ export async function requestProfileData(socket){
   return new Promise((resolve, reject) => {
     socket.addEventListener("open", () => {
       console.log("WebSocket connection established. in profile");
-      socket.send(JSON.stringify({"type":"profile", "message":{"nickname":"test"}}));
+      socket.send(JSON.stringify({"type":"getProfile", "message":{}}));
 
     });
     socket.addEventListener("message", (event) => {
