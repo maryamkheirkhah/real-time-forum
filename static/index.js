@@ -94,8 +94,10 @@ export const router = async () => {
                      socket.addEventListener("message", (event) => {
                             console.log("WebSocket message:", event.data);
                      });
+                   
                      document.querySelector("#app").innerHTML = await view.getHtml(socket);
-                     if (match.route.view == blamer) {
+
+     /*                 if (match.route.view == blamer) {
                             if (
                                    document.getElementById("activeUserName") !== null &&
                                    document.getElementById("activeUserName").textContent !==
@@ -244,7 +246,7 @@ export const router = async () => {
                                                  });
                                           });
                                    });
-                            }
+                            } */
                             if (match.route.view == register) {
                                    const button = document.getElementById("register-submit");
                                    button.addEventListener("click", async (e) => {
@@ -260,6 +262,9 @@ export const router = async () => {
                                           e.preventDefault();
                                           sendLoginData(socket, await dataGathering("login"));
                                    });
+                            }
+                            if (match.route.view == profile) {
+                                   
                             }
 
                             socket.addEventListener("close", (event) => {

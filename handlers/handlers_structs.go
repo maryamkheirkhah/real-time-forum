@@ -16,8 +16,11 @@ type MessageData struct {
 }
 type User struct {
 	Username  string
-	UserRank  string
-	UserEmail string
+	FirstName string
+	LastName  string
+	Birthday  string
+	Gender    string
+	Email     string
 }
 type LoginData struct {
 	NickName string `json:"loginusername"`

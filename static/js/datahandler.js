@@ -185,3 +185,23 @@ export async function requestPostData(socket, id) {
     });
   });
 }
+export async function requestProfileData(socket){
+  return new Promise((resolve, reject) => {
+    socket.addEventListener("open", () => {
+      console.log("WebSocket connection established. in profile");
+      socket.send(JSON.stringify({"type":"profile", "message":{"nickname":"test"}}));
+
+    });
+    socket.addEventListener("message", (event) => {
+      resolve(event.data);
+    });
+    socket.addEventListener("close", (event) => {
+      console.log("WebSocket connection closed:", event);
+      reject(event);
+    });
+    socket.addEventListener("error", (event) => {
+      console.error("WebSocket error:", event);
+      reject(event);
+    });
+  });
+}

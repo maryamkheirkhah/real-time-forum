@@ -15,7 +15,7 @@ func StartServer() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./static/index.html")
 	})
-	http.HandleFunc("/profile", handlers.Profile)
+	//http.HandleFunc("/profile", handlers.Profile)
 	http.HandleFunc("/api/chat", handlers.WsHandler)
 
 	http.HandleFunc("/api/data-route", handlers.DataRoute)

@@ -2,11 +2,9 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"real-time-forum/db"
-	"reflect"
 	"strings"
 	"time"
 )
@@ -161,7 +159,6 @@ calling other functions etc., otherwise the first error encountered is returned 
 a -1 integer as the userId.
 */
 func getUserId(userName string) (int, error) {
-	fmt.Println("userName: ", userName)
 	user, err := db.SelectDataHandler("users", "Nickname", userName)
 	if err != nil {
 		return -1, errors.New("error in getting userId" + err.Error() + "userName: " + userName)
@@ -188,7 +185,6 @@ a User struct with the username and email data from the database. It also return
 error value, which is non-nil if there was an error in the database query.
 */
 func (u *User) FillUserStruct(userName string) error {
-	u.UserRank = "" // Fill this UserRank field in later task
 
 	// Extract entire row for user from "users" table in database
 	userInfo, err := db.SelectDataHandler("users", "NickName", userName)
@@ -196,7 +192,12 @@ func (u *User) FillUserStruct(userName string) error {
 		return errors.New("error in getting user info from database: " + err.Error())
 	}
 	// Assign e-mail value to output struct
-	u.UserEmail = userInfo.(db.User).Email
+
+	u.Email = userInfo.(db.User).Email
+	u.Birthday = userInfo.(db.User).BirthDate
+	u.FirstName = userInfo.(db.User).FirstName
+	u.LastName = userInfo.(db.User).LastName
+	u.Gender = userInfo.(db.User).Gender
 
 	return nil
 }
@@ -549,7 +550,6 @@ collection of inputs, to the database. The returned error value is nil if no err
 calling other functions etc., otherwise the first error encountered is returned.
 */
 func insertPostToDB(username string, title string, content string, topicStr string) error {
-	fmt.Println("topics", topicStr)
 	topics := strings.Split(topicStr, " and ")
 	var topicIds []int
 	dt := time.Now()
@@ -564,7 +564,6 @@ func insertPostToDB(username string, title string, content string, topicStr stri
 	for _, topic := range topics {
 		topicId := -1
 		for tId, t := range topicMap.(map[int]string) {
-			fmt.Println("testing topics", "tId:", tId, "t:", t, "topic:", topic)
 			if t == topic {
 				topicId = tId
 				topicIds = append(topicIds, tId)
@@ -595,7 +594,6 @@ inputs, to the database. The returned error value is nil if no error occurs whil
 other functions etc., otherwise the first error encountered is returned.
 */
 func insertComment(userName string, postId int, content string) error {
-	fmt.Println("inserting comment", userName, postId, content)
 	userId, err := getUserId(userName)
 	if err != nil {
 		return errors.New("error in getting userId:" + err.Error())
@@ -925,9 +923,7 @@ func GetContentDataStruct(r *http.Request, userName string, postId int) (Content
 
 	// Retrieve comments for the post, and fill the comments slice of the
 	// ContentData struct
-	fmt.Println("postId type: ", reflect.TypeOf(postId).Kind())
 	comments, err := db.SelectDataHandler("comments", "postId", postId)
-	fmt.Println("comments: ", comments)
 
 	if err != nil && err.Error() != "data doesn't exist" {
 		return cd, errors.New("error in getting comments from database" + err.Error())
@@ -947,13 +943,9 @@ func GetContentDataStruct(r *http.Request, userName string, postId int) (Content
 	}
 	// Sort comments in descending order of creation time
 	cd.Comments = sortCommentSlice(cd.Comments)
-	fmt.Println("comments: ", cd.Comments)
 	return cd, nil
 }
 
-/*
-FillProfileDataStruct function description...
-*/
 func GetProfileDataStruct(r *http.Request, activeUsername, userName string) (ProfileData, error) {
 	// Initialise output struct
 	profile := ProfileData{ActiveUsername: activeUsername}

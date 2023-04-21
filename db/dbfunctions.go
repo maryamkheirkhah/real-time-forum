@@ -267,7 +267,6 @@ func selectCommentHandler(myQuery string, keyName string, keyValue any, args ...
 	//when we call the function for selecting all comments
 	var rows *sql.Rows
 	var err error
-	fmt.Println("here in selectCommentHandler", "query", myQuery, "keyName", keyName, "keyValue", keyValue, "args", args)
 	if keyName == "" {
 		myQuery = "SELECT * FROM comments"
 		rows, err = selectData(myQuery, keyValue)

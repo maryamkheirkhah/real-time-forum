@@ -10,7 +10,6 @@ import (
 	"real-time-forum/db"
 	"real-time-forum/security"
 	"real-time-forum/sessions"
-	"reflect"
 	"strconv"
 	"time"
 
@@ -28,12 +27,6 @@ var (
 	}
 )
 
-/*
-redirectHandler is a global http redirect handler function which in addition to the standard http.Responsewriter
-and *http.Request variables, also takes a string for the target page name and a string for the message to be
-displayed on the target page. The message is stored in a cookie with a 10 second lifespan, and the user is
-redirected to the target page.
-*/
 func redirectHandler(w http.ResponseWriter, r *http.Request, pageName string, message string) {
 	// Create a new cookie with the message value
 	var messageCookie = http.Cookie{
@@ -46,12 +39,9 @@ func redirectHandler(w http.ResponseWriter, r *http.Request, pageName string, me
 	// Set the cookie on the response writer
 	http.SetCookie(w, &messageCookie)
 	w.WriteHeader(http.StatusOK)
-
-	// Redirect to the target page
-	//http.Redirect(w, r, pageName, http.StatusMovedPermanently)
 }
 
-func Profile(w http.ResponseWriter, r *http.Request) {
+/* func Profile(w http.ResponseWriter, r *http.Request) {
 	// Check for logged-in session cookie, renew / update if found, return username if found
 	activeNickname, exist := sessions.Check(r)
 	if !exist {
@@ -83,11 +73,11 @@ func Profile(w http.ResponseWriter, r *http.Request) {
 	//username := url.Get("Username")
 	username := "testUser5"
 	// Check if username is valid
-	/* 	_, err := getUserId(username)
+	_, err := getUserId(username)
 	if err != nil {
 		redirectHandler(w, r, "/main", "User "+username+" does not exist")
 		return
-	} */
+	}
 	// Retreive data for profile page
 	profilePageData, err := GetProfileDataStruct(r, activeNickname, username)
 	if err != nil {
@@ -108,21 +98,7 @@ func Profile(w http.ResponseWriter, r *http.Request) {
 
 	// Send the JSON string in the response body
 	w.Write(jsonData)
-}
-
-func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println("Failed to upgrade connection to WebSocket:", err)
-		return
-	}
-
-	client := NewClient(SocketHub, conn)
-	SocketHub.register <- client
-
-	go client.Read()
-	go client.Write()
-}
+} */
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request, message map[string]interface{}) {
 	var rgData RegisterJsonData
@@ -281,6 +257,7 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("error in unmarshaling", err.Error())
 		}
 		fmt.Println("data", data)
+		profileHandler(r, nickname, nickname)
 		switch data.MessageType {
 		case "login":
 			client.SendMessage(LoginHandler(w, r, data.Message))
@@ -300,27 +277,37 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			insertComment(nickname, id, content.(string))
 		//chatHandle(w, r, conn)
 		case "content":
-			//get the post id from message
-			//data.Message["id"].(string)
-			fmt.Println("id is ", data.Message["id"].(string))
 			id, err := strconv.Atoi(data.Message["id"].(string))
 			if err != nil {
 				// ... handle error
 				fmt.Println("error in converting string to int", err.Error())
 			}
-			fmt.Println("int id is ", reflect.TypeOf(id).Kind())
-			fmt.Println(GetContentDataStruct(r, nickname, id))
-			//send content data to client
 			client.SendMessage(contentHandler(r, nickname, id))
 			break
+		case "profile":
+			//profileNickname := data.Message["nickname"]
+			client.SendMessage(profileHandler(r, nickname, nickname))
 		default:
 			fmt.Println("default")
 		}
 		//(break
 	}
-	fmt.Println("here out of for just checking conn is :")
-	//}()
-	fmt.Println("here out side go func just checking conn is")
+
+}
+func profileHandler(r *http.Request, activeNickname string, nickname string) []byte {
+	profilePageData, err := GetProfileDataStruct(r, activeNickname, nickname)
+	if err != nil {
+		//SendError(w, r, http.StatusInternalServerError, "Internal Server Error:\n"+err.Error())
+		return nil
+	}
+
+	// Marshal the profile struct into a JSON string
+	jsonData, err := json.Marshal(profilePageData)
+	if err != nil {
+		fmt.Println("error in marshal", err.Error())
+		return nil
+	}
+	return jsonData
 }
 func contentHandler(r *http.Request, nickname string, postId int) []byte {
 	fmt.Println("content handler")

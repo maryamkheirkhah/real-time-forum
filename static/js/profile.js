@@ -1,4 +1,5 @@
 import abstact from "./abstract.js";
+import { requestProfileData } from "./datahandler.js";
 
 export default class extends abstact {
        constructor() {
@@ -8,16 +9,20 @@ export default class extends abstact {
               this.data = null;
        }
        // getData return data from the server
-       async getData() {
-              const response = await fetch("/profile");
-              this.data = await response.json();
+       async getData(socket) {
+              this.data = await JSON.parse((await requestProfileData(socket)));
+              // Wait until this.data is set before proceeding
+              while (!this.data) {
+                     await new Promise((resolve) => setTimeout(resolve, 100));
+              }
+              console.log("profile data",this.data);
               this.user = this.findUser(this.data.ActiveUsername);
               this.info1 = this.findInfo1();
               this.info2 = this.findInfo2();
        }
-       async getHtml() {
-              await this.getData();
-
+       async getHtml(socket) {
+              await this.getData(socket);
+              console.log(this.info1, "info 2 :",this.info2)
               return `
         <div class="pContainer">
           <div class="profile">
@@ -59,7 +64,6 @@ export default class extends abstact {
               return `
           <div class="info1">
                     <div class="userName">${this.data.UserInfo.Username}</div>
-                    <div class="userTitle">${this.data.UserInfo.UserRank}</div>
                     <div class="userLater"></div>
           </div>
           `;
@@ -68,6 +72,7 @@ export default class extends abstact {
 
 
        findInfo2() {
+              console.log("findInfo2", this.data);
               let likedPosts = "";
               let dislikedPosts = "";
               let createdPosts = "";
@@ -93,39 +98,39 @@ export default class extends abstact {
             `;
                      });
               }
-
-              return `
-          <div class="info2">
-                    <ul id="userInfo" class="userNav" >
-                        <li id="aboutMeBtn" class="userNavBtn"> <a>About Me</a></li>
-                        <li id="createdPostsBtn" class="userNavBtn"> <a>Created Posts</a></li>
-                        <li id="likedPostsBtn" class="userNavBtn"> <a>Liked Posts</a></li>
-                        <li id="dislikedPostsBtn" class="userNavBtn"> <a>Disliked Posts</a></li>
-                    </ul>
-                    <div id="aboutMe" class="userInfo">
-                      <div class="aboutMe1"><label for="nickname">Nickname:</label></div>
-                      <div class="aboutMe2"><p>${this.data.UserInfo.Username}</p></div>
-                      <div class="aboutMe1"><label for="firstName">First Name:</label></div>
-                      <div class="aboutMe2"><p>${this.data.UserInfo.FirstName}</p></div>
-                      <div class="aboutMe1"><label for="lastName">Last Name:</label></div>
-                      <div class="aboutMe2"><p>${this.data.UserInfo.LastName}</p></div>
-                      <div class="aboutMe1"><label for="birthday">Birthday:</label></div>
-                      <div class="aboutMe2"><p>${this.data.UserInfo.Birthday}</p></div>
-                      <div class="aboutMe1"><label for="age">Age:</label></div>
-                      <div class="aboutMe2"><p>${this.data.UserInfo.Age}</p></div>
-                      <div class="aboutMe1"><label for="email">Email:</label></div>
-                      <div class="aboutMe2"><p>${this.data.UserInfo.Email}</p></div>
-                    </div>
-                    <div id="createdPosts" class="userInfo">
-                    ${createdPosts}
-                    </div>
-                    <div id="likedPosts" class="userInfo">
-                    ${likedPosts}
-                    </div>
-                    <div id="dislikedPosts" class="userInfo">
-                    ${dislikedPosts}
-                    </div>
-          </div>`;
+              const info2 = `
+              <div class="info2">
+                        <ul id="userInfo" class="userNav" >
+                            <li id="aboutMeBtn" class="userNavBtn"> <a>About Me</a></li>
+                            <li id="createdPostsBtn" class="userNavBtn"> <a>Created Posts</a></li>
+                            <li id="likedPostsBtn" class="userNavBtn"> <a>Liked Posts</a></li>
+                            <li id="dislikedPostsBtn" class="userNavBtn"> <a>Disliked Posts</a></li>
+                        </ul>
+                        <div id="aboutMe" class="userInfo">
+                          <div class="aboutMe1"><label for="nickname">Nickname:</label></div>
+                          <div class="aboutMe2"><p>${this.data.UserInfo.Username}</p></div>
+                          <div class="aboutMe1"><label for="firstName">First Name:</label></div>
+                          <div class="aboutMe2"><p>${this.data.UserInfo.FirstName}</p></div>
+                          <div class="aboutMe1"><label for="lastName">Last Name:</label></div>
+                          <div class="aboutMe2"><p>${this.data.UserInfo.LastName}</p></div>
+                          <div class="aboutMe1"><label for="birthday">Birthday:</label></div>
+                          <div class="aboutMe2"><p>${this.data.UserInfo.Birthday}</p></div>
+                          <div class="aboutMe1"><label for="age">Age:</label></div>
+                          <div class="aboutMe1"><label for="email">Email:</label></div>
+                          <div class="aboutMe2"><p>${this.data.UserInfo.Email}</p></div>
+                        </div>
+                        <div id="createdPosts" class="userInfo">
+                        ${createdPosts}
+                        </div>
+                        <div id="likedPosts" class="userInfo">
+                        ${likedPosts}
+                        </div>
+                        <div id="dislikedPosts" class="userInfo">
+                        ${dislikedPosts}
+                        </div>
+              </div>`;
+              console.log("info2", info2)
+              return info2
        }
 
 
