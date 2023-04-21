@@ -101,10 +101,10 @@ export default class extends abstact {
               const info2 = `
               <div class="info2">
                         <ul id="userInfo" class="userNav" >
-                            <li id="aboutMeBtn" class="userNavBtn"> <a>About Me</a></li>
-                            <li id="createdPostsBtn" class="userNavBtn"> <a>Created Posts</a></li>
-                            <li id="likedPostsBtn" class="userNavBtn"> <a>Liked Posts</a></li>
-                            <li id="dislikedPostsBtn" class="userNavBtn"> <a>Disliked Posts</a></li>
+                            <li id="aboutMeBtn" class="userNavBtn"> About Me</li>
+                            <li id="createdPostsBtn" class="userNavBtn"> Created Posts</li>
+                            <li id="likedPostsBtn" class="userNavBtn"> Liked Posts</li>
+                            <li id="dislikedPostsBtn" class="userNavBtn"> Disliked Posts</li>
                         </ul>
                         <div id="aboutMe" class="userInfo">
                           <div class="aboutMe1"><label for="nickname">Nickname:</label></div>

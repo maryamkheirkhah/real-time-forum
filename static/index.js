@@ -266,6 +266,50 @@ export const router = async() => {
         });
     }
     if (match.route.view == profile) {
+      const userNavBtn = document.querySelectorAll(".userNavBtn")
+      const userInfo = document.querySelectorAll(".userInfo")
+      console.log("userNavBtn", userNavBtn)
+        userNavBtn.forEach((btn) => {
+            btn.addEventListener("click", (e) => {
+            if (e.target.id === "aboutMeBtn") {
+                userInfo.forEach((info) => {
+                    if (info.id === "aboutMe") {
+                        info.style.display = "block"
+                    }else{
+                        info.style.display = "none"
+                    }
+                })
+            }
+             if (e.target.id === "createdPostsBtn") {
+                userInfo.forEach((info) => {
+                    if (info.id === "createdPosts") {
+                        info.style.display = "block"
+                    }else{
+                        info.style.display = "none"
+                    }
+                })
+            }
+             if (e.target.id === "likedPostsBtn") {
+                userInfo.forEach((info) => {
+                    if (info.id === "likedPosts") {
+                        info.style.display = "block"
+                    }else{
+                        info.style.display = "none"
+                    }
+                })
+            }
+             if (e.target.id === "dislikedPostsBtn") {
+                userInfo.forEach((info) => {
+                    if (info.id === "dislikedPosts") {
+                        info.style.display = "block"
+                    }else{
+                        info.style.display = "none"
+                    }
+                })
+            }
+        })
+    })
+
 
     }
 
