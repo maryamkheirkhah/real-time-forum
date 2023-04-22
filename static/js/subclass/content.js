@@ -115,13 +115,13 @@ async blameContent(element) {
         parent.appendChild(await this.createCommentArea());
     }
     document.getElementById("letsComment").addEventListener("click",async(e) => {
-        document.getElementById("bCommentBoxContent").value = "";
         e.preventDefault();
         let data = await dataGathering("blameC")
         let ID = document.querySelector(".blameContent").id
         data["message"]["PostId"] = ID
         await sendNewCommentData(this.socket, data)
         addNewComment(data["message"],this.activeUserName)
+        document.getElementById("bCommentBoxContent").value = "";
     }
 );
 }
@@ -139,7 +139,7 @@ function addNewComment(message, name){
     container.innerHTML = `
            <div class="pbCommentUname"><b>${name}</b>${creationTime}</div>
            <div class="pbCommentContent" >
-                  <div class="pbCommentText">${message}</div>
+                  <div class="pbCommentText">${message.Content}</div>
            </div>
            <div class="pbCommentBotton">
                   <div class="pbCommentLike"><span id="lNumb">${0}</span><span id="lButton" style="color :${like}">Like</span></div>
