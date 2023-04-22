@@ -113,6 +113,8 @@ async blameContent(element) {
     parent.appendChild(commentBox);
     if (this.reactionData.comments != null) {
         parent.appendChild(await this.createCommentArea());
+    } else {
+        parent.innerHTML += `<div class="pbCommentArea"></div>`;
     }
     document.getElementById("letsComment").addEventListener("click",async(e) => {
         e.preventDefault();
