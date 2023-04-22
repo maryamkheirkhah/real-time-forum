@@ -13,8 +13,9 @@ import {
     sendNewPostData,
     dataGathering,
     requestPostData,
-    sendChatData
 } from "./js/datahandler.js";
+import Content from "./js/subclass/content.js";
+
 const pathToRegex = (path) =>
     new RegExp(
         "^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$"
@@ -214,23 +215,7 @@ export const router = async() => {
         let allPost = document.querySelectorAll(".pBox");
         allPost.forEach((element) => {
             element.addEventListener("click", async() => {
-                await view.blameContent(element, JSON.parse(await requestPostData(socket, element.id)));
-                if (document.getElementById("activeUserName") !== null && document.getElementById("activeUserName").textContent !== "guest") {
-                    // click on comment button will send comment to server
-                    document
-                        .getElementById("letsComment")
-                        .addEventListener(
-                            "click",
-                            async(e) => {
-                                e.preventDefault();
-                                let data = await dataGathering("blameC")
-                                let ID = document.querySelector(".blameContent").id
-                                data["message"]["PostId"] = ID
-                                await sendNewCommentData(socket, data)
-                                console.log("im try to get comment data", data)
-                            }
-                        );
-                }
+            let content = new Content(element,socket)
             });
         });
         // click on topic will show only posts belong to that topic
