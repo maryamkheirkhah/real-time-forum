@@ -120,6 +120,3 @@ type ChatData struct {
 	Msg      string `json:"content"`
 	Time     string `json:"time"`
 }
-
-// TO-DO:
-// Fill ProfileData struct

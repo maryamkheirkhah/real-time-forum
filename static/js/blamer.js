@@ -1,5 +1,7 @@
 import abstract from "./abstract.js";
-import { requestMainData } from "./datahandler.js";
+import {
+    requestMainData
+} from "./datahandler.js";
 export default class extends abstract {
     constructor() {
         super();
@@ -9,27 +11,27 @@ export default class extends abstract {
     }
 
     async getData(socket) {
-            this.data = await JSON.parse((await requestMainData(socket)));
-            // Wait until this.data is set before proceeding
-            while (!this.data) {
-                await new Promise((resolve) => setTimeout(resolve, 100));
-            }
-            this.chatBox = "";
-            if (this.data.NickName === "") {
-                this.data.NickName = "guest";
-            } else if (this.data.NickName !== "guest") {
-                this.activeUserName = this.data.NickName;
-            }
-            this.user = this.findUser(this.data.NickName);
-            this.posts = this.findPost("all");
-            this.Topics = this.findTopics();
-            this.postBox = "";
-            this.postBox = this.posting();
+        this.data = await JSON.parse((await requestMainData(socket)));
+        // Wait until this.data is set before proceeding
+        while (!this.data) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
         }
-        // getHtml return html code
+        this.chatBox = "";
+        if (this.data.NickName === "") {
+            this.data.NickName = "guest";
+        } else if (this.data.NickName !== "guest") {
+            this.activeUserName = this.data.NickName;
+        }
+        this.user = this.findUser(this.data.NickName);
+        this.posts = this.findPost("all");
+        this.Topics = this.findTopics();
+        this.postBox = "";
+        this.postBox = this.posting();
+    }
+    // getHtml return html code
     async getHtml(socket) {
-            await this.getData(socket);
-            return `
+        await this.getData(socket);
+        return `
         <div class="bContainer">
         ${this.postBox}
         ${this.user}
@@ -39,11 +41,11 @@ export default class extends abstract {
         </div>
         </div>
    `;
-        }
-        // findUser return user info
+    }
+    // findUser return user info
     findUser(uName = "guest") {
-            if (uName !== "guest") {
-                return `
+        if (uName !== "guest") {
+            return `
               <div class="bUser">
                      <div class="userTop">
                             <div id="activeUserName" class="bUserName">${uName}</div>
@@ -56,8 +58,8 @@ export default class extends abstract {
                      </div>
                </div>
                 `;
-            } else if (uName === "guest") {
-                return `
+        } else if (uName === "guest") {
+            return `
             <div class="bUser">
                 <div class="userTop">
                      <div id="activeUserName" class="bUserName">guest</div>
@@ -66,11 +68,62 @@ export default class extends abstract {
                      </div>
                 </div>
             </div>`;
-            }
         }
-        // findcontactList return contact list
+    }
+    // findcontactList return contact list
     findContactList() {
         let list = "";
+
+        console.log(this.data.users)
+        this.data.users.sort(function (a, b) {
+            return a.toLowerCase().localeCompare(b.toLowerCase());
+        });
+        console.log(this.data.users)
+        let allMessages 
+        
+        if (this.data.Messages && this.data.Messages["receive"] && this.data.Messages["send"]) {
+            allMessages = this.data.Messages["receive"].concat(this.data.Messages["send"])
+        }else if(this.data.Messages && this.data.Messages["receive"]){
+            allMessages = this.data.Messages["receive"]
+        }else if(this.data.Messages && this.data.Messages["send"]){
+            allMessages = this.data.Messages["send"]
+        }
+        if (allMessages){
+            this.data.users.sort(function (a, b) {
+                let lastMessageA
+                let lastMessageB
+                allMessages.forEach((message) => {
+                    if ((message.receiver == a || message.sender == a)) {
+                        if(lastMessageA == undefined){
+                        lastMessageA = message
+                        }
+                        else if(Date.parse(lastMessageA.time) < Date.parse(message.time)){
+                            lastMessageA = message
+                        }
+                    }else if (message.receiver == b || message.sender == b) {
+                        if (lastMessageB == undefined) {
+                            lastMessageB = message
+                        }
+                        else if (Date.parse(lastMessageB.time) < Date.parse(message.time)) {
+                            lastMessageB = message
+                        }
+                    }
+                })
+                if (lastMessageA && lastMessageB) {
+                    if (Date.parse(lastMessageA.time) >= Date.parse(lastMessageB.time)) {
+                        return -1;
+                    } else if (Date.parse(lastMessageA.time) < Date.parse(lastMessageB.time)) {
+                        return 1;
+                    } 
+                } else if (lastMessageA) {
+                    return -1;
+                } else if (lastMessageB) {
+                    return 1;
+                }
+                return 0;
+            });
+        }
+        console.log("after sorting",this.data.users)
         this.data.users.forEach((user) => {
             if (user !== this.data.NickName) {
                 list += `
@@ -114,15 +167,15 @@ export default class extends abstract {
     }
     updatedPostList(topic) {
 
-            let postBox = document.querySelectorAll(".bPost")
-            postBox.forEach((post) => {
-                    post.remove()
-                })
-                // add new posts
-            let posts = this.findPost(topic);
-            document.getElementById("mainPostsBox").innerHTML = posts;
-        }
-        // findPost return all posts
+        let postBox = document.querySelectorAll(".bPost")
+        postBox.forEach((post) => {
+            post.remove()
+        })
+        // add new posts
+        let posts = this.findPost(topic);
+        document.getElementById("mainPostsBox").innerHTML = posts;
+    }
+    // findPost return all posts
     findPost(topics = "all") {
         let posts = "";
         this.data.Posts.sort((b, a) => Date.parse(a.CreationTime) - Date.parse(b.CreationTime));
@@ -179,7 +232,9 @@ export default class extends abstract {
                 }
             });
         }
-        if (posts == "") { return this.findPost("all") }
+        if (posts == "") {
+            return this.findPost("all")
+        }
         return posts;
 
     }
@@ -225,82 +280,80 @@ export default class extends abstract {
         `;
         return postBox;
     }
-    findAllUser() {
-        let userList = "";
-
-        this.data.users.forEach((user) => {
-            if (user != this.data.NickName) {
-                userList += `<option value="${user}">${user}</option>`;
-            }
-        });
-        return userList;
-    }
     async updatedChat(receiver) {
-            console.log("im chating with" + receiver)
-            let chat = "";
-            let messages = [];
-            if (this.message) {
-                if (this.message.sender == this.data.NickName)
+        console.log("im chating with" + receiver)
+        let chat = "";
+        let messages = [];
+        if (this.message) {
+            if (this.message.sender == this.data.NickName)
+                if (this.data.Messages.send){
                     this.data.Messages.send =
                     this.data.Messages.send.concat(this.message);
-                else if (this.message.receiver == this.data.NickName)
+                }else {
+                    this.data.Messages.send = [this.message];
+                }
+            else if (this.message.receiver == this.data.NickName)
+                if (this.data.Messages.receive){
                     this.data.Messages.receive =
                     this.data.Messages.receive.concat(
                         this.message
-                    );
-            }
-            // Combine send and receive messages into a single array
-            if (this.data.Messages.send) {
-                messages = messages.concat(this.data.Messages.send);
-            }
-            if (this.data.Messages.receive) {
-                messages = messages.concat(this.data.Messages.receive);
-            }
+                );
+                }else {
+                    this.data.Messages.receive = [this.message];
+                }
+        }
+        // Combine send and receive messages into a single array
+        if (this.data.Messages.send) {
+            messages = messages.concat(this.data.Messages.send);
+        }
+        if (this.data.Messages.receive) {
+            messages = messages.concat(this.data.Messages.receive);
+        }
 
-            // Sort messages by time
-            messages.sort((a, b) => new Date(a.time) - new Date(b.time));
-            // Generate chat HTML
+        // Sort messages by time
+        messages.sort((a, b) => new Date(a.time) - new Date(b.time));
+        // Generate chat HTML
 
-            messages.forEach((message) => {
-                if (receiver == null) {
-                    if (((message.sender == this.data.NickName && message.receiver == receiver) ||
-                            (message.receiver == this.data.NickName && message.sender == receiver)) &&
-                        message.content.length > 39
+        messages.forEach((message) => {
+            if (receiver == null) {
+                if (((message.sender == this.data.NickName && message.receiver == receiver) ||
+                        (message.receiver == this.data.NickName && message.sender == receiver)) &&
+                    message.content.length > 39
+                ) {
+                    for (
+                        let i = 0; i < message.content.length; i += 40
                     ) {
-                        for (
-                            let i = 0; i < message.content.length; i += 40
-                        ) {
-                            message.content =
-                                message.content.slice(0, i) +
-                                "\n" +
-                                message.content.slice(i);
-                        }
+                        message.content =
+                            message.content.slice(0, i) +
+                            "\n" +
+                            message.content.slice(i);
                     }
                 }
-                if (
-                    message.sender == this.data.NickName &&
-                    message.receiver == receiver
-                ) {
-                    chat += `
+            }
+            if (
+                message.sender == this.data.NickName &&
+                message.receiver == receiver
+            ) {
+                chat += `
                             <div class="messageBox" style="justify-items: end;">
                             <div class="mInfo" style="float:right;"><b>Me:</b> ${message.time}</div>
                             <div class=" message"><span>${message.content}</span></div>
                             </div>
                   `;
-                } else if (
-                    message.receiver == this.data.NickName &&
-                    message.sender == receiver
-                ) {
-                    chat += `
+            } else if (
+                message.receiver == this.data.NickName &&
+                message.sender == receiver
+            ) {
+                chat += `
                             <div class="messageBox" style="justify-items: start;">
                             <div class="mInfo" style="float:left; "><b>${message.sender}:</b> ${message.time}</div>
                             <div class=" message"><span>${message.content}</span></div>
                             </div>`;
-                }
-            });
-            return chat;
-        }
-        // updatedChatBox return updated chatbox
+            }
+        });
+        return chat;
+    }
+    // updatedChatBox return updated chatbox
     async updatedChatBox(message) {
         /* 
         const response = await fetch("/blamer");

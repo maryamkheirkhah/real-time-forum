@@ -69,31 +69,15 @@ export async function sendLoginData(socket, data) {
   socket.addEventListener("close", (event) => {
     console.log("WebSocket connection closed:", event);
   }); 
-  /*                      // Wait for the response and then close the WebSocket connection
-                       await new Promise(resolve => {
-                         socket.addEventListener("close", () => {
-                           console.log("WebSocket connection closed.");
-                           resolve();
-                         });
-                       });
-                       
-                       // Remove the event listener for message to avoid multiple invocations
-                       socket.removeEventListener("message", handleResponse); */
   navigateTo("/blamer");
 }
 export async function sendRegisterData(socket, data) {
   // const socket = new WebSocket(location);
   // Wait for the WebSocket connection to open
-  await new Promise(resolve => {
-    socket.addEventListener("open", () => {
-      console.log("WebSocket connection established.");
-      resolve();
-    });
-  });
-
   // Send the login data as JSON to the backend through the WebSocket
-  socket.send("register-start");
+  console.log("sendRegisterData", socket);
   socket.send(JSON.stringify(data));
+  console.log("sendRegisterData", data);
 }
 export async function sendNewPostData(socket, data) {
   console.log("sendNewPostData", data);

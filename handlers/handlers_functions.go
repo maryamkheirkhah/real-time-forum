@@ -781,6 +781,7 @@ func GetMainDataStruct(r *http.Request, nickName string) (MainData, error) {
 
 	return md, nil
 }
+
 func GetAllUsersNickName() ([]string, error) {
 	users, err := db.SelectDataHandler("users", "", nil)
 	if err != nil {
