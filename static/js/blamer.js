@@ -164,7 +164,7 @@ export default class extends abstract {
                 if (post.Topics == topics) {
                     posts += `
                                    <div class="bPost">
-                                   <div id="${post.Username}_${post.Title}" class="pBox">
+                                   <div id="${post.PostId}" class="pBox">
                                    <div class="pBlamer">${post.Username}</div>
                                    <div class="pTopic">${post.Topics}</div>
                                    <div class="pComent">${post.TotalComments}</div>

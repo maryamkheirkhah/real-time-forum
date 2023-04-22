@@ -7,12 +7,10 @@ import {
     navigateTo
 } from "./js/teleport.js";
 import {
-    sendNewCommentData,
     sendLoginData,
     sendRegisterData,
     sendNewPostData,
     dataGathering,
-    requestPostData,
 } from "./js/datahandler.js";
 import Content from "./js/subclass/content.js";
 
@@ -35,29 +33,51 @@ const getParams = (match) => {
 };
 
 export const router = async() => {
-    const routes = [
-        //    { path: "/", view: Dashboard },
-        {
-            path: "/blamer",
-            view: blamer,
-        },
-        {
-            path: "/register",
-            view: register,
-        },
-        {
-            path: "/login",
-            view: login,
-        },
-        {
-            path: "/profile",
-            view: profile,
-        },
-        {
-            path: "/logout",
-            view: logout,
-        },
-    ];
+    const cookies = document.cookie.split(";")
+    let online = false;
+    for (var i = 0; i < cookies.length; i++) {
+        
+        // Get the name and value of each cookie
+        var name = cookies[i].split("=")[0];
+        var value = cookies[i].split("=")[1];
+        
+        // Check if the cookie with name "myCookie" exists
+        if (name.trim() == "sessionID") {
+            // Print the value of the cookie
+            if (value){
+                online = true;
+            } else {
+                online = false;
+            }
+          break;
+        }
+      }
+     let routes = []
+    if (online){
+            routes = [
+            {
+                path: "/blamer",
+                view: blamer,
+            }, 
+            {
+                path: "/profile",
+                view: profile,
+            }
+        ]
+    }else{
+        routes = [
+            {
+                path: "/login",
+                view: login,
+            },
+          
+            {
+                path: "/register",
+                view: register,
+            }
+        ];
+
+    }
 
     // Test each route for potential match
     const potentialMatches = routes.map((route) => {
@@ -79,6 +99,7 @@ export const router = async() => {
     }
 
     const view = new match.route.view(getParams(match));
+
     const loc = "ws://localhost:8080/api/data-route";
 
     const socket = new WebSocket(loc);
@@ -97,7 +118,9 @@ export const router = async() => {
     });
     // make page
     document.querySelector("#app").innerHTML = await view.getHtml(socket);
-    if (match.route.view == blamer) {
+    
+    if (match.route.view == blamer && online
+    ) {
         if (
             document.getElementById("activeUserName") !== null &&
             document.getElementById("activeUserName").textContent !==
@@ -215,7 +238,8 @@ export const router = async() => {
         let allPost = document.querySelectorAll(".pBox");
         allPost.forEach((element) => {
             element.addEventListener("click", async() => {
-            let content = new Content(element,socket)
+                console.log("element", element)
+             new Content(element,socket)
             });
         });
         // click on topic will show only posts belong to that topic
@@ -231,14 +255,14 @@ export const router = async() => {
                 allPost = document.querySelectorAll(".pBox");
                 allPost.forEach((box) => {
                     box.addEventListener("click", async() => {
-                        view.blameContent(box);
-                        ContentReaction(123)
+                        console.log("box", box)
+                    new Content(box,socket)
                     });
                 });
             });
         });
     }
-    if (match.route.view == register) {
+    if (match.route.view == register&& !online) {
         const button = document.getElementById("register-submit");
         button.addEventListener("click", async(e) => {
             e.preventDefault();
@@ -254,7 +278,7 @@ export const router = async() => {
             sendLoginData(socket, await dataGathering("login"));
         });
     }
-    if (match.route.view == profile) {
+    if (match.route.view == profile && !online) {
       const userNavBtn = document.querySelectorAll(".userNavBtn")
       const userInfo = document.querySelectorAll(".userInfo")
       console.log("userNavBtn", userNavBtn)
