@@ -150,19 +150,24 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, message map[string]int
 	user, err := db.SelectDataHandler("users", "NickName", data.NickName)
 	var msg string
 	if err != nil {
-		msg = "User does not exist"
-		fmt.Println("login: error:", msg)
-		return nil
-	} else if !security.MatchPasswords([]byte(data.Password), user.(db.User).Pass) {
+		msg = "User with this nickname does not exist"
+		user, err = db.SelectDataHandler("users", "email", data.NickName)
+		if err != nil {
+			msg = "User with this email does not exist"
+			return []byte(msg)
+
+		}
+	}
+	if !security.MatchPasswords([]byte(data.Password), user.(db.User).Pass) {
 		fmt.Println("login: error: password does not match")
 	} else {
-		sessionId, err := sessions.CreateSession(w, data.NickName)
+		sessionId, err := sessions.CreateSession(w, user.(db.User).NickName)
 		fmt.Println("w", w)
 		if err != nil {
 			fmt.Println("error in create session", err.Error())
 			return nil
 		}
-		response := map[string]string{"nickname": data.NickName, "sessionId": sessionId}
+		response := map[string]string{"nickname": user.(db.User).NickName, "sessionId": sessionId}
 		responseData, err := json.Marshal(response)
 		if err != nil {
 			fmt.Println("error in marshal", err.Error())
