@@ -238,12 +238,38 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 		case "getProfile":
 			fmt.Println("getProfile", newProfile)
 			client.SendMessage(profileHandler(r, nickname, newProfile))
+		case "reaction":
+			reactionHandler(nickname, data.Message["Reaction"].(float64), data.Message["PostId"].(string))
 		default:
 			fmt.Println("default")
 		}
 		//(break
 	}
 
+}
+func reactionHandler(nickname string, Reaction float64, postId string) {
+	//adding or something
+	/* 	id := int(postId)*/
+	reaction := int(Reaction)
+
+	id, err := strconv.Atoi(postId)
+	if err != nil {
+		// ... handle error
+		fmt.Println("error in converting string to int", err.Error())
+	}
+	if reaction == 1 {
+		err := insertReaction(nickname, id, -1, "like")
+		if err != nil {
+			fmt.Println("error in insert reaction", err.Error())
+			return
+		}
+	} else if reaction == -1 {
+		err := insertReaction(nickname, id, -1, "dislike")
+		if err != nil {
+			fmt.Println("error in insert reaction", err.Error())
+			return
+		}
+	}
 }
 func profileHandler(r *http.Request, activeNickname string, nickname string) []byte {
 	profilePageData, err := GetProfileDataStruct(r, activeNickname, nickname)

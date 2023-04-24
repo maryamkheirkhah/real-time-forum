@@ -178,7 +178,7 @@ export async function requestPostData(socket, id) {
 }
 
 export async function sendReactionData(socket,data){
-  socket.send(JSON.stringify(data));
+  socket.send(data);
   socket.addEventListener("close", (event) => {
     console.log("WebSocket connection closed:", event);
   }); 
