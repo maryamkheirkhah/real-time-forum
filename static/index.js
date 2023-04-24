@@ -2,7 +2,6 @@ import login from "./js/login.js";
 import register from "./js/register.js";
 import blamer from "./js/blamer.js";
 import profile from "./js/profile.js";
-import logout from "./js/logout.js";
 import {
     navigateTo
 } from "./js/teleport.js";
@@ -13,6 +12,7 @@ import {
     dataGathering,
 } from "./js/datahandler.js";
 import Content from "./js/subclass/content.js";
+import Chat from "./js/subclass/chat.js";
 
 const pathToRegex = (path) =>
     new RegExp(
@@ -142,47 +142,20 @@ export const router = async() => {
                     document.querySelectorAll(".bTopic").forEach((box) => {
                         box.style.height = "100px";
                     });
-
                     document.querySelectorAll(".bContactBox").forEach((box) => {
                         box.remove()
                     });
                 }
                 if (document.querySelectorAll(".bChatBox")) {
-
                     const socketChat = new WebSocket("ws://localhost:8080/api/chat");
                     // update chatbox when receive message from server
-                    socketChat.onmessage = async(event) => {
-                        view.updatedChatBox(JSON.parse(event.data));
-                    };
 
                     document.querySelectorAll(".bcButton").forEach((button) => {
                         button.addEventListener("click", async() => {
-                            
-                            document.getElementById("bRightSideArea").appendChild(view.findChatBox(button.id));
-                            
-                            view.updatedChatBox();
                             document.querySelectorAll(".bContactBox").forEach((box) => {
                                 box.remove()
-                            });
-                            const messageInput = document.getElementById("message-input");
-                            //  messageinput get event == enter will sent message to server
-                            messageInput.addEventListener("keydown", async(event) => {
-                                if (event.key === "Enter" && messageInput.value !== "") {
-                                    const message = messageInput.value;
-                                    messageInput.value = "";
-                                    const payload = {
-                                        sender: document.getElementById("activeUserName").textContent,
-                                        receiver: document.getElementById("receiverName").textContent,
-                                        content: message,
-                                        time: new Date().toLocaleString(),
-                                    };
-                                    socketChat.send(
-                                        JSON.stringify(
-                                            payload
-                                        )
-                                    );
-                                }
-                            });
+                            })
+                        const newChat = new Chat(document.getElementById("bRightSideArea"),socketChat,button.id, view.getMessages());
                         });
                     });
                     document.querySelectorAll(".bContactName").forEach((button) => {
