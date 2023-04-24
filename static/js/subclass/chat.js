@@ -11,7 +11,7 @@ export default class Chat {
     }
 
     async chatHeader(){
-       
+       console.log("chat header")
         this.element.appendChild(this.findChatBox(this.receive));
         this.updatedChatBox()
         const messageInput = document.querySelector("#message-input");

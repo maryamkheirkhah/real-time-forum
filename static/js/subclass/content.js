@@ -108,7 +108,7 @@ async blameContent(element) {
     // add reaction attribute to pbBottom
     document.querySelector(".pbBottom").setAttribute("data-reaction", 0);
     console.log("reaction data",this.reactionData)
-    updateReactionData(this.reactionData.likeStatus)
+    updateReactionData(this.reactionData.likeStatus,false)
 
 
     let commentBox = await this.createCommentBox(element.id);
@@ -140,7 +140,7 @@ async blameContent(element) {
                 reaction = -1
             }
         let rMessage = JSON.stringify({"type": "reaction", "message": {"PostId": element.id, "Reaction": reaction}})
-        updateReactionData(reaction)
+        updateReactionData(reaction,true)
         await sendReactionData(this.socket, rMessage)
     })  
         
@@ -148,7 +148,7 @@ async blameContent(element) {
 
 }
 }
-function updateReactionData(reaction){
+function updateReactionData(reaction,local){
     let like = document.querySelector(".pbLikeNumb")
     let dislike = document.querySelector(".pbDislikeNumb")
     let likeNumb = document.querySelector("#pbLikebtn").parentElement.querySelector("span")
@@ -159,6 +159,7 @@ function updateReactionData(reaction){
         "dislike" : "#2d4443",
         "neutral" :  "#e3ded7"
     }
+  
     if (reactionStatus == 0) {
         if (reaction == 1) {
             likeNumb.innerHTML = parseInt(likeNumb.innerHTML) + 1
@@ -194,6 +195,14 @@ function updateReactionData(reaction){
             reactionStatus = 0
         }
     }
+    if (!local){
+        switch (reactionStatus) {
+            case 1:
+                likeNumb.innerHTML = parseInt(likeNumb.innerHTML) - 1;
+            case -1:
+                dislikeNumb.innerHTML = parseInt(dislikeNumb.innerHTML) - 1;
+    }
+}
     document.querySelector(".pbBottom").setAttribute("data-reaction", reactionStatus)
 }
 
