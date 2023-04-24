@@ -89,6 +89,7 @@ func TestDeleteData(t *testing.T) {
 		tableName string
 		key       any
 	}{
+		{"reactions", 6},
 		//test correct input
 		//	{"users", "marikh"},
 

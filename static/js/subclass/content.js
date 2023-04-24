@@ -95,6 +95,7 @@ async createCommentArea() {
 
 async blameContent(element) {
     this.reactionData = JSON.parse(await requestPostData(this.socket, element.id));
+    console.log("reaction data",this.reactionData)
     let parents = document.querySelectorAll(".bPost");
     if (parents) {
         parents.forEach((parent) => {
@@ -106,6 +107,7 @@ async blameContent(element) {
     parent.innerHTML = blame;
     // add reaction attribute to pbBottom
     document.querySelector(".pbBottom").setAttribute("data-reaction", 0);
+    console.log("reaction data",this.reactionData)
     updateReactionData(this.reactionData.likeStatus)
 
 
@@ -127,7 +129,7 @@ async blameContent(element) {
     }
 );
    const reactionButton = document.querySelectorAll("#pbLikebtn, #pbDislikebtn")
-   console.log(reactionButton)
+   console.log("reaction ",reactionButton)
     reactionButton.forEach((button) => {
         button.addEventListener("click", async (e) => {
             e.preventDefault();
