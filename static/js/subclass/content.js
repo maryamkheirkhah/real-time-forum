@@ -1,4 +1,4 @@
-import {dataGathering,sendNewCommentData,requestPostData} from "../datahandler.js"
+import {dataGathering,sendNewCommentData,requestPostData,sendReactionData} from "../datahandler.js"
 export default class Content {
     constructor( element, socket) {
         this.socket = socket;
@@ -14,8 +14,6 @@ export default class Content {
         if (this.reactionData.comments) {
             comments = this.reactionData.comments.length;
         }
-        console.log(this.data,"in findBlameThing")
-        
         let post = this.data
                 blameThing = `
                         <div class="bPost">
@@ -28,8 +26,8 @@ export default class Content {
                                <textarea class="pbContent" readonly>${post.story}</textarea>
                                <div class="pbBottom">
                                       <div class="pbTopic">${post.topic}</div>
-                                      <div class="pbLikeNumb"><span>${this.reactionData["likes"]} </span><span id="pbLikebtn">LIKE</span></div>
-                                      <div class="pbDislikeNumb"><span>${this.reactionData["dislikes"]} </span><span id="pbDislikebtn-">DISLIKE</span></div>
+                                      <div class="pbLikeNumb"><span>${this.reactionData["likes"]} </span><span id="pbLikebtn" class="reacbtn">LIKE</span></div>
+                                      <div class="pbDislikeNumb"><span>${this.reactionData["dislikes"]} </span><span id="pbDislikebtn" class="reacbtn">DISLIKE</span></div>
                                       <div class="pbCommentNumb"><span>${post.commentCount} </span><span>COMMENTS</span></div>
                                </div>
                                </div>
@@ -75,10 +73,7 @@ async findComments() {
                                       <div class="pbCommentContent" >
                                              <div class="pbCommentText">${comment.Content}</div>
                                       </div>
-                                      <div class="pbCommentBotton">
-                                             <div class="pbCommentLike"><span id="lNumb">${comment.Likes}</span><span id="lButton" style="color :${like}">Like</span></div>
-                                             <div class="pbCommentDislike"><span id="dNumb">${comment.Dislikes}</span><span id="lButton" style="color :${dislike}">Dislike</span></div>
-                                      </div>
+                                  
                                </div>
                         `;
 
@@ -109,6 +104,11 @@ async blameContent(element) {
     let parent = document.getElementById("mainPostsBox");
     let blame = await this.findBlameThing(element.id);
     parent.innerHTML = blame;
+    // add reaction attribute to pbBottom
+    document.querySelector(".pbBottom").setAttribute("data-reaction", 0);
+    updateReactionData(this.reactionData.likeStatus)
+
+
     let commentBox = await this.createCommentBox(element.id);
     parent.appendChild(commentBox);
     if (this.reactionData.comments != null) {
@@ -126,7 +126,73 @@ async blameContent(element) {
         document.getElementById("bCommentBoxContent").value = "";
     }
 );
+   const reactionButton = document.querySelectorAll("#pbLikebtn, #pbDislikebtn")
+   console.log(reactionButton)
+    reactionButton.forEach((button) => {
+        button.addEventListener("click", async (e) => {
+            e.preventDefault();
+            let reaction = 0
+            if (button.id == "pbLikebtn") {
+                reaction = 1
+            } else if (button.id == "pbDislikebtn") {
+                reaction = -1
+            }
+        let rMessage = JSON.stringify({"type": "reaction", "message": {"PostId": element.id, "Reaction": reaction}})
+        updateReactionData(reaction)
+        await sendReactionData(this.socket, rMessage)
+    })  
+        
+        })
+
 }
+}
+function updateReactionData(reaction){
+    let like = document.querySelector(".pbLikeNumb")
+    let dislike = document.querySelector(".pbDislikeNumb")
+    let likeNumb = document.querySelector("#pbLikebtn").parentElement.querySelector("span")
+    let dislikeNumb = document.querySelector("#pbDislikebtn").parentElement.querySelector("span")
+    let reactionStatus = document.querySelector(".pbBottom").getAttribute("data-reaction")
+    const color = {
+        "like" : "#2d4443",
+        "dislike" : "#2d4443",
+        "neutral" :  "#e3ded7"
+    }
+    if (reactionStatus == 0) {
+        if (reaction == 1) {
+            likeNumb.innerHTML = parseInt(likeNumb.innerHTML) + 1
+            like.style.color = color.like
+            reactionStatus = 1
+        } else if (reaction == -1) {
+            dislikeNumb.innerHTML = parseInt(dislikeNumb.innerHTML) + 1
+            dislike.style.color = color.dislike
+            reactionStatus = -1
+        }
+    } else if (reaction == 1) {
+        if (reactionStatus == 1) {
+            likeNumb.innerHTML = parseInt(likeNumb.innerHTML) - 1
+            like.style.color = color.neutral
+            reactionStatus = 0
+        } else if (reactionStatus == -1) {
+            likeNumb.innerHTML = parseInt(likeNumb.innerHTML) + 1
+            dislikeNumb.innerHTML = parseInt(dislikeNumb.innerHTML) - 1
+            like.style.color = color.like
+            dislike.style.color = color.neutral
+            reactionStatus = 1
+        }
+    } else if (reaction == -1) {
+        if (reactionStatus == 1) {
+            likeNumb.innerHTML = parseInt(likeNumb.innerHTML) - 1
+            dislikeNumb.innerHTML = parseInt(dislikeNumb.innerHTML) + 1
+            like.style.color = color.neutral
+            dislike.style.color = color.dislike
+            reactionStatus = -1
+        } else if (reactionStatus == -1) {
+            dislikeNumb.innerHTML = parseInt(dislikeNumb.innerHTML) - 1
+            dislike.style.color = color.neutral
+            reactionStatus = 0
+        }
+    }
+    document.querySelector(".pbBottom").setAttribute("data-reaction", reactionStatus)
 }
 
 function addNewComment(message, name){
