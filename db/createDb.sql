@@ -61,7 +61,8 @@ CREATE TABLE messages(
     senderId INTEGER NOT NULL,
     receiverId INTEGER NOT NULL,
     messageContent TEXT NOT NULL,
-    sendTime TEXT NOT NULL, 
+    sendTime TEXT NOT NULL,
+    seen INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY(senderId) REFERENCES users(userId)
     FOREIGN KEY(receiverId) REFERENCES users(userId)
 );

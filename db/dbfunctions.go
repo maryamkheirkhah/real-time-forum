@@ -182,6 +182,19 @@ func InsertData(tableName string, args ...any) (int64, error) {
 	}
 	return id, nil
 }
+func updateSeenMessage(messageId int) error {
+	db, err := sql.Open("sqlite3", "forum.db")
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+	query := "UPDATE messages SET seen=1 WHERE messageId=?"
+	_, err = db.Exec(query, messageId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 /*
 UpdateData get the table name as a string to identify which type of data is going to update
@@ -263,6 +276,7 @@ selectCommentHandler called in SelectDataHandler it gets the query and column na
 this function is specific for selecting comment data from comment table
 it retruns a map with those comments for that specific value on columnName and nil error or nil map and non-nil error when its not exist or there are other problem.
 */
+
 func selectCommentHandler(myQuery string, keyName string, keyValue any, args ...any) (any, error) {
 	//when we call the function for selecting all comments
 	var rows *sql.Rows
@@ -462,6 +476,9 @@ func DeleteData(tableName string, keyValue any) error {
 		key = "reactionId"
 	case "PostTopics":
 		key = "postId"
+
+	case "messages":
+		key = "messageId"
 	default:
 		return errors.New("table does not exist")
 	}
