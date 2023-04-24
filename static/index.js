@@ -55,13 +55,26 @@ export const router = async() => {
      let routes = []
     if (online){
             routes = [
-            {path: "/blamer",view: blamer,}, 
-            {path: "/profile",view: profile,}
+            {
+                path: "/blamer",
+                view: blamer,
+            }, 
+            {
+                path: "/profile",
+                view: profile,
+            }
         ]
     }else{
         routes = [
-            {path: "/login", view: login,},
-            {path: "/register", view: register,}
+            {
+                path: "/login",
+                view: login,
+            },
+          
+            {
+                path: "/register",
+                view: register,
+            }
         ];
 
     }
@@ -144,8 +157,9 @@ export const router = async() => {
 
                     document.querySelectorAll(".bcButton").forEach((button) => {
                         button.addEventListener("click", async() => {
+                            
                             document.getElementById("bRightSideArea").appendChild(view.findChatBox(button.id));
-
+                            
                             view.updatedChatBox();
                             document.querySelectorAll(".bContactBox").forEach((box) => {
                                 box.remove()
@@ -183,15 +197,19 @@ export const router = async() => {
 
             });
             // click on post button will post content
-            document.getElementById("letPost").addEventListener("click", async(e) => {
+            document
+                .getElementById("letPost")
+                .addEventListener("click", async(e) => {
                     e.preventDefault();
                     console.log("post button clicked");
                     sendNewPostData(socket, await dataGathering("blameP"));
                 });
 
             // delete cookie when click logout button
-            document.getElementById("logout").addEventListener("click", async(e) => {
-                e.preventDefault();
+            document
+                .getElementById("logout")
+                .addEventListener("click", async(e) => {
+                    e.preventDefault();
                     const logout =
                         document.querySelector("#logout");
                     if (e) {
@@ -209,7 +227,11 @@ export const router = async() => {
                         }
                     }
                 });
-        } else if (document.getElementById("activeUserName") !== null &&document.getElementById("activeUserName").textContent ==="guest") {
+        } else if (
+            document.getElementById("activeUserName") !== null &&
+            document.getElementById("activeUserName").textContent ===
+            "guest"
+        ) {
             let postBox = document.getElementById("cPostBox");
             postBox.remove();
         }
