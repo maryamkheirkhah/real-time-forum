@@ -10,7 +10,6 @@ export async function dataGathering(location) {
   const obj = {};
   const fdata = new FormData();
   inputs.forEach((input) => {
-    console.log(input);
     const {
       name,
       value
@@ -24,7 +23,6 @@ export async function dataGathering(location) {
   var obj2 ={};
   obj2["message"] = obj;
   obj2["type"] = location;
-  console.log("obj2", obj2);
   return obj2;
 }
 export async function sendLoginData(socket, data) {
@@ -33,9 +31,7 @@ export async function sendLoginData(socket, data) {
   socket.addEventListener("open", () => {
     console.log("WebSocket connection established.");
   });
-  
-  console.log("sendLoginData");
-  // Send the login data as JSON to the backend through the WebSocket
+    // Send the login data as JSON to the backend through the WebSocket
   socket.send(JSON.stringify(data));
 
   // Define a callback function to handle the response from the backend
@@ -43,7 +39,6 @@ export async function sendLoginData(socket, data) {
     // Handle the response from the backend
 
     const response = JSON.parse(event.data);
-    console.log("Response from backend:", response);
     if (response) {
       if (
         data["loginusername"] !== "" &&
@@ -75,12 +70,9 @@ export async function sendRegisterData(socket, data) {
   // const socket = new WebSocket(location);
   // Wait for the WebSocket connection to open
   // Send the login data as JSON to the backend through the WebSocket
-  console.log("sendRegisterData", socket);
   socket.send(JSON.stringify(data));
-  console.log("sendRegisterData", data);
 }
 export async function sendNewPostData(socket, data) {
-  console.log("sendNewPostData", data);
   socket.send(JSON.stringify(data));
   navigateTo("/blamer");
   socket.addEventListener("close", (event) => {
@@ -117,11 +109,6 @@ export async function sendChatData(socket, data) {
     console.log("WebSocket message:", event.data);
    return event.data;
   });
- 
-  // Wait for the WebSocket connection to ope
-  // Send the login data as JSON to the backend through the WebSocket
-  // TODO:Define a callback function to handle the response from the backend
-  console.log("sendChatData");
 }
 export async function requestMainData(socket) {
   return new Promise((resolve, reject) => {

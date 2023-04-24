@@ -73,14 +73,10 @@ export default class extends abstract {
     // findcontactList return contact list
     findContactList() {
         let list = "";
-
-        console.log(this.data.users)
         this.data.users.sort(function (a, b) {
             return a.toLowerCase().localeCompare(b.toLowerCase());
         });
-        console.log(this.data.users)
         let allMessages 
-        
         if (this.data.Messages && this.data.Messages["receive"] && this.data.Messages["send"]) {
             allMessages = this.data.Messages["receive"].concat(this.data.Messages["send"])
         }else if(this.data.Messages && this.data.Messages["receive"]){
@@ -88,6 +84,7 @@ export default class extends abstract {
         }else if(this.data.Messages && this.data.Messages["send"]){
             allMessages = this.data.Messages["send"]
         }
+        console.log(this.data.Messages)
         if (allMessages){
             this.data.users.sort(function (a, b) {
                 let lastMessageA
@@ -123,7 +120,6 @@ export default class extends abstract {
                 return 0;
             });
         }
-        console.log("after sorting",this.data.users)
         this.data.users.forEach((user) => {
             if (user !== this.data.NickName) {
                 list += `
@@ -145,6 +141,12 @@ export default class extends abstract {
               `;
         return container;
 
+    }
+    unseenMessage(message) {
+        if(message.receiver == this.data.NickName && message.seen === 0){
+            return true
+        }
+        return false
     }
     findChatBox(receiver) {
         const regex = /(chatWith)_(\w+)/;
@@ -355,10 +357,7 @@ export default class extends abstract {
     }
     // updatedChatBox return updated chatbox
     async updatedChatBox(message) {
-        /* 
-        const response = await fetch("/blamer");
-        this.data = await response.json(); */
-        console.log("see=?")
+        console.log("im chating with message is ???",message)
         if (
             this.activeUserName != null &&
             this.activeUserName !== "guest"

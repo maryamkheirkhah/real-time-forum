@@ -57,4 +57,5 @@ type Message struct {
 	ReceiverId int
 	Message    string
 	SendTime   string
+	Seen       int
 }

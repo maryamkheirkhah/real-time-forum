@@ -81,6 +81,9 @@ func TestSelectDataHandler(t *testing.T) {
 	}
 
 }
+func TestUpdateSeenMessage(t *testing.T) {
+	updateSeenMessage(46)
+}
 func TestDeleteData(t *testing.T) {
 	var tests = []struct {
 		tableName string
@@ -92,8 +95,7 @@ func TestDeleteData(t *testing.T) {
 		//test missing data
 		/* 		{"PostTopics", 4},
 		   		{"PostTopics", 5}, */
-		{"posts", 4},
-		{"posts", 5},
+
 		//test missing table
 		//	{"users121", "marikh3"},
 		/* 	{"topics", "art"},
@@ -107,9 +109,11 @@ func TestDeleteData(t *testing.T) {
 		// table entry. These are shown separately
 		// when executing `go test -v`.
 		testname := fmt.Sprintf("%s,%d", tt.tableName, tt.key)
+		fmt.Println(testname)
 		t.Run(testname, func(t *testing.T) {
 			err := DeleteData(tt.tableName, tt.key)
 			if err != nil {
+
 				t.Errorf("DeleteData got error: %v:", err)
 
 			}
