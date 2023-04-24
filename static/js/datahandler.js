@@ -176,3 +176,13 @@ export async function requestPostData(socket, id) {
     });
   });
 }
+
+export async function sendReactionData(socket,data){
+  socket.send(JSON.stringify(data));
+  socket.addEventListener("close", (event) => {
+    console.log("WebSocket connection closed:", event);
+  }); 
+  socket.addEventListener("error", (event) => {
+    console.error("WebSocket error:", event);
+  });
+}
