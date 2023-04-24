@@ -160,7 +160,7 @@ export const router = async() => {
                     });
                     document.querySelectorAll(".bContactName").forEach((button) => {
                         button.addEventListener("click", async() => {
-                            socket.send(JSON.stringify({"type":"profile","message":{"nickname":button.textContent}}))
+                            socket.send(JSON.stringify({"type":"profile","message":{"nickname":document.getElementById("fpUser").textContent}}))
                             navigateTo("/profile");
                         })
 

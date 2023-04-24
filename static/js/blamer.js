@@ -146,7 +146,7 @@ export default class extends abstract {
 
                 list += `
                      <div class="bContact">
-                            <div class="bContactName">${user}<span> ${numb}</span></div>
+                            <div class="bContactName"><span id="fpUser">${user}</span><span> ${numb}</span></div>
                             <div id="chatWith_${user}" class="bcButton">Chat</div>
                      </div>
                      `;
