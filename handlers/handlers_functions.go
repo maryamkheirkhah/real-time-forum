@@ -865,7 +865,7 @@ func changeDBMessageToMessage(message db.Message) (ChatData, error) {
 	if err != nil {
 		return msgData, errors.New("error in getting user id from database:" + err.Error())
 	}
-	return ChatData{Sender: sender, Receiver: receiver, Msg: message.Message, Time: message.SendTime}, nil
+	return ChatData{Sender: sender, Receiver: receiver, Msg: message.Message, Time: message.SendTime, Seen: message.Seen}, nil
 }
 
 /*

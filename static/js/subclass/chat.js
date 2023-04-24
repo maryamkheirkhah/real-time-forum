@@ -61,6 +61,8 @@ export default class Chat {
         console.log("im chating with" + receiver)
         let chat = "";
         let messages = [];
+        console.log("this is message",this.message)
+        
         if (this.message) {
             if (this.message.sender == this.activeUserName)
                 if (this.datamessage.send){
@@ -168,10 +170,5 @@ export default class Chat {
             }
         }
     }
-    unseenMessage(message) {
-        if(message.receiver == this.activeUserName && message.seen === 0){
-            return true
-        }
-        return false
-    }
+   
 }

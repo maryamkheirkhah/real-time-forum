@@ -70,6 +70,13 @@ export default class extends abstract {
             </div>`;
         }
     }
+    unseenMessage(message) {
+        if(message.receiver == this.activeUserName && message.seen === 0){
+            console.log("in unseen is true ",message)
+            return true
+        }
+        return false
+    }
     // findcontactList return contact list
     findContactList() {
         let list = "";
@@ -120,16 +127,33 @@ export default class extends abstract {
                 return 0;
             });
         }
+        let userNotif = new Map();
+        this.data.Messages.receive.forEach((message) => {
+
+            if (this.unseenMessage(message)) {
+                userNotif.set(message.sender, userNotif.get(message.sender) + 1 || 1)   
+            }
+        })
+
         this.data.users.forEach((user) => {
-            if (user !== this.data.NickName) {
+            
+            if (user !== this.data.NickName)  {
+
+                let numb = userNotif.get(user) || 0
+                if (numb <= 0) {
+                    numb = ""
+                }
+
                 list += `
                      <div class="bContact">
-                            <div class="bContactName">${user}</div>
+                            <div class="bContactName">${user}<span> ${numb}</span></div>
                             <div id="chatWith_${user}" class="bcButton">Chat</div>
                      </div>
                      `;
             }
         });
+        
+    
         let container = document.createElement("div");
         container.id = "bContactBox";
         container.className = "bContactBox";

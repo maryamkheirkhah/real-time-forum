@@ -119,4 +119,5 @@ type ChatData struct {
 	Sender   string `json:"sender"`
 	Msg      string `json:"content"`
 	Time     string `json:"time"`
+	Seen     int    `json:"seen"`
 }
