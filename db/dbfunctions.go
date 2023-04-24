@@ -429,7 +429,7 @@ func selectMessageHandler(myQuery string, keyName string, keyValue any, args ...
 		defer rows.Close()
 		message := Message{}
 		for rows.Next() {
-			rows.Scan(&message.MessageId, &message.SenderId, &message.ReceiverId, &message.Message, &message.SendTime)
+			rows.Scan(&message.MessageId, &message.SenderId, &message.ReceiverId, &message.Message, &message.SendTime, &message.Seen)
 		}
 		if message.Message != "" {
 			return message, nil
@@ -445,12 +445,13 @@ func selectMessageHandler(myQuery string, keyName string, keyValue any, args ...
 	message := Message{}
 	messages := map[int]Message{}
 	for rows.Next() {
-		rows.Scan(&message.MessageId, &message.SenderId, &message.ReceiverId, &message.Message, &message.SendTime)
+		rows.Scan(&message.MessageId, &message.SenderId, &message.ReceiverId, &message.Message, &message.SendTime, &message.Seen)
 		messages[message.MessageId] = message
 	}
 	if message.Message != "" {
 		return messages, nil
 	}
+	fmt.Println("message in db func", messages, message)
 	return nil, errors.New("message doesn't exist in messages table")
 }
 

@@ -41,65 +41,6 @@ func redirectHandler(w http.ResponseWriter, r *http.Request, pageName string, me
 	w.WriteHeader(http.StatusOK)
 }
 
-/* func Profile(w http.ResponseWriter, r *http.Request) {
-	// Check for logged-in session cookie, renew / update if found, return username if found
-	activeNickname, exist := sessions.Check(r)
-	if !exist {
-		fmt.Println("no fucking cookie")
-		// Redirect to login page if CheckSessions returns an error
-		//redirectHandler(w, r, "/login", err.Error()+": please try logging in or registering")
-	} else if activeNickname == "" {
-		activeNickname = "guest"
-	}
-	if r.Method == "POST" && activeNickname == "guest" {
-		redirectHandler(w, r, "/", "You must be logged in to post")
-		return
-	}
-
-	// Handle Logout POST request
-	if r.Method == "POST" && r.PostFormValue("Logout") == "Logout" {
-		// Perform cookies and sessions logout
-		//sessions.Logout(w, r)
-		// Redirect to landing page once logged out
-		err := sessions.DeleteSession(w, activeNickname)
-		if err != nil {
-			fmt.Println("err in logout", err.Error())
-		}
-	}
-
-	// Handle GET request and render profile page
-	//if r.Method == "GET" {
-	//	url := r.URL.Query()
-	//username := url.Get("Username")
-	username := "testUser5"
-	// Check if username is valid
-	_, err := getUserId(username)
-	if err != nil {
-		redirectHandler(w, r, "/main", "User "+username+" does not exist")
-		return
-	}
-	// Retreive data for profile page
-	profilePageData, err := GetProfileDataStruct(r, activeNickname, username)
-	if err != nil {
-		//SendError(w, r, http.StatusInternalServerError, "Internal Server Error:\n"+err.Error())
-		return
-	}
-
-	// Marshal the MainData struct into a JSON string
-	jsonData, err := json.Marshal(profilePageData)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	json.Unmarshal(jsonData, &profilePageData)
-
-	// Set the content type of the response to JSON
-	w.Header().Set("Content-Type", "application/json")
-
-	// Send the JSON string in the response body
-	w.Write(jsonData)
-} */
-
 func RegisterHandler(w http.ResponseWriter, r *http.Request, message map[string]interface{}) {
 	var rgData RegisterJsonData
 	userName, exist := sessions.Check(r)
@@ -185,6 +126,7 @@ func MainDataHandler(w http.ResponseWriter, r *http.Request, nickname string) []
 		//http.Error(w, err.Error(), http.StatusInternalServerError)
 		return nil
 	}
+	fmt.Println("main data", mainData)
 	jsonData, err := json.Marshal(mainData)
 	if err != nil {
 		fmt.Println("error in marshal", err.Error())

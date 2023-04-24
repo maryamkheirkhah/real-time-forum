@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"real-time-forum/db"
@@ -824,6 +825,8 @@ func GetMessages(nickname string) (map[string][]ChatData, error) {
 	if err != nil && err.Error() != "message doesn't exist in messages table" {
 		return nil, errors.New("error in getting messages from database:" + err.Error())
 	}
+	fmt.Println("sender messages:", SendMessages)
+	fmt.Println("receiver messages:", receiverMessages)
 	var messages map[string][]ChatData = make(map[string][]ChatData)
 	if SendMessages != nil {
 
@@ -845,6 +848,7 @@ func GetMessages(nickname string) (map[string][]ChatData, error) {
 			messages["receive"] = append(messages["receive"], msg)
 		}
 	}
+	fmt.Println("messages:", messages)
 	return messages, nil
 
 }
