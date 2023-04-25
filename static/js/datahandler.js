@@ -110,6 +110,25 @@ export async function sendChatData(socket, data) {
    return event.data;
   });
 }
+export async function requestOnlineUsers(socket) {
+  return new Promise((resolve, reject) => {
+
+  socket.send(JSON.stringify({"type":"onlineUsers", "message":{}}));
+  socket.addEventListener("open", () => {
+      console.log("WebSocket connection established. in online users");
+    });
+    socket.addEventListener("message", (event) => {
+      resolve(event.data);
+        });
+
+    socket.addEventListener("error", (event) => {
+      console.error("WebSocket error:", event);
+      reject(event);
+      socket.close();
+    });
+  });
+
+}  
 export async function requestMainData(socket) {
   return new Promise((resolve, reject) => {
     // const socket = new WebSocket(location);

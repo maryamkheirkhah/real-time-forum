@@ -90,6 +90,14 @@ func GetSession(nickname string) (Session, bool) {
 		}
 	}
 	return Session{}, false
+
+}
+func GetOnlineUsers() []string {
+	var onlineUsers []string
+	for _, session := range ActiveSessions.Data {
+		onlineUsers = append(onlineUsers, session.nickname)
+	}
+	return onlineUsers
 }
 
 // GetNickname retrieves the nickname for a given session ID

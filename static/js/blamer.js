@@ -1,6 +1,7 @@
 import abstract from "./abstract.js";
 import {
-    requestMainData
+    requestMainData,
+    requestOnlineUsers,
 } from "./datahandler.js";
 export default class extends abstract {
     constructor() {
@@ -11,6 +12,7 @@ export default class extends abstract {
     }
 
     async getData(socket) {
+        this.socket = socket;
         this.data = await JSON.parse((await requestMainData(socket)));
         // Wait until this.data is set before proceeding
         while (!this.data) {
@@ -78,7 +80,13 @@ export default class extends abstract {
         return false
     }
     // findcontactList return contact list
-    findContactList() {
+    async findContactList() {
+        
+        this.onlineUsers = await(JSON.parse(await requestOnlineUsers(this.socket)));
+        while(!this.onlineUsers){
+            await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+        console.log("online users are :",this.onlineUsers)
         let list = "";
         this.data.users.sort(function (a, b) {
             return a.toLowerCase().localeCompare(b.toLowerCase());
@@ -128,26 +136,32 @@ export default class extends abstract {
             });
         }
         let userNotif = new Map();
-        if (this.data.Messages && this.data.Messages["receive"]) {   
-        this.data.Messages.receive.forEach((message) => {
-            if (this.unseenMessage(message)) {
-                userNotif.set(message.sender, userNotif.get(message.sender) + 1 || 1)   
-            }
-        })
-    }
-
+        if (this.data.Messages.receive) {
+            this.data.Messages.receive.forEach((message) => {
+                if (this.unseenMessage(message)) {
+                    userNotif.set(message.sender, userNotif.get(message.sender) + 1 || 1)   
+                }else{
+                    userNotif.set(message.sender, userNotif.get(message.sender) || 0)
+                }
+            })
+        
+        }        
         this.data.users.forEach((user) => {
             
             if (user !== this.data.NickName)  {
 
                 let numb = userNotif.get(user) || 0
+                let online = this.onlineUsers.includes(user)
+                if (online) {
+                    console.log(user,"online")
+                }
                 if (numb <= 0) {
                     numb = ""
                 }
 
                 list += `
                      <div class="bContact">
-                            <div class="bContactName"><span id="fpUser">${user}</span><span> ${numb}</span></div>
+                            <div class="bContactName"><span id="fpUser">${user}</span><span> ${numb}</span><span> ${online}</span></div>
                             <div id="chatWith_${user}" class="bcButton">Chat</div>
                      </div>
                      `;
