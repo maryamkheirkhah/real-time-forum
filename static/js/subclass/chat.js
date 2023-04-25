@@ -8,6 +8,7 @@ export default class Chat {
         this.receive = receive;
         this.activeUserName =  document.querySelector("#activeUserName").textContent;
         this.chatHeader()
+        this.index = 10
         
     }
     messageToArr(message) {
@@ -42,6 +43,14 @@ export default class Chat {
         this.socket.onmessage = async(event) => {
             this.updatedChatBox(JSON.parse(event.data));
         };
+        // scroll event that add old 10 message to chat box
+        const messageList = document.getElementById("message-list");
+        messageList.addEventListener('scroll', async(event) => {
+            if (messageList.scrollTop == 0) {
+                this.index += 10
+                this.addOldMessage()
+            }
+        })
 /*         const messageList = document.getElementById("message-list"); 
         messageList.addEventListener('DOMContentLoaded', function() {
             function checkIfNeedsMoreContent() {
@@ -85,7 +94,6 @@ export default class Chat {
     async updatedChat(receiver) {
         let index = 0;
         console.log("im chating with" + receiver)
-        this.chat = "";
         let messages = [];
         console.log("this is message",this.message)
         
@@ -117,12 +125,23 @@ export default class Chat {
 
         // Sort messages by time
         messages.sort((a, b) => new Date(a.time) - new Date(b.time));
-        // Generate chat HTML
-        console.log("this is message",messages)
+        this.withReceiver = [] ;
         messages.forEach((message) => {
-            if (index == 10){
-                return
+        if (((message.sender == this.activeUserName && message.receiver == receiver) ||
+            (message.receiver == this.activeUserName && message.sender == receiver))){
+               // add message to withReceiver
+                this.withReceiver.push(message)
             }
+        });
+    }
+
+    async printChat(receiver) {
+        let index = this.index;
+        let chat = "";
+        console.log("this is with receiver",this.withReceiver)
+        // slice this.withReceiver like [[message],[message],[message]...] 
+        // and print the last 10 messages
+        this.withReceiver.slice(-index).forEach((message) => {
             if (receiver == null) {
                 if (((message.sender == this.activeUserName && message.receiver == receiver) ||
                         (message.receiver == this.activeUserName && message.sender == receiver)) &&
@@ -142,26 +161,26 @@ export default class Chat {
                 message.sender == this.activeUserName &&
                 message.receiver == receiver
             ) {
-                this.chat += `
+               chat += `
                             <div class="messageBox" style="justify-items: end;">
                             <div class="mInfo" style="float:right;"><b>Me:</b> ${message.time}</div>
                             <div class=" message"><span>${message.content}</span></div>
                             </div>
                   `;
-                  index++
+            
             } else if (
                 message.receiver == this.activeUserName &&
                 message.sender == receiver
             ) {
-                this.chat += `
+                chat += `
                             <div class="messageBox" style="justify-items: start;">
                             <div class="mInfo" style="float:left; "><b>${message.sender}:</b> ${message.time}</div>
                             <div class=" message"><span>${message.content}</span></div>
                             </div>`;
-                        index++
+                
             }
         });
-        console.log("return value of updateChat",this.chat)
+        return chat;
     }
 
     // updatedChatBox return updated chatbox
@@ -172,7 +191,8 @@ export default class Chat {
             this.activeUserName !== "guest"
         ) {
             if (message != undefined) {
-
+                this.index = this.index + 10;
+                console.log("this is index",this.index)
                 this.message = message;
                 let parent =
                     document.getElementById("message-list");
@@ -188,8 +208,7 @@ export default class Chat {
                     this.activeUserName
                 ) {
                     await this.updatedChat(document.getElementById("receiverName").textContent);
-                    console.log("this is chat",this.chat)
-                    parent.innerHTML = this.chat
+                    parent.innerHTML = await this.printChat(document.getElementById("receiverName").textContent)
 
                 }
             } else {
@@ -201,10 +220,19 @@ export default class Chat {
                     children.forEach((child) => child.remove());
                 }
                 await this.updatedChat(document.getElementById("receiverName").textContent);
-                console.log("this is chat in else",this.chat)
-                parent.innerHTML = this.chat
+                
+                parent.innerHTML = await this.printChat(document.getElementById("receiverName").textContent)
             }
         }
+    }
+    async addOldMessage() {
+        let parent = document.getElementById("message-list");
+        let children = document.querySelectorAll(".message");
+        if (children.length > 0) {
+            children.forEach((child) => child.remove());
+        }
+        parent.innerHTML = await this.printChat(document.getElementById("receiverName").textContent)
+
     }
    
 }
