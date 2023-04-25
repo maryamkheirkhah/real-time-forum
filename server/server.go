@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"real-time-forum/handlers"
+	"real-time-forum/sessions"
+	"time"
 )
 
 func StartServer() {
@@ -27,6 +29,6 @@ func StartServer() {
 	fmt.Println("server started on port 8080")
 	// Start the server on port 8080
 	http.ListenAndServe(":8080", nil)
-	//sessions.DeleteSession()
 
+	sessions.ActiveSessions.CleanUpInactiveSessions(0 * time.Minute)
 }

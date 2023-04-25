@@ -140,3 +140,11 @@ func DeleteSession(w http.ResponseWriter, nickname string) error {
 	}
 	return fmt.Errorf("No session found for user %s", nickname)
 }
+func (s *LoggedInSessions) CleanUpInactiveSessions(maxIdleTime time.Duration) {
+	now := time.Now()
+	for sessionId, session := range s.Data {
+		if now.Sub(*session.LastAccess) > maxIdleTime {
+			delete(s.Data, sessionId)
+		}
+	}
+}
