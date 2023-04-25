@@ -1052,7 +1052,7 @@ body {
 }
 .info2 {
        display: grid;
-       grid-template-rows: 0.4fr 1.6fr;
+       grid-template-rows: 0.2fr 1.8fr;
        grid-auto-columns: 1fr;
        gap: 0px 0px;
        grid-auto-flow: row;
@@ -1073,7 +1073,25 @@ body {
        display: block;
 }
 .aboutMe {
-       grid-area: 3 / 1 / 4 / 2;
+       font-family: regular;
+       font-size: 18px;
+       color: var(--color-primary);
+       font-weight: 800;
+       text-align: left;
+       padding: 20px;
+       margin-left: 20px;
+}
+.pbPostLink{
+       color: var(--color-primary);
+       font-weight: 800;
+       font-family: regular;
+       font-size: 18px;
+       text-align: left;
+       padding: 20px;
+       margin-left: 20px;
+}
+.pbPostLink:hover{
+       color: white;
 }
 
 /*>---------------------- Profile -----------------------< */
