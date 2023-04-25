@@ -164,7 +164,8 @@ export const router = async() => {
                                     box.remove();
                                 });
                             }
-                            let userProfile =new Profile(socket);
+                            new Profile(socket,view);
+                            
                         })
 
                   } );

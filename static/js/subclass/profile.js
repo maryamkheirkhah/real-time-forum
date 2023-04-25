@@ -1,8 +1,10 @@
 
 import {requestProfileData} from "../datahandler.js";
+import Content from "./content.js";
 export default class Profile {
-    constructor( socket) {
+    constructor( socket ,view) {
         this.socket = socket;
+        this.view = view;
         this.activeUserName = document.querySelector("#activeUserName").textContent;
         this.profileHeader()
     }
@@ -17,7 +19,6 @@ export default class Profile {
 
     const userNavBtn = document.querySelectorAll(".userNavBtn")
     const userInfo = document.querySelectorAll(".userInfo")
-    console.log("userNavBtn", userNavBtn)
         userNavBtn.forEach((btn) => {
             btn.addEventListener("click", (e) => {
             if (e.target.id === "aboutMeBtn") {
@@ -58,6 +59,16 @@ export default class Profile {
             }
         })
     })
+        document.querySelectorAll(".pbPostLink").forEach((link) => {
+            link.addEventListener("click", async () => {
+               await this.view.updatedPostList("all")
+               let allPost =  document.querySelectorAll(".pBox");
+               allPost.forEach((box) => {
+                    if (box.id === link.id)
+                   new Content(box,this.socket)
+               });
+            })
+        })
     }
     async getHtml() {
         return `
@@ -87,7 +98,7 @@ export default class Profile {
         if (this.userdata.LikedPosts !== null) {
                this.userdata.LikedPosts.forEach((post) => {
                       likedPosts += `
-      <p>${post.CreationTime}<a href="/post/${post.Id}">${post.Title}</a><text style="color: white;">${post.Message}</text></p>
+                        <p class="pbPostLink" id="${post.Id}">${post.CreationTime} ${post.Title}</p>
       `;
                });
         }
@@ -95,14 +106,14 @@ export default class Profile {
         if (this.userdata.DislikedPosts !== null) {
                this.userdata.DislikedPosts.forEach((post) => {
                       dislikedPosts += `
-      <p>${post.CreationTime}<a href="/post/${post.Id}">${post.Title}</a><text style="color: white;">${post.Message}</text></p>
+                        <p class="pbPostLink" id="${post.Id}">${post.CreationTime} ${post.Title}</p>
       `;
                });
         }
         if (this.userdata.CreatedPosts !== null) {
                this.userdata.CreatedPosts.forEach((post) => {
                       createdPosts += `
-      <p>${post.CreationTime}<a href="/post/${post.Id}">${post.Title}</a><text style="color: white;">${post.Message}</text></p>
+                       <p class="pbPostLink" id="${post.Id}"> ${post.CreationTime} ${post.Title}</p>
       `;
                });
         }
@@ -116,22 +127,22 @@ export default class Profile {
                   </ul>
                   <div id="aboutMe" class="userInfo">
                   <div class="aboutMe">
-                  <span>Nickname:</span><span>${this.userdata.UserInfo.Username}</span>
+                 Nickname: ${this.userdata.UserInfo.Username}
                   </div>
                   <div class="aboutMe">
-                  <span>First Name:</span><span>${this.userdata.UserInfo.FirstName}</span>
+                  First Name: ${this.userdata.UserInfo.FirstName}
                   </div>
                   <div class="aboutMe">
-                    <span>Last Name:</span><span>${this.userdata.UserInfo.LastName}</span>
+                   Last Name: ${this.userdata.UserInfo.LastName}
                   </div>
                   <div class="aboutMe">
-                  <span>Birthday:</span><span>${this.userdata.UserInfo.Birthday}</span>
+                  Birthday: ${this.userdata.UserInfo.Birthday}
                   </div>
                   <div class="aboutMe">
-                  <span>Age:</span><span>${79999}</span>
+                 Age: ${79087987987999}
                   </div>
                   <div class="aboutMe">
-                  <span>Email:</span><span>${this.userdata.UserInfo.Email}</span>
+                Email: ${this.userdata.UserInfo.Email}
                   </div>
                   </div>
                   <div id="createdPosts" class="userInfo">
