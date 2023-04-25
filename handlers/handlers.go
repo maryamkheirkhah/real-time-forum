@@ -126,7 +126,6 @@ func MainDataHandler(w http.ResponseWriter, r *http.Request, nickname string) []
 		//http.Error(w, err.Error(), http.StatusInternalServerError)
 		return nil
 	}
-	fmt.Println("main data", mainData)
 	jsonData, err := json.Marshal(mainData)
 	if err != nil {
 		fmt.Println("error in marshal", err.Error())
@@ -137,14 +136,13 @@ func MainDataHandler(w http.ResponseWriter, r *http.Request, nickname string) []
 }
 func CreatePostHandler(w http.ResponseWriter, r *http.Request, message map[string]interface{}, nickname string) {
 	if nickname != "" {
-		fmt.Println("create post: nickname", nickname)
 		var post PostJsonData
 		post.Title = message["Title"].(string)
 		post.Content = message["Content"].(string)
 		post.AllTopics = message["Topics"].(string)
 		err := insertPostToDB(nickname, post.Title, post.Content, post.AllTopics)
 		if err != nil {
-			fmt.Println("error in insert post to db", err.Error())
+			fmt.Errorf("error in insert post to db %s", err.Error())
 			return
 		}
 		redirectHandler(w, r, "/", "Post created")
@@ -201,7 +199,6 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		var data MessageData
-		fmt.Println("message", string(message))
 		err = json.Unmarshal(message, &data)
 		if err != nil {
 			fmt.Println("error in unmarshaling", err.Error())

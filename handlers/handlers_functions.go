@@ -2,11 +2,9 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"real-time-forum/db"
-	"reflect"
 	"strings"
 	"time"
 )
@@ -270,7 +268,6 @@ error encountered is returned.
 */
 func findReactionStatus(username string, postId int, commentId int) (int, error) {
 	userId, err := getUserId(username)
-	fmt.Println("userId: ", userId, "postId: ", postId, "commentId: ", commentId)
 	if err != nil {
 		return -2, errors.New("error in getting user id:" + err.Error())
 	}
@@ -279,7 +276,6 @@ func findReactionStatus(username string, postId int, commentId int) (int, error)
 	if postId != -1 {
 		// Get reactions for the input postID
 		reaction, err = db.SelectDataHandler("reactions", "postId", postId)
-		fmt.Println("reaction: ", reaction)
 	} else if commentId != -1 {
 		reaction, err = db.SelectDataHandler("reactions", "commentId", commentId)
 	}
@@ -288,7 +284,6 @@ func findReactionStatus(username string, postId int, commentId int) (int, error)
 
 		// Find the reaction of the input user
 	} else if err == nil {
-		fmt.Println("reaction: ", reaction)
 		for _, r := range reaction.(map[int]db.Reaction) {
 			if r.UserId == userId {
 				if r.Reaction == "like" {
@@ -828,8 +823,6 @@ func GetMessages(nickname string) (map[string][]ChatData, error) {
 	if err != nil && err.Error() != "message doesn't exist in messages table" {
 		return nil, errors.New("error in getting messages from database:" + err.Error())
 	}
-	fmt.Println("sender messages:", SendMessages)
-	fmt.Println("receiver messages:", receiverMessages)
 	var messages map[string][]ChatData = make(map[string][]ChatData)
 	if SendMessages != nil {
 
@@ -851,7 +844,6 @@ func GetMessages(nickname string) (map[string][]ChatData, error) {
 			messages["receive"] = append(messages["receive"], msg)
 		}
 	}
-	fmt.Println("messages:", messages)
 	return messages, nil
 
 }
@@ -907,7 +899,6 @@ func GetContentDataStruct(r *http.Request, userName string, postId int) (Content
 	var cd ContentData
 	// Get post data
 	var post Post
-	fmt.Println("postId", postId, "postid", reflect.TypeOf(postId))
 	dbPost, err := db.SelectDataHandler("posts", "postId", postId)
 	if err != nil {
 		return cd, errors.New("error in getting post from database:" + err.Error())
@@ -920,7 +911,6 @@ func GetContentDataStruct(r *http.Request, userName string, postId int) (Content
 	}
 	cd.Likes = post.Likes
 	cd.Dislikes = post.Dislikes
-	fmt.Println("username", userName)
 	if userName == "guest" {
 		cd.LikeStatus = 0
 	} else {
@@ -931,7 +921,6 @@ func GetContentDataStruct(r *http.Request, userName string, postId int) (Content
 		cd.LikeStatus = reStatus
 
 	}
-	fmt.Println("like status:", cd.LikeStatus)
 	// Retrieve comments for the post, and fill the comments slice of the
 	// ContentData struct
 	comments, err := db.SelectDataHandler("comments", "postId", postId)
@@ -955,7 +944,6 @@ func GetContentDataStruct(r *http.Request, userName string, postId int) (Content
 	// Sort comments in descending order of creation time
 	cd.Comments = sortCommentSlice(cd.Comments)
 
-	fmt.Println("cd", cd)
 	return cd, nil
 }
 

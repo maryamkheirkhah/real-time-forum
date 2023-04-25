@@ -121,3 +121,7 @@ type ChatData struct {
 	Time     string `json:"time"`
 	Seen     int    `json:"seen"`
 }
+type AllChats struct {
+	Chats       map[string][]ChatData
+	onlineUsers []string
+}
