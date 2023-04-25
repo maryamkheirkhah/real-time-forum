@@ -74,7 +74,6 @@ export default class extends abstract {
     }
     unseenMessage(message) {
         if(message.receiver == this.activeUserName && message.seen === 0){
-            console.log("in unseen is true ",message)
             return true
         }
         return false
