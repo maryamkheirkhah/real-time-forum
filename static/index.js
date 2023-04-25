@@ -155,14 +155,14 @@ export const router = async() => {
                     });
                     document.querySelectorAll(".bContactName").forEach((button) => {
                         button.addEventListener("click", async() => {
-                            socket.send(JSON.stringify({"type":"profile","message":{"nickname":document.getElementById("fpUser").textContent}}))
+                            socket.send(JSON.stringify({"type":"profile","message":{"nickname":button.querySelector("#fpUser").textContent}}))
                             let boxs = document.querySelectorAll(".bPost");
                             if (boxs) {
                                 boxs.forEach((box) => {
                                     box.remove();
                                 });
                             }
-                            new Profile(socket);
+                            let userProfile =new Profile(socket);
                         })
 
                   } );

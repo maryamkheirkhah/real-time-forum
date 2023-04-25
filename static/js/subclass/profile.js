@@ -115,17 +115,24 @@ export default class Profile {
                       <li id="dislikedPostsBtn" class="userNavBtn"> Disliked Posts</li>
                   </ul>
                   <div id="aboutMe" class="userInfo">
-                    <div class="aboutMe1"><label for="nickname">Nickname:</label></div>
-                    <div class="aboutMe2"><p>${this.userdata.UserInfo.Username}</p></div>
-                    <div class="aboutMe1"><label for="firstName">First Name:</label></div>
-                    <div class="aboutMe2"><p>${this.userdata.UserInfo.FirstName}</p></div>
-                    <div class="aboutMe1"><label for="lastName">Last Name:</label></div>
-                    <div class="aboutMe2"><p>${this.userdata.UserInfo.LastName}</p></div>
-                    <div class="aboutMe1"><label for="birthday">Birthday:</label></div>
-                    <div class="aboutMe2"><p>${this.userdata.UserInfo.Birthday}</p></div>
-                    <div class="aboutMe1"><label for="age">Age:</label></div>
-                    <div class="aboutMe1"><label for="email">Email:</label></div>
-                    <div class="aboutMe2"><p>${this.userdata.UserInfo.Email}</p></div>
+                  <div class="aboutMe">
+                  <span>Nickname:</span><span>${this.userdata.UserInfo.Username}</span>
+                  </div>
+                  <div class="aboutMe">
+                  <span>First Name:</span><span>${this.userdata.UserInfo.FirstName}</span>
+                  </div>
+                  <div class="aboutMe">
+                    <span>Last Name:</span><span>${this.userdata.UserInfo.LastName}</span>
+                  </div>
+                  <div class="aboutMe">
+                  <span>Birthday:</span><span>${this.userdata.UserInfo.Birthday}</span>
+                  </div>
+                  <div class="aboutMe">
+                  <span>Age:</span><span>${79999}</span>
+                  </div>
+                  <div class="aboutMe">
+                  <span>Email:</span><span>${this.userdata.UserInfo.Email}</span>
+                  </div>
                   </div>
                   <div id="createdPosts" class="userInfo">
                   ${createdPosts}

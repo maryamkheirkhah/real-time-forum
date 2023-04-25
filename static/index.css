@@ -1072,5 +1072,8 @@ body {
 .userInfo :active {
        display: block;
 }
+.aboutMe {
+       grid-area: 3 / 1 / 4 / 2;
+}
 
 /*>---------------------- Profile -----------------------< */
