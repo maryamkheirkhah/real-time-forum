@@ -127,7 +127,7 @@ export const router = async() => {
             "guest"
         ) {
             // click on Chat to see contact list
-            document.getElementById("bChatButton").addEventListener("click", (e) => {
+            document.getElementById("bChatButton").addEventListener("click", async (e) => {
                 if (document.querySelectorAll(".bChatBox").length > 0) {
                     document.querySelectorAll(".bChatBox").forEach((box) => {
                         box.remove();
@@ -137,7 +137,7 @@ export const router = async() => {
                     document.querySelectorAll(".bTopic").forEach((box) => {
                         box.style.height = "25px";
                     });
-                    document.getElementById("bRightSideArea").appendChild(view.findContactList());
+                    document.getElementById("bRightSideArea").appendChild( await view.findContactList());
                 } else if (document.querySelectorAll(".bContactBox").length > 0) {
                     document.querySelectorAll(".bTopic").forEach((box) => {
                         box.style.height = "100px";

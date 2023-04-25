@@ -156,6 +156,8 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request, message map[strin
 var newProfile string
 
 func DataRoute(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Println("online users", sessions.GetOnlineUsers())
 	nickname, exist := sessions.Check(r)
 	if !exist {
 
@@ -207,12 +209,16 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 		switch data.MessageType {
 		case "login":
 			client.SendMessage(LoginHandler(w, r, data.Message))
+			break
 		case "register":
 			RegisterHandler(w, r, data.Message)
+			break
 		case "mainData":
 			client.SendMessage(MainDataHandler(w, r, nickname))
+			break
 		case "blameP":
 			CreatePostHandler(w, r, data.Message, nickname)
+			break
 		case "blameC":
 			content := data.Message["Content"]
 			id, err := strconv.Atoi(data.Message["PostId"].(string))
@@ -221,7 +227,7 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 				fmt.Println("error in converting string to int", err.Error())
 			}
 			insertComment(nickname, id, content.(string))
-		//chatHandle(w, r, conn)
+			break
 		case "content":
 			id, err := strconv.Atoi(data.Message["id"].(string))
 			if err != nil {
@@ -232,15 +238,26 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			break
 		case "profile":
 			newProfile = data.Message["nickname"].(string)
+			break
 		case "getProfile":
 			fmt.Println("getProfile", newProfile)
 			client.SendMessage(profileHandler(r, nickname, newProfile))
+			break
 		case "reaction":
 			reactionHandler(nickname, data.Message["Reaction"].(float64), data.Message["PostId"].(string))
+			break
+		case "onlineUsers":
+			jsonUsers, err := json.Marshal(sessions.GetOnlineUsers())
+			if err != nil {
+				fmt.Println("error in marshal", err.Error())
+			}
+			//log.Println("MainData: Failed to marshal JSON:", err)
+			client.SendMessage(jsonUsers)
+			break
 		default:
 			fmt.Println("default")
+			break
 		}
-		//(break
 	}
 
 }
