@@ -1013,70 +1013,19 @@ body {
 }
 /*>---------------------- Blamer/main -----------------------< */
 /*>---------------------- Profile -----------------------< */
-.pContainer {
-       display: grid;
-       grid-template-columns: 0.1fr 3fr 0.1fr;
-       grid-template-rows: 0.1fr 3fr 0.1fr;
-       gap: 0px 0px;
-       grid-auto-flow: row;
-       grid-template-areas:
-              ". . ."
-              ". profile ."
-              ". . .";
-}
-.profile {
-       display: grid;
-       grid-template-columns: 1fr 1.3fr 0.7fr;
-       grid-template-rows: 0.2fr 1.8fr;
-       grid-auto-columns: 1fr;
-       gap: 0px 0px;
-       grid-auto-flow: row;
-       grid-template-areas:
-              ". . pUser"
-              ". . .";
-       grid-area: profile;
-}
-.pUser {
-       grid-area: pUser;
-
-       width: 400px;
-       height: 100px;
-       position: relative;
-       background-color: var(--color-quaternary);
-       color: var(--color-primary);
-       border-radius: 0% 0% 0% 0% / 0% 0% 0% 0%;
-       box-shadow: 10px 10px rgba(0, 0, 0, 0.15);
-       transition: all 0.4s ease;
-}
-.pUser:hover {
-       border-radius: 0% 0% 50% 50% / 0% 0% 5% 5%;
-       box-shadow: 10px 10px rgba(0, 0, 0, 0.25);
-}
 .infoContainer {
-       position: absolute;
-       display: grid;
-       grid-template-columns: 0.1fr 3.1fr 0.1fr;
-       grid-template-rows: 0.1fr 2.9fr 0.1fr;
-       gap: 0px 0px;
-       grid-auto-flow: row;
-       grid-template-areas:
-              ". . ."
-              ". pProfileBox ."
-              ". . .";
-       margin: 100px 0 0 0;
-       width: 1300px;
-       height: 1000px;
+       grid-area: pBox;
 }
 .pProfileBox {
        display: grid;
-       grid-template-columns: 0.6fr 2.3fr 0.1fr;
-       grid-template-rows: 1fr 1.8fr 0.2fr;
+       grid-template-columns: 1fr ;
+       grid-template-rows: 1fr ;
        gap: 0px 0px;
        grid-auto-flow: row;
        grid-template-areas:
-              "pProfileImg info1 ."
-              ". info2 ."
-              ". . .";
+              " info1 "
+              " info2 "
+             ;
        grid-area: pProfileBox;
        width: 100%;
        height: 100%;
@@ -1090,32 +1039,16 @@ body {
        border-radius: 0% 0% 50% 50% / 0% 0% 5% 5%;
        box-shadow: 10px 10px rgba(0, 0, 0, 0.25);
 }
-.pProfileImg {
-       grid-area: pProfileImg;
-       background: url("/static/images/profile.jpg");
-       background-size: cover;
-       background-position: center;
-       background-repeat: no-repeat;
-       width: 90%;
-       height: 90%;
-       border: #2d4443 5px solid;
-}
 .info1 {
        display: grid;
-       grid-template-rows: 1fr 0.7fr 0.7fr 1.6fr;
+       grid-template-rows: 1fr;
        grid-auto-columns: 1fr;
        gap: 0px 0px;
        grid-auto-flow: row;
        grid-area: info1;
-}
-.userName {
-       grid-area: 1 / 1 / 2 / 2;
-}
-.userTitle {
-       grid-area: 2 / 1 / 3 / 2;
-}
-.userLater {
-       grid-area: 3 / 1 / 4 / 2;
+       place-self: center;
+       font-size: 30px;
+       padding: 5px;
 }
 .info2 {
        display: grid;
@@ -1125,9 +1058,12 @@ body {
        grid-auto-flow: row;
        grid-area: info2;
 }
-.userNav {
-       grid-area: 1 / 1 / 2 / 2;
-}
+
+#userInfo li {
+       display: inline-block;
+       margin-right: 10px; /* Add some space between the list items */
+       }
+
 
 .userInfo {
        grid-area: 2 / 1 / 3 / 2;
@@ -1135,6 +1071,9 @@ body {
 }
 .userInfo :active {
        display: block;
+}
+.aboutMe {
+       grid-area: 3 / 1 / 4 / 2;
 }
 
 /*>---------------------- Profile -----------------------< */

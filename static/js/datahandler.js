@@ -154,11 +154,9 @@ export async function requestMainData(socket) {
 
   });
 }
-
 // requestPostData try to get post data from server
 // that return likeStatus, likenumb, dislikenub, []comments table
 export async function requestPostData(socket, id) {
-  
   return new Promise((resolve, reject) => {
     socket.send(JSON.stringify({"type":"content", "message":{"id":id}}));
     socket.addEventListener("message", (event) => {
@@ -176,24 +174,21 @@ export async function requestPostData(socket, id) {
   });
 }
  export async function requestProfileData(socket){
-  return new Promise((resolve, reject) => {
-    socket.addEventListener("open", () => {
-      console.log("WebSocket connection established. in profile");
+    return new Promise((resolve, reject) => {
       socket.send(JSON.stringify({"type":"getProfile", "message":{}}));
-
+      socket.addEventListener("message", (event) => {
+        console.log("WebSocket message:", event.data);
+        resolve(event.data);
+      });
+      socket.addEventListener("close", (event) => {
+        console.log("WebSocket connection closed:", event);
+        reject(event);
+      });
+      socket.addEventListener("error", (event) => {
+        console.error("WebSocket error:", event);
+        reject(event);
+      });
     });
-    socket.addEventListener("message", (event) => {
-      resolve(event.data);
-    });
-    socket.addEventListener("close", (event) => {
-      console.log("WebSocket connection closed:", event);
-      reject(event);
-    });
-    socket.addEventListener("error", (event) => {
-      console.error("WebSocket error:", event);
-      reject(event);
-    });
-  });
 }
 
 export async function sendReactionData(socket,data){
