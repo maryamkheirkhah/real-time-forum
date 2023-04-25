@@ -43,7 +43,7 @@ func redirectHandler(w http.ResponseWriter, r *http.Request, pageName string, me
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request, message map[string]interface{}) {
 	var rgData RegisterJsonData
-	userName, exist := sessions.Check(r)
+	userName, exist := sessions.Check(w, r)
 	if !exist {
 		// Reload login page if CheckSessions returns an error
 		//		renderTemplate(w, r, err.Error()+": please try logging in or registering",
@@ -158,7 +158,7 @@ var newProfile string
 func DataRoute(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("online users", sessions.GetOnlineUsers())
-	nickname, exist := sessions.Check(r)
+	nickname, exist := sessions.Check(w, r)
 	if !exist {
 
 	} else if nickname != "" {
@@ -316,7 +316,7 @@ func contentHandler(r *http.Request, nickname string, postId int) []byte {
 
 func WsHandler(w http.ResponseWriter, r *http.Request) {
 	// Upgrade the HTTP connection to a WebSocket connection
-	nickname, exist := sessions.Check(r)
+	nickname, exist := sessions.Check(w, r)
 	if !exist {
 
 	} else if nickname == "" {

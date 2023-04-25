@@ -108,8 +108,9 @@ func GetNickname(sessionID string) (string, bool) {
 	}
 	return "", false
 }
-func Check(r *http.Request) (string, bool) {
+func Check(w http.ResponseWriter, r *http.Request) (string, bool) {
 	cookie, err := r.Cookie("sessionID")
+	fmt.Println("cookie:", cookie)
 	if err != nil {
 		return "", false // If cookie not found --> User not logged in
 	} else {
@@ -118,7 +119,18 @@ func Check(r *http.Request) (string, bool) {
 			fmt.Println("id", id, "session:", session.nickname)
 		}
 		wtf, ok := ActiveSessions.Data[sessionID]
+		fmt.Println("wtf:", wtf, "ok:", ok)
 		if !ok {
+			fmt.Println("session not found")
+			http.SetCookie(w, &http.Cookie{
+				Name:   "sessionID",
+				Value:  "",
+				Path:   "/",
+				MaxAge: -1,
+			})
+			w.WriteHeader(http.StatusOK)
+			fmt.Println("cookie deleted", w)
+			//	DeleteSession(w, wtf.nickname)
 			return "", false // If session not found --> User not logged in
 		}
 		return wtf.nickname, true

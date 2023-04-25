@@ -33,6 +33,8 @@ const getParams = (match) => {
 
 export const router = async() => {
     const cookies = document.cookie.split(";")
+    console.log(cookies)
+
     let online = false;
     for (var i = 0; i < cookies.length; i++) {
         
@@ -247,7 +249,6 @@ export const router = async() => {
     if (match.route.view == login) {
         const button = document.getElementById("loginSubmit");
         button.addEventListener("click", async(e) => {
-            e.preventDefault();
             e.preventDefault();
             sendLoginData(socket, await dataGathering("login"));
         });
