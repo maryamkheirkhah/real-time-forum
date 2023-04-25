@@ -1,9 +1,9 @@
 import {dataGathering,sendNewCommentData,requestPostData,sendReactionData} from "../datahandler.js"
 export default class Content {
     constructor( element, socket) {
+        this.element = element
         this.socket = socket;
         this.data = extractPostData(element);
-        this.element = element
         this.activeUserName =  document.querySelector("#activeUserName").textContent;
         this.blameContent(this.element)
     }
@@ -107,7 +107,6 @@ async blameContent(element) {
     parent.innerHTML = blame;
     // add reaction attribute to pbBottom
     document.querySelector(".pbBottom").setAttribute("data-reaction", 0);
-    console.log("reaction data",this.reactionData)
     updateReactionData(this.reactionData.likeStatus,false)
 
 

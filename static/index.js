@@ -1,7 +1,6 @@
 import login from "./js/login.js";
 import register from "./js/register.js";
 import blamer from "./js/blamer.js";
-import profile from "./js/profile.js";
 import {
     navigateTo
 } from "./js/teleport.js";
@@ -13,7 +12,7 @@ import {
 } from "./js/datahandler.js";
 import Content from "./js/subclass/content.js";
 import Chat from "./js/subclass/chat.js";
-
+import Profile from "./js/subclass/profile.js";
 const pathToRegex = (path) =>
     new RegExp(
         "^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$"
@@ -58,10 +57,6 @@ export const router = async() => {
             {
                 path: "/blamer",
                 view: blamer,
-            }, 
-            {
-                path: "/profile",
-                view: profile,
             }
         ]
     }else{
@@ -161,7 +156,13 @@ export const router = async() => {
                     document.querySelectorAll(".bContactName").forEach((button) => {
                         button.addEventListener("click", async() => {
                             socket.send(JSON.stringify({"type":"profile","message":{"nickname":document.getElementById("fpUser").textContent}}))
-                            navigateTo("/profile");
+                            let boxs = document.querySelectorAll(".bPost");
+                            if (boxs) {
+                                boxs.forEach((box) => {
+                                    box.remove();
+                                });
+                            }
+                            new Profile(socket);
                         })
 
                   } );
@@ -229,7 +230,6 @@ export const router = async() => {
                 allPost = document.querySelectorAll(".pBox");
                 allPost.forEach((box) => {
                     box.addEventListener("click", async() => {
-                        console.log("box", box)
                     new Content(box,socket)
                     });
                 });
@@ -251,53 +251,6 @@ export const router = async() => {
             e.preventDefault();
             sendLoginData(socket, await dataGathering("login"));
         });
-    }
-    if (match.route.view == profile && !online) {
-      const userNavBtn = document.querySelectorAll(".userNavBtn")
-      const userInfo = document.querySelectorAll(".userInfo")
-      console.log("userNavBtn", userNavBtn)
-        userNavBtn.forEach((btn) => {
-            btn.addEventListener("click", (e) => {
-            if (e.target.id === "aboutMeBtn") {
-                userInfo.forEach((info) => {
-                    if (info.id === "aboutMe") {
-                        info.style.display = "block"
-                    }else{
-                        info.style.display = "none"
-                    }
-                })
-            }
-             if (e.target.id === "createdPostsBtn") {
-                userInfo.forEach((info) => {
-                    if (info.id === "createdPosts") {
-                        info.style.display = "block"
-                    }else{
-                        info.style.display = "none"
-                    }
-                })
-            }
-             if (e.target.id === "likedPostsBtn") {
-                userInfo.forEach((info) => {
-                    if (info.id === "likedPosts") {
-                        info.style.display = "block"
-                    }else{
-                        info.style.display = "none"
-                    }
-                })
-            }
-             if (e.target.id === "dislikedPostsBtn") {
-                userInfo.forEach((info) => {
-                    if (info.id === "dislikedPosts") {
-                        info.style.display = "block"
-                    }else{
-                        info.style.display = "none"
-                    }
-                })
-            }
-        })
-    })
-
-
     }
     socket.addEventListener("close", (event) => {
         console.log("WebSocket connection closed:", event);

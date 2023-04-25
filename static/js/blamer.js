@@ -128,12 +128,13 @@ export default class extends abstract {
             });
         }
         let userNotif = new Map();
+        if (this.data.Messages && this.data.Messages["receive"]) {   
         this.data.Messages.receive.forEach((message) => {
-
             if (this.unseenMessage(message)) {
                 userNotif.set(message.sender, userNotif.get(message.sender) + 1 || 1)   
             }
         })
+    }
 
         this.data.users.forEach((user) => {
             
