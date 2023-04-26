@@ -8,6 +8,7 @@
        font-family: regular;
        src: url(./font/Prata-Regular.ttf);
 }
+
 a {
        color: var(--color-tertiary);
        text-decoration: none;
@@ -351,6 +352,7 @@ body {
        color: var(--color-primary);
 }
 .sendB:hover {
+       cursor: pointer;
        color: var(--color-secondary);
        border-radius: 0% 0% 900% 900% / 0% 0% 500% 500%;
 }
@@ -404,6 +406,7 @@ body {
        place-self: center;
        width: 100%;
        height: 50px;
+
 }
 .bUserName{
        grid-area: "bUserName";
@@ -436,9 +439,11 @@ body {
        color: var(--color-primary);
        margin-left: 10px;
        margin-bottom: 10px;
-}
+       transition: all 0.4s ease;
+}      
 .bChatButton:hover {
        color: var(--color-secondary);
+       cursor: pointer;
 }
 
 .bPosts {
@@ -566,10 +571,50 @@ body {
        place-self: start;
        text-align: left;
 }
+#fpUser{
+       margin-right: 10px;
+       transition: all 0.4s ease
+}
+#fpUser:hover{
+       cursor: pointer;
+       color: var(--color-secondary);
+}
+.offlineStatus{
+       border: 10px;
+       display: inline-block;
+       width: 15px;
+       height: 15px;
+       border-radius: 50%;
+       background-color: var(--color-primary);
+}
+.onlineStatus{
+       border: 10px;
+       display: inline-block;
+       width: 15px;
+       height: 15px;
+       border-radius: 50%;
+       background-color: var(--color-tertiary);
+}
+.notif {
+       margin-left: 10px ;
+       display: inline-block;
+       padding: 0.25em;
+       border-radius: 5px;
+       background-color: var(--color-secondary);
+       color: white;
+       font-size: 0.8em;
+       font-weight: bold;
+       box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.3);
+     }
 .bcButton{
        grid-area: bcButton;
        place-self: center;
        margin-right: 10px;
+       transition: all 0.4s ease;
+}
+.bcButton:hover{
+       cursor: pointer;
+       color: var(--color-secondary);
 }
 .bChatBox{
        grid-area: bChat;

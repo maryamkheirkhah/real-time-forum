@@ -70,9 +70,46 @@ export async function sendRegisterData(socket, data) {
   // const socket = new WebSocket(location);
   // Wait for the WebSocket connection to open
   // Send the login data as JSON to the backend through the WebSocket
+  let registerFields =[]
+  let errMsg = "Please fill\n"
+  for (let [key, value] of Object.entries(data["message"])) {
+    console.log(key, value)
+    if (value === '') {
+      registerFields.push(key);
+      errMsg += "* " + key + "\n"
+    }
+    if (key === "nickName" && value.length < 3|| key === "nickName" && value.length > 20) {
+      registerFields.push(key);
+      errMsg += "* Nickname value must be between 3 and 20 characters in length." + "\n"
+    }
+    if (key === "* password" && value.length < 8|| key === "password" && value.length > 20) {
+      registerFields.push(key);
+      errMsg += "* Password value must be between 8 and 20 characters in length." + "\n"
+    }
+  }
+ 
+  if (
+    registerFields >0
+  ){
+    console.log(registerFields)
+    alert(errMsg);
+    return;
+  }
+  if (data["message"]["password"] !== data["message"]["cpassword"]){
+    alert("* Passwords do not match")
+    return
+  }
+ 
   socket.send(JSON.stringify(data));
+  navigateTo("/login");
 }
 export async function sendNewPostData(socket, data) {
+  console.log(data);
+  if (data["message"]["Title"] === "" || data["message"]["Content"] === ""|| data===undefined || data===null) {
+    alert("Please fill in all fields");
+    return;
+  }
+
   socket.send(JSON.stringify(data));
   navigateTo("/blamer");
   socket.addEventListener("close", (event) => {

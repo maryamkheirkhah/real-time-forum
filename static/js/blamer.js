@@ -152,15 +152,21 @@ export default class extends abstract {
                 let numb = userNotif.get(user) || 0
                 let online = this.onlineUsers.includes(user)
                 if (online) {
-                    console.log(user,"online")
+                    online =`<span class="onlineStatus"></span>
+                    `
+                } else {
+                    online = `<span class="offlineStatus"></span>`
                 }
+
                 if (numb <= 0) {
                     numb = ""
+                } else {
+                    numb = `<span class="notif">${numb}</span>`
                 }
 
                 list += `
                      <div class="bContact">
-                            <div class="bContactName"><span id="fpUser">${user}</span><span> ${numb}</span><span> ${online}</span></div>
+                            <div class="bContactName"><span id="fpUser">${user}</span>${online}${numb}</div>
                             <div id="chatWith_${user}" class="bcButton">Chat</div>
                      </div>
                      `;
