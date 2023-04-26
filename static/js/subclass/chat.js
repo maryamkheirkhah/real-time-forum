@@ -48,6 +48,9 @@ export default class Chat {
         messageList.addEventListener('scroll', async(event) => {
             if (messageList.scrollTop == 0) {
                 this.index += 10
+                if (this.index > this.withReceiver.length) {
+                    this.index = this.withReceiver.length
+                }
                 this.addOldMessage()
             }
         })
