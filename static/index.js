@@ -101,11 +101,26 @@ export const router = async() => {
 
     const socket = new WebSocket(loc);
 
+
+   
     socket.addEventListener("open", () => {
         console.log("WebSocket connection established.");
     });
-    socket.addEventListener("error", (event) => {
+    socket.addEventListener("error", async (event) => {
         console.error("WebSocket error:", event);
+        const response = await fetch(
+            "/logout", {
+                method: "POST",
+            }
+        );
+        //delete cookie
+        document.cookie =
+            "sessionID=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        console.log(response);
+        if (response.status === 200) {
+            navigateTo("/login");
+        }
+
     });
     socket.addEventListener("close", (event) => {
         console.log("WebSocket connection closed:", event);

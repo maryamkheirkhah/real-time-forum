@@ -156,9 +156,9 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request, message map[strin
 var newProfile string
 
 func DataRoute(w http.ResponseWriter, r *http.Request) {
-
 	fmt.Println("online users", sessions.GetOnlineUsers())
 	nickname, exist := sessions.Check(w, r)
+	fmt.Println("nickname", nickname)
 	if !exist {
 
 	} else if nickname != "" {
@@ -178,17 +178,8 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	Clients[nickname] = conn
-
 	client := NewClient(SocketHub, conn)
 	SocketHub.register <- client
-	/* 	defer func() {
-		SocketHub.unregister <- client
-		conn.Close()
-	}() */
-	/* go client.SendMessage([]byte("ping"))
-	go client.Read() */
-	//go func() {
-
 	for {
 		err = conn.WriteMessage(websocket.PingMessage, []byte{})
 		if err != nil {
