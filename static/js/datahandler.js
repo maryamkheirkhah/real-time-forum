@@ -37,7 +37,7 @@ export async function sendLoginData(socket, data) {
   // Define a callback function to handle the response from the backend
   const handleResponse = (event) => {
     // Handle the response from the backend
-
+  
     const response = JSON.parse(event.data);
     if (response) {
       if (
@@ -49,9 +49,9 @@ export async function sendLoginData(socket, data) {
         document.cookie = `sessionID=${response["sessionId"]}; path=/; max-age=3600;`;
         navigateTo("/blamer");
       } else if (data["loginusername"] === "") {
-        console.log("password or username is wrong");
+        alert("Please enter username");
       } else if (data["loginusername"] === "wrong") {
-        console.log("password or username is wrong");
+        alert("Password or username is wrong");
       }
     } else {
       alert("Invalid username or password");
@@ -86,11 +86,16 @@ export async function sendRegisterData(socket, data) {
       registerFields.push(key);
       errMsg += "* Password value must be between 8 and 20 characters in length." + "\n"
     }
+    if (key ==="email"){
+      const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+      if (!value.match(emailRegex)){
+        errMsg += "* Email is not valid" + "\n"
+        registerFields.push(key);
+    }
+    }
   }
- 
-  if (
-    registerFields >0
-  ){
+ console.log(registerFields)
+  if (registerFields.length > 0 ){
     console.log(registerFields)
     alert(errMsg);
     return;
