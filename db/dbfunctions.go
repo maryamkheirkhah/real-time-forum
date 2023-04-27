@@ -182,14 +182,19 @@ func InsertData(tableName string, args ...any) (int64, error) {
 	}
 	return id, nil
 }
-func updateSeenMessage(messageId int) error {
-	db, err := sql.Open("sqlite3", "forum.db")
-	if err != nil {
-		return err
+func UpdateSeenMessage(messageId int) error {
+	myQuery := "UPDATE messages SET seen=1 WHERE messageId=?"
+	// for founding the current location
+	_, b, _, _ := runtime.Caller(0)
+	basepath := filepath.Dir(b)
+	db, errOpen := sql.Open("sqlite3", basepath+"/forum.db")
+	if errOpen != nil {
+		fmt.Println("errOpen", errOpen)
+		log.Fatal(errOpen)
 	}
+	db.SetMaxOpenConns(1)
 	defer db.Close()
-	query := "UPDATE messages SET seen=1 WHERE messageId=?"
-	_, err = db.Exec(query, messageId)
+	_, err := db.Exec(myQuery, messageId)
 	if err != nil {
 		return err
 	}

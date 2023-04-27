@@ -362,16 +362,18 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	// Read messages from the WebSocket connection
 	for {
 		_, message, err := conn.ReadMessage()
-		fmt.Println("message", string(message), "from", nickname)
 		if err != nil {
 			log.Println(err)
 			break
 		}
 		var messageData ChatData
-		fmt.Println("message", string(message), "from", nickname)
 		err = json.Unmarshal(message, &messageData)
 		if err != nil {
-			log.Println(err)
+			fmt.Println("error but not err")
+			err = handleUpdateSeen(message)
+			if err != nil {
+				log.Println("wwwwwwwhhhhhhhattttttt", err)
+			}
 			continue
 		}
 		messageData.Time = time.Now().Format("2006-01-02 15:04:05")
@@ -383,7 +385,12 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if string(messageData.MessageType) == "message" {
+		if string(messageData.MessageType) == "seen" {
+			err = handleUpdateSeen(message)
+			if err != nil {
+				log.Println("hahahahahahahahah", err)
+			}
+		} else if string(messageData.MessageType) == "message" {
 			err = SaveMessage(messageData)
 			if err != nil {
 				log.Println(errors.New("error saving message"), err)
@@ -401,4 +408,24 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+}
+func handleUpdateSeen(message []byte) error {
+	var data MessageUpdate
+	err := json.Unmarshal(message, &data)
+	if err != nil {
+		fmt.Println("error in unmarshaling", err.Error())
+		return err
+	}
+	if data.MessageType == "seen" {
+		for _, message := range data.Message {
+			if int(message.(map[string]interface{})["seen"].(float64)) == 0 {
+				err = db.UpdateSeenMessage(int(message.(map[string]interface{})["id"].(float64)))
+				if err != nil {
+					fmt.Println("error in update seen", err.Error())
+					return err
+				}
+			}
+		}
+	}
+	return nil
 }

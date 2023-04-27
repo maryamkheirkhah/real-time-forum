@@ -136,6 +136,7 @@ export default class Chat {
                 this.withReceiver.push(message)
             }
         });
+        this.updateSeenMessage(this.withReceiver);
     }
 
     async printChat(receiver) {
@@ -223,6 +224,17 @@ export default class Chat {
             }
         }
     }
+    // updateSeenMessage send seen messages to server with a websocket message 
+    async updateSeenMessage(messages) {
+        // push messages to a map of map[string]interface{} to send to sever 
+        const payload ={};
+        payload["message"] = messages;
+        payload["type"] = "seen";
+        this.socket.send(JSON.stringify(payload));
+
+    }
+
+
     async addOldMessage() {
         let parent = document.getElementById("message-list");
         let children = document.querySelectorAll(".message");

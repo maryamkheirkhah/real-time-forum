@@ -9,7 +9,10 @@ type StatusData struct {
 	Code int
 	Msg  string
 }
-
+type MessageUpdate struct {
+	MessageType string `json:"type"`
+	Message     []any  `json:"message"`
+}
 type MessageData struct {
 	Message     map[string]interface{} `json:"message"`
 	MessageType string                 `json:"type"`
@@ -115,6 +118,7 @@ type PostJsonData struct {
 	Content   string `json:"Content"`
 }
 type ChatData struct {
+	Id          int    `json:"id"`
 	Receiver    string `json:"receiver"`
 	Sender      string `json:"sender"`
 	Msg         string `json:"content"`

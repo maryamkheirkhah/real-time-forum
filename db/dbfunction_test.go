@@ -82,7 +82,7 @@ func TestSelectDataHandler(t *testing.T) {
 
 }
 func TestUpdateSeenMessage(t *testing.T) {
-	updateSeenMessage(46)
+	UpdateSeenMessage(46)
 }
 func TestDeleteData(t *testing.T) {
 	var tests = []struct {
