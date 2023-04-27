@@ -156,9 +156,13 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request, message map[strin
 var newProfile string
 
 func DataRoute(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("online users", sessions.GetOnlineUsers())
+	//fmt.Println("online users", sessions.GetOnlineUsers())
 	nickname, exist := sessions.Check(w, r)
-	fmt.Println("nickname", nickname)
+	//fmt.Println("nickname", nickname)
+	//	fmt.Println("-------------------- 1 ------------------- ")
+	getAllUsersStatus(nickname)
+	//	fmt.Println("-------------------- 2 ------------------- ")
+
 	if !exist {
 
 	} else if nickname != "" {
@@ -204,6 +208,11 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 		case "register":
 			RegisterHandler(w, r, data.Message)
 			break
+		case "logout":
+			fmt.Println("-------------------- ////////  ------------------- ")
+			sessions.DeleteSession(w, nickname)
+			fmt.Println("-------------------- ////////  ------------------- ")
+			break
 		case "mainData":
 			client.SendMessage(MainDataHandler(w, r, nickname))
 			break
@@ -245,6 +254,9 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			//log.Println("MainData: Failed to marshal JSON:", err)
 			client.SendMessage(jsonUsers)
 			break
+		case "allChats":
+			client.SendMessage(getAllUsersStatus(nickname))
+			break
 		default:
 			fmt.Println("default")
 			break
@@ -252,6 +264,25 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+func getAllUsersStatus(activeNickname string) []byte {
+	allUsersStatus := make(map[string]UserStatus)
+	users, err := GetAllUsersNickName()
+	if err != nil {
+		fmt.Println("error in get all users", err.Error())
+		return nil
+	}
+	for _, user := range users {
+		allUsersStatus[user] = FillUserStatus(activeNickname, user)
+	}
+	fmt.Println("allUsersStatus", allUsersStatus)
+	jsonData, err := json.Marshal(allUsersStatus)
+	if err != nil {
+		fmt.Println("error in marshal", err.Error())
+	}
+
+	return jsonData
+}
+
 func reactionHandler(nickname string, Reaction float64, postId string) {
 	//adding or something
 	/* 	id := int(postId)*/

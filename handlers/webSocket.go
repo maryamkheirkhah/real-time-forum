@@ -35,7 +35,6 @@ func (h *Hub) Run() {
 	for {
 		select {
 		case client := <-h.register:
-			fmt.Println("Registering client")
 			h.mutex.Lock()
 			h.clients[client] = true
 			h.mutex.Unlock()

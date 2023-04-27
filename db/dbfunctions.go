@@ -451,7 +451,6 @@ func selectMessageHandler(myQuery string, keyName string, keyValue any, args ...
 	if message.Message != "" {
 		return messages, nil
 	}
-	fmt.Println("message in db func", messages, message)
 	return nil, errors.New("message doesn't exist in messages table")
 }
 

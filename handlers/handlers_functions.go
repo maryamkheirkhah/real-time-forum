@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"real-time-forum/db"
+	"real-time-forum/sessions"
 	"strings"
 	"time"
 )
@@ -779,6 +781,55 @@ func GetMainDataStruct(r *http.Request, nickName string) (MainData, error) {
 	md.Topics = sortStringSlice(topics) // Bubble sort topics in alphabetical order
 
 	return md, nil
+}
+func isOnline(nickName string) bool {
+	onlineusers := sessions.GetOnlineUsers()
+	for _, user := range onlineusers {
+		if user == nickName {
+			return true
+		}
+	}
+	return false
+}
+func GetUnReadMessages(nickName string, activeNickname string) int {
+	activeId, err := getUserId(activeNickname)
+	if err != nil {
+		fmt.Println(err)
+		return -1
+	}
+	senderId, err := getUserId(nickName)
+	if err != nil {
+		fmt.Println(err)
+		return -1
+	}
+
+	receiveMessages, err := db.SelectDataHandler("messages", "receiverId", activeId)
+	if err != nil && err.Error() != "message doesn't exist in messages table" {
+		fmt.Printf("error in getting messages from database:" + err.Error())
+		return -1
+	}
+	var count int
+
+	if receiveMessages != nil {
+		for _, message := range receiveMessages.(map[int]db.Message) {
+			if message.SenderId == senderId && message.Seen == 0 {
+				count++
+			}
+		}
+	}
+
+	return count
+}
+func isTyping(nickname string) bool {
+	return false
+}
+func FillUserStatus(activeNickname, nickName string) UserStatus {
+	var s UserStatus
+	s.NickName = nickName
+	s.Online = isOnline(nickName)
+	s.UnRead = GetUnReadMessages(nickName, activeNickname)
+	s.IsTyping = isTyping(nickName)
+	return s
 }
 
 func GetAllUsersNickName() ([]string, error) {

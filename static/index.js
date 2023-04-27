@@ -202,18 +202,22 @@ export const router = async() => {
                 .getElementById("logout")
                 .addEventListener("click", async(e) => {
                     e.preventDefault();
-                    const logout =
-                        document.querySelector("#logout");
+                    console.log("logout button clicked");
+                    const logout = document.querySelector("#logout");
                     if (e) {
-                        const response = await fetch(
+                         const response = await fetch(
                             "/logout", {
                                 method: "POST",
                             }
-                        );
+                        ); 
                         //delete cookie
                         document.cookie =
                             "sessionID=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                        console.log(response);
+                        console.log("cookie deleted");
+                            console.log("WebSocket connection established.in logout");
+                            console.log("socket", socket);
+                            socket.send(JSON.stringify({   "type": "logout","message": {"nickname": document.getElementById("activeUserName").textContent    }  }));
+                            console.log("logout message sent");
                         if (response.status === 200) {
                             navigateTo("/login");
                         }

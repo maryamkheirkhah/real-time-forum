@@ -121,7 +121,23 @@ type ChatData struct {
 	Time     string `json:"time"`
 	Seen     int    `json:"seen"`
 }
-type AllChats struct {
+
+/* type AllChats struct {
 	Chats       map[string][]ChatData
 	onlineUsers []string
+} */
+type CertainChat struct {
+	ActiveUser string
+	OtherUser  string
+	Chats      [][10]ChatData
+}
+
+/* type AllUsersStatus struct {
+	UsersStatus map[string]UserStatus
+} */
+type UserStatus struct {
+	NickName string
+	Online   bool
+	UnRead   int
+	IsTyping bool
 }

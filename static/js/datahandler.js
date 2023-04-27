@@ -242,3 +242,23 @@ export async function sendReactionData(socket,data){
     console.error("WebSocket error:", event);
   });
 }
+
+
+/* export async function requestAllChat(socket){
+  return new Promise((resolve, reject) => {
+    socket.send(JSON.stringify({"type":"allChats", "message":{}}));
+    socket.addEventListener("message", (event) => {
+      console.log("WebSocket message:", event.data);
+      resolve(event.data);
+    });
+    socket.addEventListener("close", (event) => {
+      console.log("WebSocket connection closed:", event);
+      reject(event);
+    });
+    socket.addEventListener("error", (event) => {
+      console.error("WebSocket error:", event);
+      reject(event);
+    });
+  });
+
+} */
