@@ -85,7 +85,6 @@ export default class extends abstract {
         while(!this.onlineUsers){
             await new Promise((resolve) => setTimeout(resolve, 100));
         }
-        console.log("online users are :",this.onlineUsers)
         let list = "";
         this.data.users.sort(function (a, b) {
             return a.toLowerCase().localeCompare(b.toLowerCase());
@@ -98,7 +97,6 @@ export default class extends abstract {
         }else if(this.data.Messages && this.data.Messages["send"]){
             allMessages = this.data.Messages["send"]
         }
-        console.log(this.data.Messages)
         if (allMessages){
             this.data.users.sort(function (a, b) {
                 let lastMessageA

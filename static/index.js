@@ -33,8 +33,6 @@ const getParams = (match) => {
 
 export const router = async() => {
     const cookies = document.cookie.split(";")
-    console.log(cookies)
-
     let online = false;
     for (var i = 0; i < cookies.length; i++) {
         
@@ -116,7 +114,6 @@ export const router = async() => {
         //delete cookie
         document.cookie =
             "sessionID=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        console.log(response);
         if (response.status === 200) {
             navigateTo("/login");
         }
@@ -193,7 +190,6 @@ export const router = async() => {
                 .getElementById("letPost")
                 .addEventListener("click", async(e) => {
                     e.preventDefault();
-                    console.log("post button clicked");
                     sendNewPostData(socket, await dataGathering("blameP"));
                 });
 
@@ -213,7 +209,6 @@ export const router = async() => {
                         //delete cookie
                         document.cookie =
                             "sessionID=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                        console.log(response);
                         if (response.status === 200) {
                             navigateTo("/login");
                         }
@@ -231,7 +226,6 @@ export const router = async() => {
         let allPost = document.querySelectorAll(".pBox");
         allPost.forEach((element) => {
             element.addEventListener("click", async() => {
-                console.log("element", element)
              new Content(element,socket)
             });
         });

@@ -1,4 +1,3 @@
-import { requestMainData } from "../datahandler.js";
 export default class Chat {
     constructor(element, socket, receive,message){
         //this.datamessage = this.messageToArr(message);
@@ -19,7 +18,6 @@ export default class Chat {
         return arr;
     }
     async chatHeader(){
-       console.log("chat header")
         this.element.appendChild(this.findChatBox(this.receive));
         this.updatedChatBox()
         const messageInput = document.querySelector("#message-input");
@@ -47,7 +45,6 @@ export default class Chat {
         const messageList = document.getElementById("message-list");
       
 messageList.addEventListener('scroll', throttle (async (event) => {
-    console.log("scroll",messageList.scrollTop)
     if (messageList.scrollTop >= 0&& messageList.scrollTop <= 5) {
       
       this.index += 10
@@ -55,7 +52,6 @@ messageList.addEventListener('scroll', throttle (async (event) => {
         this.index = this.withReceiver.length
       }
         this.addOldMessage()
-        console.log(messageList.scrollHeight , messageList.clientHeight)
       if (this.index !== this.withReceiver.length) {
         messageList.scrollTop = 450 }
     }
@@ -86,10 +82,7 @@ messageList.addEventListener('scroll', throttle (async (event) => {
 
     async updatedChat(receiver) {
         let index = 0;
-        console.log("im chating with" + receiver)
-        let messages = [];
-        console.log("this is message",this.message)
-        
+        let messages = [];      
         if (this.message) {
             if (this.message.sender == this.activeUserName)
                 if (this.datamessage.send){
@@ -131,7 +124,6 @@ messageList.addEventListener('scroll', throttle (async (event) => {
     async printChat(receiver) {
        
         let chat = "";
-        console.log("this is with receiver",this.withReceiver)
         // slice this.withReceiver like [[message],[message],[message]...] 
         // and print the last 10 messages
         this.withReceiver.slice(-this.index).forEach((message) => {
@@ -176,14 +168,12 @@ messageList.addEventListener('scroll', throttle (async (event) => {
 
     // updatedChatBox return updated chatbox
     async updatedChatBox(message) {
-        console.log("im chating with message is ???",message)
         if (
             this.activeUserName != null &&
             this.activeUserName !== "guest"
         ) {
             if (message != undefined) {
                 this.index = 10
-                console.log("this is index",this.index)
                 this.message = message;
                 let parent =
                     document.getElementById("message-list");
@@ -230,7 +220,6 @@ messageList.addEventListener('scroll', throttle (async (event) => {
    
 }
 function throttle(func, limit) {
-    console.log("throttle")
     let throttling = false;
     return function throttledFunction(...args) {
       if (!throttling) {

@@ -10,7 +10,6 @@ export default class Profile {
     }
     async profileHeader() {
     this.userdata =  JSON.parse((await requestProfileData(this.socket)));
-    console.log(this.userdata);
      this.info1 = this.findInfo1();
      this.info2 = this.findInfo2();
     
