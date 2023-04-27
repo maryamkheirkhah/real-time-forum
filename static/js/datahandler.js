@@ -62,7 +62,7 @@ export async function sendLoginData(socket, data) {
   // Wait for a response from the backend and call the callback function
   socket.addEventListener("message", handleResponse);
   socket.addEventListener("close", (event) => {
-    console.log("WebSocket connection closed:", event);
+    console.log("WebSocket connection closed:");
   }); 
   
   navigateTo("/blamer");
@@ -202,7 +202,7 @@ export async function requestPostData(socket, id) {
   return new Promise((resolve, reject) => {
     socket.send(JSON.stringify({"type":"content", "message":{"id":id}}));
     socket.addEventListener("message", (event) => {
-      console.log("WebSocket message:", event.data);
+      console.log("WebSocket message:");
       resolve(event.data);
     });
     socket.addEventListener("close", (event) => {
@@ -219,7 +219,7 @@ export async function requestPostData(socket, id) {
     return new Promise((resolve, reject) => {
       socket.send(JSON.stringify({"type":"getProfile", "message":{}}));
       socket.addEventListener("message", (event) => {
-        console.log("WebSocket message:", event.data);
+        console.log("WebSocket message:");
         resolve(event.data);
       });
       socket.addEventListener("close", (event) => {
