@@ -44,7 +44,6 @@ export async function sendLoginData(socket, data) {
         data["loginusername"] !== "" &&
         data["loginusername"] !== "wrong"
       ) {
-        console.log("user", response["nickname"]);
         // Set a cookie with the user's username
         document.cookie = `sessionID=${response["sessionId"]}; path=/; max-age=3600;`;
         navigateTo("/blamer");
@@ -57,13 +56,15 @@ export async function sendLoginData(socket, data) {
       alert("Invalid username or password");
     }
     socket.close();
+    location.reload();
   };
 
   // Wait for a response from the backend and call the callback function
   socket.addEventListener("message", handleResponse);
   socket.addEventListener("close", (event) => {
-    console.log("WebSocket connection closed:", event);
+    console.log("WebSocket connection closed:");
   }); 
+  
   navigateTo("/blamer");
 }
 export async function sendRegisterData(socket, data) {
@@ -109,7 +110,6 @@ export async function sendRegisterData(socket, data) {
   navigateTo("/login");
 }
 export async function sendNewPostData(socket, data) {
-  console.log(data);
   if (data["message"]["Title"] === "" || data["message"]["Content"] === ""|| data===undefined || data===null) {
     alert("Please fill in all fields");
     return;
@@ -202,7 +202,7 @@ export async function requestPostData(socket, id) {
   return new Promise((resolve, reject) => {
     socket.send(JSON.stringify({"type":"content", "message":{"id":id}}));
     socket.addEventListener("message", (event) => {
-      console.log("WebSocket message:", event.data);
+      console.log("WebSocket message:");
       resolve(event.data);
     });
     socket.addEventListener("close", (event) => {
@@ -219,7 +219,7 @@ export async function requestPostData(socket, id) {
     return new Promise((resolve, reject) => {
       socket.send(JSON.stringify({"type":"getProfile", "message":{}}));
       socket.addEventListener("message", (event) => {
-        console.log("WebSocket message:", event.data);
+        console.log("WebSocket message:");
         resolve(event.data);
       });
       socket.addEventListener("close", (event) => {

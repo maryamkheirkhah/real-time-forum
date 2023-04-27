@@ -58,7 +58,6 @@ async findComments() {
    
   
     this.reactionData.comments.forEach((comment) => {
-        console.log(comment,"in findComments")
         if (comment.Username == this.activeUserName) {
             side = "justify-items: end;";
         }
@@ -95,7 +94,6 @@ async createCommentArea() {
 
 async blameContent(element) {
     this.reactionData = JSON.parse(await requestPostData(this.socket, element.id));
-    console.log("reaction data",this.reactionData)
     let parents = document.querySelectorAll(".bPost");
     if (parents) {
         parents.forEach((parent) => {
@@ -128,7 +126,6 @@ async blameContent(element) {
     }
 );
    const reactionButton = document.querySelectorAll("#pbLikebtn, #pbDislikebtn")
-   console.log("reaction ",reactionButton)
     reactionButton.forEach((button) => {
         button.addEventListener("click", async (e) => {
             e.preventDefault();
@@ -218,10 +215,6 @@ function addNewComment(message, name){
            <div class="pbCommentUname"><b>${name}</b>${creationTime}</div>
            <div class="pbCommentContent" >
                   <div class="pbCommentText">${message.Content}</div>
-           </div>
-           <div class="pbCommentBotton">
-                  <div class="pbCommentLike"><span id="lNumb">${0}</span><span id="lButton" style="color :${like}">Like</span></div>
-                  <div class="pbCommentDislike"><span id="dNumb">${0}</span><span id="lButton" style="color :${dislike}">Dislike</span></div>
            </div>
 `
     document.querySelector(".pbCommentArea").appendChild(container);

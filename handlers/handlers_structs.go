@@ -115,11 +115,12 @@ type PostJsonData struct {
 	Content   string `json:"Content"`
 }
 type ChatData struct {
-	Receiver string `json:"receiver"`
-	Sender   string `json:"sender"`
-	Msg      string `json:"content"`
-	Time     string `json:"time"`
-	Seen     int    `json:"seen"`
+	Receiver    string `json:"receiver"`
+	Sender      string `json:"sender"`
+	Msg         string `json:"content"`
+	Time        string `json:"time"`
+	Seen        int    `json:"seen"`
+	MessageType string `json:"type"`
 }
 
 /* type AllChats struct {

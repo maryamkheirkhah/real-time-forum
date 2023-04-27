@@ -362,6 +362,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	// Read messages from the WebSocket connection
 	for {
 		_, message, err := conn.ReadMessage()
+		fmt.Println("message", string(message), "from", nickname)
 		if err != nil {
 			log.Println(err)
 			break
@@ -382,15 +383,17 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = SaveMessage(messageData)
-		if err != nil {
-			log.Println(errors.New("error saving message"), err)
-			continue
+		if string(messageData.MessageType) == "message" {
+			err = SaveMessage(messageData)
+			if err != nil {
+				log.Println(errors.New("error saving message"), err)
+				continue
+			}
 		}
-
 		// Broadcast message to receiver
 		for cNickname, c := range Clients {
 			if cNickname == messageData.Receiver || cNickname == messageData.Sender {
+				fmt.Println("looking for typing")
 				err = c.WriteMessage(websocket.TextMessage, jsonData)
 				if err != nil {
 					log.Println(err)
