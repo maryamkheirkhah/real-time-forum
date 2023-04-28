@@ -38,7 +38,7 @@ func redirectHandler(w http.ResponseWriter, r *http.Request, pageName string, me
 	}
 	// Set the cookie on the response writer
 	http.SetCookie(w, &messageCookie)
-	w.WriteHeader(http.StatusOK)
+	//w.WriteHeader(http.StatusOK)
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request, message map[string]interface{}) {
@@ -103,7 +103,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, message map[string]int
 		fmt.Println("login: error: password does not match")
 	} else {
 		sessionId, err := sessions.CreateSession(w, user.(db.User).NickName)
-		fmt.Println("w", w)
 		if err != nil {
 			fmt.Println("error in create session", err.Error())
 			return nil
@@ -114,6 +113,13 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, message map[string]int
 			fmt.Println("error in marshal", err.Error())
 			return nil
 		}
+		responseToAll := map[string]string{"type": "loginData", "nicknameData": user.(db.User).NickName}
+		responseDataToAll, err := json.Marshal(responseToAll)
+		if err != nil {
+			fmt.Println("error in marshal", err.Error())
+			//return
+		}
+		broadcastToAll(user.(db.User).NickName, responseDataToAll)
 		redirectHandler(w, r, "/", "You are successfully logged in")
 		return responseData
 	}
@@ -158,13 +164,11 @@ var newProfile string
 func DataRoute(w http.ResponseWriter, r *http.Request) {
 	//fmt.Println("online users", sessions.GetOnlineUsers())
 	nickname, exist := sessions.Check(w, r)
-	//fmt.Println("nickname", nickname)
-	//	fmt.Println("-------------------- 1 ------------------- ")
-	getAllUsersStatus(nickname)
-	//	fmt.Println("-------------------- 2 ------------------- ")
-
+	if exist {
+		getAllUsersStatus(nickname)
+	}
 	if !exist {
-
+		fmt.Println("you're not logged in")
 	} else if nickname != "" {
 
 	}
@@ -184,6 +188,7 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 	Clients[nickname] = conn
 	client := NewClient(SocketHub, conn)
 	SocketHub.register <- client
+
 	for {
 		err = conn.WriteMessage(websocket.PingMessage, []byte{})
 		if err != nil {
@@ -210,6 +215,14 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			break
 		case "logout":
 			fmt.Println("-------------------- ////////  ------------------- ")
+			response := map[string]string{"type": "logoutData", "nicknameData": nickname}
+			responseData, err := json.Marshal(response)
+			if err != nil {
+				fmt.Println("error in marshal", err.Error())
+				return
+			}
+			//client.SendMessage(responseData)
+			broadcastToAll(nickname, responseData)
 			sessions.DeleteSession(w, nickname)
 			fmt.Println("-------------------- ////////  ------------------- ")
 			break
@@ -257,6 +270,7 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 		case "allChats":
 			client.SendMessage(getAllUsersStatus(nickname))
 			break
+
 		default:
 			fmt.Println("default")
 			break
@@ -274,12 +288,10 @@ func getAllUsersStatus(activeNickname string) []byte {
 	for _, user := range users {
 		allUsersStatus[user] = FillUserStatus(activeNickname, user)
 	}
-	fmt.Println("allUsersStatus", allUsersStatus)
 	jsonData, err := json.Marshal(allUsersStatus)
 	if err != nil {
 		fmt.Println("error in marshal", err.Error())
 	}
-
 	return jsonData
 }
 
@@ -313,7 +325,6 @@ func profileHandler(r *http.Request, activeNickname string, nickname string) []b
 		//SendError(w, r, http.StatusInternalServerError, "Internal Server Error:\n"+err.Error())
 		return nil
 	}
-
 	// Marshal the profile struct into a JSON string
 	jsonData, err := json.Marshal(profilePageData)
 	if err != nil {
@@ -323,7 +334,6 @@ func profileHandler(r *http.Request, activeNickname string, nickname string) []b
 	return jsonData
 }
 func contentHandler(r *http.Request, nickname string, postId int) []byte {
-	fmt.Println("content handler")
 	ContentData, err := GetContentDataStruct(r, nickname, postId)
 	if err != nil {
 		fmt.Println(err.Error(), http.StatusInternalServerError)
@@ -384,8 +394,18 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			return
 		}
-
-		if string(messageData.MessageType) == "seen" {
+		if string(messageData.MessageType) == "online" {
+			onlineUsers := sessions.GetOnlineUsers()
+			// send josn message which contains online users and type of message
+			fmt.Println("onlineUsers here", onlineUsers)
+			jsonData, err := json.Marshal(onlineUsers)
+			if err != nil {
+				log.Println(err)
+				//	return
+			}
+			conn.WriteMessage(websocket.TextMessage, jsonData)
+			continue
+		} else if string(messageData.MessageType) == "seen" {
 			err = handleUpdateSeen(message)
 			if err != nil {
 				log.Println("hahahahahahahahah", err)
@@ -412,10 +432,12 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 func handleUpdateSeen(message []byte) error {
 	var data MessageUpdate
 	err := json.Unmarshal(message, &data)
+
 	if err != nil {
 		fmt.Println("error in unmarshaling", err.Error())
 		return err
 	}
+
 	if data.MessageType == "seen" {
 		for _, message := range data.Message {
 			if int(message.(map[string]interface{})["seen"].(float64)) == 0 {
@@ -428,4 +450,21 @@ func handleUpdateSeen(message []byte) error {
 		}
 	}
 	return nil
+}
+func broadcastToAll(nickname string, message []byte) {
+
+	fmt.Println("broadcast to all", Clients)
+	fmt.Println("this the message", string(message))
+	//SocketHub.broadcast <- message
+
+	for cNickname, c := range Clients {
+		fmt.Println("broadcast to all", cNickname, nickname)
+		if cNickname != nickname && cNickname != "" {
+			fmt.Println("broadcasting to all", string(message))
+			err := c.WriteMessage(websocket.TextMessage, message)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+	}
 }
