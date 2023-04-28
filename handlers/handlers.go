@@ -394,17 +394,9 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			return
 		}
-		if string(messageData.MessageType) == "online" {
-			onlineUsers := sessions.GetOnlineUsers()
-			// send josn message which contains online users and type of message
-			fmt.Println("onlineUsers here", onlineUsers)
-			jsonData, err := json.Marshal(onlineUsers)
-			if err != nil {
-				log.Println(err)
-				//	return
-			}
-			conn.WriteMessage(websocket.TextMessage, jsonData)
-			continue
+		if string(messageData.MessageType) == "status" {
+			broadcastToAll("", jsonData)
+
 		} else if string(messageData.MessageType) == "seen" {
 			err = handleUpdateSeen(message)
 			if err != nil {
@@ -417,10 +409,11 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 		}
+		// how to send message to all clients
+
 		// Broadcast message to receiver
 		for cNickname, c := range Clients {
 			if cNickname == messageData.Receiver || cNickname == messageData.Sender {
-				fmt.Println("looking for typing")
 				err = c.WriteMessage(websocket.TextMessage, jsonData)
 				if err != nil {
 					log.Println(err)

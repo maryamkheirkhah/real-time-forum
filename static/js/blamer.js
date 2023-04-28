@@ -9,13 +9,11 @@ export default class extends abstract {
         this.app = document.querySelector("#app");
         //   this.app.innerHTML += this.style();
         this.setTitle("Blamer");
-       
     }
 
-    async getData(socket) {
-        this.socket = socket;
-
-        this.data = await JSON.parse((await requestMainData(socket)));
+    async getData() {
+        console.log("blamer constructor socket", this.socket);
+        this.data = await JSON.parse((await requestMainData(this.socket)));
         // Wait until this.data is set before proceeding
         while (!this.data) {
             await new Promise((resolve) => setTimeout(resolve, 100));
@@ -31,26 +29,6 @@ export default class extends abstract {
         this.Topics = this.findTopics();
         this.postBox = "";
         this.postBox = this.posting();
-        this.socket.onmessage = async (event) => {
-            const data = JSON.parse(event.data);
-            console.log("data: ??????????", data)
-            if (data.type === "logoutData" || data.type === "loginData") {
-                console.log("data is not fucked", data)
-                if (data.type === "logoutData") {
-                    console.log("dataaaaaaaaaaaaaaaaaa nicknameData",data.nicknameData)
-                     this.UpdateOnlineUsers(data.nicknameData, 0)
-                } else {
-                    console.log("dataaaaaaaaaaaaaaaaaa nicknameData 1" ,data.nicknameData)
-                    console.log( document.querySelectorAll("#fpUser"), "all contact")
-
-                    this.UpdateOnlineUsers(data.nicknameData , 1)
-
-                }
-                console.log("online users???????????? :", data.nickname)
-            }
-
-        }
-        this.mainHeader()
     }
     // getHtml return html code
     async getHtml(socket) {
@@ -114,11 +92,12 @@ export default class extends abstract {
 
 
     async findContactList() {
-
+        //console.log(await JSON.parse(await requestMainData(this.socket))) 
         this.onlineUsers = await (JSON.parse(await requestOnlineUsers(this.socket)));
         while (!this.onlineUsers) {
             await new Promise((resolve) => setTimeout(resolve, 100));
         }
+       
         let list = "";
         this.data.users.sort(function (a, b) {
             return a.toLowerCase().localeCompare(b.toLowerCase());
@@ -189,7 +168,7 @@ export default class extends abstract {
                 }
 
                 if (numb <= 0) {
-                    numb = ""
+                    numb = `<span class="notif"></span>`
                 } else {
                     numb = `<span class="notif">${numb}</span>`
                 }

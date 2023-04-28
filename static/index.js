@@ -95,7 +95,8 @@ export const router = async () => {
     const loc = "ws://localhost:8080/api/data-route";
 
     const socket = new WebSocket(loc);
-
+    const socketChat = new WebSocket("ws://localhost:8080/api/chat");
+    view.socket = socket;
 
 
     socket.addEventListener("open", () => {
@@ -122,29 +123,20 @@ export const router = async () => {
     socket.addEventListener("message", (event) => {
         console.log("WebSocket message:");
     });
+  
     // make page
     document.querySelector("#app").innerHTML = await view.getHtml(socket);
 
     if (match.route.view == blamer && online) {
-        socket.onmessage = async (event) => {
-            const data = JSON.parse(event.data);
-            console.log("data: ??????????", data)
-            if (data.type === "logoutData" || data.type === "loginData") {
-                console.log("data is not fucked", data)
-                if (data.type === "logoutData") {
-                    console.log("dataaaaaaaaaaaaaaaaaa nicknameData",data.nicknameData)
-                     view.UpdateOnlineUsers(data.nicknameData, 0)
-                } else {
-                    console.log("dataaaaaaaaaaaaaaaaaa nicknameData 1" ,data.nicknameData)
-                    console.log( document.querySelectorAll("#fpUser"), )
-
-                    view.UpdateOnlineUsers(data.nicknameData , 1)
-
-                }
-                console.log("online users???????????? :", data.nickname)
-            }
-
-        }
+        const payload ={
+            type: "status",
+            content: "online",
+            sender : document.getElementById("activeUserName").textContent,
+        };
+    socketChat.addEventListener("open", () => {  
+        console.log("WebSocket connection established. sending payload");
+    });
+    socketChat.send(JSON.stringify(payload));
         if (
             document.getElementById("activeUserName") !== null &&
             document.getElementById("activeUserName").textContent !==
@@ -169,9 +161,28 @@ export const router = async () => {
                     document.querySelectorAll(".bContactBox").forEach((box) => {
                         box.remove()
                     });
+                    navigateTo("/blamer");
                 }
                 if (document.querySelectorAll(".bChatBox")) {
-                    const socketChat = new WebSocket("ws://localhost:8080/api/chat");
+                    socketChat.onmessage = async (event) => {
+                        const data = JSON.parse(event.data);
+                        if (data.type === "status") {
+                            console.log(data.type, data.content, data.sender)
+                          if (data.content === "online") {
+                            document.getElementsByName(`Status_${data.sender}`)[0].style.backgroundColor = "#8ead7c";
+                          } else if (data.content === "offline") {
+                            document.getElementsByName(`Status_${data.sender}`)[0].style.backgroundColor = "#e3ded7";
+                          }
+                        } else if (data.type === "message") {
+                         let numb = parseInt(document.querySelector(".notif").textContent)
+                         if ( isNaN(numb)) {
+                            numb = 1
+                         } else {
+                            numb += 1
+                         }
+                            document.querySelector(".notif").textContent = numb.toString()
+                          }
+                    }
                     // update chatbox when receive message from server
 
                     document.querySelectorAll(".bcButton").forEach((button) => {
@@ -187,7 +198,7 @@ export const router = async () => {
                             socket.send(JSON.stringify({
                                 "type": "profile",
                                 "message": {
-                                    "nickname": button.querySelector("#fpUser").textContent
+                                "nickname": button.querySelector("#fpUser").textContent
                                 }
                             }))
                             let boxs = document.querySelectorAll(".bPost");
@@ -239,6 +250,12 @@ export const router = async () => {
                             }
                         }));
                         console.log("logout message sent");
+                        const payload ={
+                            type: "status",
+                            content: "offline",
+                            sender : document.getElementById("activeUserName").textContent,
+                        };
+                        socketChat.send(JSON.stringify(payload));
                         if (response.status === 200) {
                             navigateTo("/login");
                         }

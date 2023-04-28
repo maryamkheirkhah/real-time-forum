@@ -172,15 +172,17 @@ export async function requestOnlineUsers(socket) {
 
 }  
 export async function requestMainData(socket) {
+  socket.addEventListener("open", () => {
+    console.log("WebSocket connection established.");
+    socket.send(JSON.stringify({"type":"mainData", "message":{}}));
+
+  });
   return new Promise((resolve, reject) => {
     // const socket = new WebSocket(location);
-
-    socket.addEventListener("open", () => {
-      console.log("WebSocket connection established.");
-      socket.send(JSON.stringify({"type":"mainData", "message":{}}));
-    });
+  
 
     socket.addEventListener("message", (event) => {
+      console.log("WebSocket message:");
       resolve(event.data);
     });
 
@@ -189,10 +191,6 @@ export async function requestMainData(socket) {
       reject(event);
       socket.close();
     });
-    socket.addEventListener("close", (event) => {
-      console.log("WebSocket connection closed:", event);
-    }); 
-
 
   });
 }

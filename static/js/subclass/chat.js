@@ -47,7 +47,7 @@ export default class Chat {
                 this.socket.send(JSON.stringify(payload));
             } else {
                 const throttle = (sendTypingMessage, time) =>{if (throttleValue) return;throttleValue = true;setTimeout(() => {sendTypingMessage();throttleValue = false;}, time);};
-               throttle(sendTypingMessage, 2000);
+               throttle(sendTypingMessage, 500);
             }
         });
         
@@ -253,8 +253,9 @@ export default class Chat {
     }
    
 }
+
+let inThrottle = false;
 function fthrottle(func, limit) {
-    let inThrottle;
     return function() {
       const args = arguments;
       const context = this;
@@ -270,5 +271,5 @@ function setTypingMessage(){
     location.innerHTML = "typing..."
     setTimeout(() => {
         location.innerHTML = ""
-    }, 1000);
+    }, 500);
 }
