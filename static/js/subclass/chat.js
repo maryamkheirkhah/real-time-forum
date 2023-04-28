@@ -32,7 +32,7 @@ export default class Chat {
             };
             this.socket.send(JSON.stringify(payload));
         };
-        
+        let throttleValue = false;
         messageInput.addEventListener("keydown", async (event) => {
             if (event.key === "Enter" && messageInput.value !== "") {
                 const message = messageInput.value;
@@ -46,7 +46,8 @@ export default class Chat {
                 };
                 this.socket.send(JSON.stringify(payload));
             } else {
-                throttle(sendTypingMessage(), );
+                const throttle = (sendTypingMessage, time) =>{if (throttleValue) return;throttleValue = true;setTimeout(() => {sendTypingMessage();throttleValue = false;}, time);};
+               throttle(sendTypingMessage, 2000);
             }
         });
         
@@ -55,13 +56,14 @@ export default class Chat {
             if (value.type !== "typing") {
             this.updatedChatBox(value);
             } else if (value.type == "typing"&& value.receiver == this.activeUserName) {
-                throttle(setTypingMessage(), 5000);
+                console.log("typing received");
+              setTypingMessage()
             }
 
         };
         // scroll event that add old 10 message to chat box
         const messageList = document.getElementById("message-list");
-        messageList.addEventListener('scroll', throttle (async (event) => {
+        messageList.addEventListener('scroll', (event) => {
         if (messageList.scrollTop >= 0&& messageList.scrollTop <= 5) {
             
             this.index += 10
@@ -72,7 +74,7 @@ export default class Chat {
             if (this.index !== this.withReceiver.length) {
             messageList.scrollTop = 450 }
         }
-        }), 1000)
+        })
 
 } 
     findChatBox(receiver) {
@@ -264,5 +266,5 @@ function setTypingMessage(){
     location.innerHTML = "typing..."
     setTimeout(() => {
         location.innerHTML = ""
-    }, 2000);
+    }, 1000);
 }
