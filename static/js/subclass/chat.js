@@ -94,9 +94,6 @@ export default class Chat {
               `
         return container;
     }
-    async updatedMessage(message) {
-    }
-
     async updatedChat(receiver) {
         let index = 0;
         let messages = [];      
@@ -233,7 +230,6 @@ export default class Chat {
         this.socket.send(JSON.stringify(payload));
 
     }
-
 
     async addOldMessage() {
         let parent = document.getElementById("message-list");

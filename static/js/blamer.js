@@ -9,10 +9,12 @@ export default class extends abstract {
         this.app = document.querySelector("#app");
         //   this.app.innerHTML += this.style();
         this.setTitle("Blamer");
+       
     }
 
     async getData(socket) {
         this.socket = socket;
+
         this.data = await JSON.parse((await requestMainData(socket)));
         // Wait until this.data is set before proceeding
         while (!this.data) {
@@ -29,6 +31,26 @@ export default class extends abstract {
         this.Topics = this.findTopics();
         this.postBox = "";
         this.postBox = this.posting();
+        this.socket.onmessage = async (event) => {
+            const data = JSON.parse(event.data);
+            console.log("data: ??????????", data)
+            if (data.type === "logoutData" || data.type === "loginData") {
+                console.log("data is not fucked", data)
+                if (data.type === "logoutData") {
+                    console.log("dataaaaaaaaaaaaaaaaaa nicknameData",data.nicknameData)
+                     this.UpdateOnlineUsers(data.nicknameData, 0)
+                } else {
+                    console.log("dataaaaaaaaaaaaaaaaaa nicknameData 1" ,data.nicknameData)
+                    console.log( document.querySelectorAll("#fpUser"), "all contact")
+
+                    this.UpdateOnlineUsers(data.nicknameData , 1)
+
+                }
+                console.log("online users???????????? :", data.nickname)
+            }
+
+        }
+        this.mainHeader()
     }
     // getHtml return html code
     async getHtml(socket) {
@@ -73,47 +95,57 @@ export default class extends abstract {
         }
     }
     unseenMessage(message) {
-        if(message.receiver == this.activeUserName && message.seen === 0){
+        if (message.receiver == this.activeUserName && message.seen === 0) {
             return true
         }
         return false
     }
     // findcontactList return contact list
+     UpdateOnlineUsers(nickname, online) {
+        console.log("UpdateOnlineUsers", nickname, online);  
+        document.querySelectorAll("#fpUser").forEach((user) => {
+            console.log("user", user.textContent, nickname, online)
+            if (user.textContent === nickname) {
+                console.log("looking for ", document.querySelector(`[name^="Status_${nickname}"]`))
+                console.log("online", user.textContent, nickname, online);
+            }
+        });
+    }
+
+
     async findContactList() {
-        
-        this.onlineUsers = await(JSON.parse(await requestOnlineUsers(this.socket)));
-        while(!this.onlineUsers){
+
+        this.onlineUsers = await (JSON.parse(await requestOnlineUsers(this.socket)));
+        while (!this.onlineUsers) {
             await new Promise((resolve) => setTimeout(resolve, 100));
         }
         let list = "";
         this.data.users.sort(function (a, b) {
             return a.toLowerCase().localeCompare(b.toLowerCase());
         });
-        let allMessages 
+        let allMessages
         if (this.data.Messages && this.data.Messages["receive"] && this.data.Messages["send"]) {
             allMessages = this.data.Messages["receive"].concat(this.data.Messages["send"])
-        }else if(this.data.Messages && this.data.Messages["receive"]){
+        } else if (this.data.Messages && this.data.Messages["receive"]) {
             allMessages = this.data.Messages["receive"]
-        }else if(this.data.Messages && this.data.Messages["send"]){
+        } else if (this.data.Messages && this.data.Messages["send"]) {
             allMessages = this.data.Messages["send"]
         }
-        if (allMessages){
+        if (allMessages) {
             this.data.users.sort(function (a, b) {
                 let lastMessageA
                 let lastMessageB
                 allMessages.forEach((message) => {
                     if ((message.receiver == a || message.sender == a)) {
-                        if(lastMessageA == undefined){
-                        lastMessageA = message
-                        }
-                        else if(Date.parse(lastMessageA.time) < Date.parse(message.time)){
+                        if (lastMessageA == undefined) {
+                            lastMessageA = message
+                        } else if (Date.parse(lastMessageA.time) < Date.parse(message.time)) {
                             lastMessageA = message
                         }
-                    }else if (message.receiver == b || message.sender == b) {
+                    } else if (message.receiver == b || message.sender == b) {
                         if (lastMessageB == undefined) {
                             lastMessageB = message
-                        }
-                        else if (Date.parse(lastMessageB.time) < Date.parse(message.time)) {
+                        } else if (Date.parse(lastMessageB.time) < Date.parse(message.time)) {
                             lastMessageB = message
                         }
                     }
@@ -123,7 +155,7 @@ export default class extends abstract {
                         return -1;
                     } else if (Date.parse(lastMessageA.time) < Date.parse(lastMessageB.time)) {
                         return 1;
-                    } 
+                    }
                 } else if (lastMessageA) {
                     return -1;
                 } else if (lastMessageB) {
@@ -136,24 +168,24 @@ export default class extends abstract {
         if (this.data.Messages.receive) {
             this.data.Messages.receive.forEach((message) => {
                 if (this.unseenMessage(message)) {
-                    userNotif.set(message.sender, userNotif.get(message.sender) + 1 || 1)   
-                }else{
+                    userNotif.set(message.sender, userNotif.get(message.sender) + 1 || 1)
+                } else {
                     userNotif.set(message.sender, userNotif.get(message.sender) || 0)
                 }
             })
-        
-        }        
+
+        }
         this.data.users.forEach((user) => {
-            
-            if (user !== this.data.NickName)  {
+
+            if (user !== this.data.NickName) {
 
                 let numb = userNotif.get(user) || 0
                 let online = this.onlineUsers.includes(user)
                 if (online) {
-                    online =`<span class="onlineStatus"></span>
+                    online = `<span name="Status_${user}" class="onlineStatus"></span>
                     `
                 } else {
-                    online = `<span class="offlineStatus"></span>`
+                    online = `<span name="Status_${user}" class="offlineStatus"></span>`
                 }
 
                 if (numb <= 0) {
@@ -170,8 +202,8 @@ export default class extends abstract {
                      `;
             }
         });
-        
-    
+
+
         let container = document.createElement("div");
         container.id = "bContactBox";
         container.className = "bContactBox";
@@ -299,7 +331,7 @@ export default class extends abstract {
         `;
         return postBox;
     }
-    getMessages(){
+    getMessages() {
         return this.data.Messages;
     }
 }
