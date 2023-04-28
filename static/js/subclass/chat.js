@@ -64,17 +64,22 @@ export default class Chat {
         // scroll event that add old 10 message to chat box
         const messageList = document.getElementById("message-list");
         messageList.addEventListener('scroll', (event) => {
-        if (messageList.scrollTop >= 0&& messageList.scrollTop <= 5) {
-            
+            console.log("scroll",messageList.scrollTop)
+        })
+        messageList.addEventListener('scroll', fthrottle((event) => {
+          if (messageList.scrollTop < 2) {
             this.index += 10
             if (this.index > this.withReceiver.length) {
-            this.index = this.withReceiver.length
+              this.index = this.withReceiver.length
             }
             this.addOldMessage()
             if (this.index !== this.withReceiver.length) {
-            messageList.scrollTop = 450 }
-        }
-        })
+                console.log("scroll,location")
+                messageList.scrollTop = 450
+                console.log("scroll,location",messageList.scrollTop)
+            }
+          }
+        }, 500));
 
 } 
     findChatBox(receiver) {
@@ -210,6 +215,7 @@ export default class Chat {
                 ) {
                     await this.updatedChat(document.getElementById("receiverName").textContent);
                     parent.innerHTML = await this.printChat(document.getElementById("receiverName").textContent)
+                    document.getElementById("message-list").scrollTop = document.getElementById("message-list").scrollHeight;
 
                 }
             } else {
@@ -223,6 +229,7 @@ export default class Chat {
                 await this.updatedChat(document.getElementById("receiverName").textContent);
                 
                 parent.innerHTML = await this.printChat(document.getElementById("receiverName").textContent)
+                document.getElementById("message-list").scrollTop = document.getElementById("message-list").scrollHeight;
             }
         }
     }
@@ -250,16 +257,17 @@ export default class Chat {
     }
    
 }
-function throttle(func, limit) {
-    let throttling = false;
-    return function throttledFunction(...args) {
-      if (!throttling) {
-        func.apply(this, args);
-        throttling = true;
-        setTimeout(() => throttling = false, limit);
-
+function fthrottle(func, limit) {
+    let inThrottle;
+    return function() {
+      const args = arguments;
+      const context = this;
+      if (!inThrottle) {
+        func.apply(context, args);
+        inThrottle = true;
+        setTimeout(() => inThrottle = false, limit);
       }
-    }
+    };
   }
 function setTypingMessage(){
     let location = document.getElementById("typeEvent")
