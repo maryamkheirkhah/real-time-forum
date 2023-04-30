@@ -9,6 +9,8 @@ import {
     sendRegisterData,
     sendNewPostData,
     dataGathering,
+    requestChat
+
 } from "./js/datahandler.js";
 import Content from "./js/subclass/content.js";
 import Chat from "./js/subclass/chat.js";
@@ -31,7 +33,7 @@ const getParams = (match) => {
     );
 };
 
-export const router = async () => {
+export const router = async() => {
     const cookies = document.cookie.split(";")
     let online = false;
     for (var i = 0; i < cookies.length; i++) {
@@ -102,7 +104,7 @@ export const router = async () => {
     socket.addEventListener("open", () => {
         console.log("WebSocket connection established.");
     });
-    socket.addEventListener("error", async (event) => {
+    socket.addEventListener("error", async(event) => {
         console.error("WebSocket error:", event);
         const response = await fetch(
             "/logout", {
@@ -123,27 +125,28 @@ export const router = async () => {
     socket.addEventListener("message", (event) => {
         console.log("WebSocket message:");
     });
-  
+
     // make page
     document.querySelector("#app").innerHTML = await view.getHtml(socket);
 
     if (match.route.view == blamer && online) {
-        const payload ={
+        const payload = {
             type: "status",
             content: "online",
-            sender : document.getElementById("activeUserName").textContent,
+            sender: document.getElementById("activeUserName").textContent,
         };
-    socketChat.addEventListener("open", () => {  
-        console.log("WebSocket connection established. sending payload");
-    });
-    socketChat.send(JSON.stringify(payload));
+        socketChat.addEventListener("open", () => {
+            console.log("WebSocket connection established. sending payload");
+        });
+        socketChat.send(JSON.stringify(payload));
         if (
             document.getElementById("activeUserName") !== null &&
             document.getElementById("activeUserName").textContent !==
             "guest"
         ) {
             // click on Chat to see contact list
-            document.getElementById("bChatButton").addEventListener("click", async (e) => {
+            document.getElementById("bChatButton").addEventListener("click", async(e) => {
+                /*   requestAllChat(socket); */
                 if (document.querySelectorAll(".bChatBox").length > 0) {
                     document.querySelectorAll(".bChatBox").forEach((box) => {
                         box.remove();
@@ -164,41 +167,57 @@ export const router = async () => {
                     navigateTo("/blamer");
                 }
                 if (document.querySelectorAll(".bChatBox")) {
-                    socketChat.onmessage = async (event) => {
-                        const data = JSON.parse(event.data);
-                        if (data.type === "status") {
-                            console.log(data.type, data.content, data.sender)
-                          if (data.content === "online") {
-                            document.getElementsByName(`Status_${data.sender}`)[0].style.backgroundColor = "#8ead7c";
-                          } else if (data.content === "offline") {
-                            document.getElementsByName(`Status_${data.sender}`)[0].style.backgroundColor = "#e3ded7";
-                          }
-                        } else if (data.type === "message") {
-                         let numb = parseInt(document.querySelector(".notif").textContent)
-                         if ( isNaN(numb)) {
-                            numb = 1
-                         } else {
-                            numb += 1
-                         }
-                            document.querySelector(".notif").textContent = numb.toString()
-                          }
-                    }
-                    // update chatbox when receive message from server
+
+                    socketChat.onmessage = async(event) => {
+                            const data = JSON.parse(event.data);
+                            if (data.type === "status") {
+                                console.log(data.type, data.content, data.sender)
+                                if (data.content === "online") {
+                                    document.getElementsByName(`Status_${data.sender}`)[0].style.backgroundColor = "#8ead7c";
+                                } else if (data.content === "offline") {
+                                    document.getElementsByName(`Status_${data.sender}`)[0].style.backgroundColor = "#e3ded7";
+                                }
+                            } else if (data.type === "message") {
+                                let numb = parseInt(document.querySelector(".notif").textContent)
+                                if (isNaN(numb)) {
+                                    numb = 1
+                                } else {
+                                    numb += 1
+                                }
+                                document.querySelector(".notif").textContent = numb.toString()
+                            }
+                        }
+                        // update chatbox when receive message from server
 
                     document.querySelectorAll(".bcButton").forEach((button) => {
-                        button.addEventListener("click", async () => {
+                        button.addEventListener("click", async() => {
                             document.querySelectorAll(".bContactBox").forEach((box) => {
                                 box.remove()
                             })
-                            const newChat = new Chat(document.getElementById("bRightSideArea"), socketChat, button.id, view.getMessages());
+
+                            const payload = {
+                                sender: document.getElementById("activeUserName").textContent,
+                                receiver: button.id,
+                                content: "",
+                                type: "getMessages",
+                                time: new Date().toLocaleString(),
+                            };;
+                            let dataMessage = JSON.parse(await requestChat(socketChat, payload))
+                            view.getMessages()
+                            let message = {
+                                "receive": dataMessage.messages.receive,
+                                "send": dataMessage.messages.send,
+                            }
+
+                            const newChat = new Chat(document.getElementById("bRightSideArea"), socketChat, button.id, message);
                         });
                     });
                     document.querySelectorAll(".bContactName").forEach((button) => {
-                        button.addEventListener("click", async () => {
+                        button.addEventListener("click", async() => {
                             socket.send(JSON.stringify({
                                 "type": "profile",
                                 "message": {
-                                "nickname": button.querySelector("#fpUser").textContent
+                                    "nickname": button.querySelector("#fpUser").textContent
                                 }
                             }))
                             let boxs = document.querySelectorAll(".bPost");
@@ -219,7 +238,7 @@ export const router = async () => {
             // click on post button will post content
             document
                 .getElementById("letPost")
-                .addEventListener("click", async (e) => {
+                .addEventListener("click", async(e) => {
                     e.preventDefault();
                     sendNewPostData(socket, await dataGathering("blameP"));
                 });
@@ -227,7 +246,7 @@ export const router = async () => {
             // delete cookie when click logout button
             document
                 .getElementById("logout")
-                .addEventListener("click", async (e) => {
+                .addEventListener("click", async(e) => {
                     e.preventDefault();
                     console.log("logout button clicked");
                     const logout = document.querySelector("#logout");
@@ -250,10 +269,10 @@ export const router = async () => {
                             }
                         }));
                         console.log("logout message sent");
-                        const payload ={
+                        const payload = {
                             type: "status",
                             content: "offline",
-                            sender : document.getElementById("activeUserName").textContent,
+                            sender: document.getElementById("activeUserName").textContent,
                         };
                         socketChat.send(JSON.stringify(payload));
                         if (response.status === 200) {
@@ -272,14 +291,14 @@ export const router = async () => {
         // click on post box will show post content
         let allPost = document.querySelectorAll(".pBox");
         allPost.forEach((element) => {
-            element.addEventListener("click", async () => {
+            element.addEventListener("click", async() => {
                 new Content(element, socket)
             });
         });
         // click on topic will show only posts belong to that topic
 
         document.querySelectorAll(".bTopic").forEach((topic) => {
-            topic.addEventListener("click", async () => {
+            topic.addEventListener("click", async() => {
                 if (topic.className === "bTopic") {
                     view.updatedPostList(
                         topic.querySelector(".tName")
@@ -288,7 +307,7 @@ export const router = async () => {
                 }
                 allPost = document.querySelectorAll(".pBox");
                 allPost.forEach((box) => {
-                    box.addEventListener("click", async () => {
+                    box.addEventListener("click", async() => {
                         new Content(box, socket)
                     });
                 });
@@ -297,7 +316,7 @@ export const router = async () => {
     }
     if (match.route.view == register && !online) {
         const button = document.getElementById("register-submit");
-        button.addEventListener("click", async (e) => {
+        button.addEventListener("click", async(e) => {
             e.preventDefault();
             await sendRegisterData(socket, await dataGathering("register"))
         });
@@ -305,7 +324,7 @@ export const router = async () => {
     }
     if (match.route.view == login) {
         const button = document.getElementById("loginSubmit");
-        button.addEventListener("click", async (e) => {
+        button.addEventListener("click", async(e) => {
             e.preventDefault();
             sendLoginData(socket, await dataGathering("login"));
         });

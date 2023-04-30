@@ -12,28 +12,28 @@ export default class extends abstract {
     }
 
     async getData() {
-        console.log("blamer constructor socket", this.socket);
-        this.data = await JSON.parse((await requestMainData(this.socket)));
-        // Wait until this.data is set before proceeding
-        while (!this.data) {
-            await new Promise((resolve) => setTimeout(resolve, 100));
+            console.log("blamer constructor socket", this.socket);
+            this.data = await JSON.parse((await requestMainData(this.socket)));
+            // Wait until this.data is set before proceeding
+            while (!this.data) {
+                await new Promise((resolve) => setTimeout(resolve, 100));
+            }
+            this.chatBox = "";
+            if (this.data.NickName === "") {
+                this.data.NickName = "guest";
+            } else if (this.data.NickName !== "guest") {
+                this.activeUserName = this.data.NickName;
+            }
+            this.user = this.findUser(this.data.NickName);
+            this.posts = this.findPost("all");
+            this.Topics = this.findTopics();
+            this.postBox = "";
+            this.postBox = this.posting();
         }
-        this.chatBox = "";
-        if (this.data.NickName === "") {
-            this.data.NickName = "guest";
-        } else if (this.data.NickName !== "guest") {
-            this.activeUserName = this.data.NickName;
-        }
-        this.user = this.findUser(this.data.NickName);
-        this.posts = this.findPost("all");
-        this.Topics = this.findTopics();
-        this.postBox = "";
-        this.postBox = this.posting();
-    }
-    // getHtml return html code
+        // getHtml return html code
     async getHtml(socket) {
-        await this.getData(socket);
-        return `
+            await this.getData(socket);
+            return `
         <div class="bContainer">
         ${this.postBox}
         ${this.user}
@@ -43,8 +43,8 @@ export default class extends abstract {
         </div>
         </div>
    `;
-    }
-    // findUser return user info
+        }
+        // findUser return user info
     findUser(uName = "guest") {
         if (uName !== "guest") {
             return `
@@ -73,14 +73,14 @@ export default class extends abstract {
         }
     }
     unseenMessage(message) {
-        if (message.receiver == this.activeUserName && message.seen === 0) {
-            return true
+            if (message.receiver == this.activeUserName && message.seen === 0) {
+                return true
+            }
+            return false
         }
-        return false
-    }
-    // findcontactList return contact list
-     UpdateOnlineUsers(nickname, online) {
-        console.log("UpdateOnlineUsers", nickname, online);  
+        // findcontactList return contact list
+    UpdateOnlineUsers(nickname, online) {
+        console.log("UpdateOnlineUsers", nickname, online);
         document.querySelectorAll("#fpUser").forEach((user) => {
             console.log("user", user.textContent, nickname, online)
             if (user.textContent === nickname) {
@@ -97,9 +97,9 @@ export default class extends abstract {
         while (!this.onlineUsers) {
             await new Promise((resolve) => setTimeout(resolve, 100));
         }
-       
+
         let list = "";
-        this.data.users.sort(function (a, b) {
+        this.data.users.sort(function(a, b) {
             return a.toLowerCase().localeCompare(b.toLowerCase());
         });
         let allMessages
@@ -111,7 +111,7 @@ export default class extends abstract {
             allMessages = this.data.Messages["send"]
         }
         if (allMessages) {
-            this.data.users.sort(function (a, b) {
+            this.data.users.sort(function(a, b) {
                 let lastMessageA
                 let lastMessageB
                 allMessages.forEach((message) => {
@@ -197,15 +197,15 @@ export default class extends abstract {
     }
     updatedPostList(topic) {
 
-        let postBox = document.querySelectorAll(".bPost")
-        postBox.forEach((post) => {
-            post.remove()
-        })
-        // add new posts
-        let posts = this.findPost(topic);
-        document.getElementById("mainPostsBox").innerHTML = posts;
-    }
-    // findPost return all posts
+            let postBox = document.querySelectorAll(".bPost")
+            postBox.forEach((post) => {
+                    post.remove()
+                })
+                // add new posts
+            let posts = this.findPost(topic);
+            document.getElementById("mainPostsBox").innerHTML = posts;
+        }
+        // findPost return all posts
     findPost(topics = "all") {
         let posts = "";
         this.data.Posts.sort((b, a) => Date.parse(a.CreationTime) - Date.parse(b.CreationTime));
@@ -311,6 +311,7 @@ export default class extends abstract {
         return postBox;
     }
     getMessages() {
+        console.log("in blamerClass", this.data.Messages)
         return this.data.Messages;
     }
 }

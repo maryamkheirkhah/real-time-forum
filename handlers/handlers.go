@@ -161,9 +161,32 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request, message map[strin
 
 var newProfile string
 
+func getChatData(receiver, sender string) []byte {
+	fmt.Println("get chat data", receiver, sender)
+	messages, errMsg := GetMessages(sender)
+	if errMsg != nil {
+		fmt.Println("error in get messages", errMsg.Error())
+		return nil
+	}
+	md := MainData{Messages: messages}
+	message := map[string]interface{}{"type": "chatData", "messages": md.Messages}
+	jsonData, err := json.Marshal(message)
+	if err != nil {
+		fmt.Println("error in marshal", err.Error())
+		return nil
+	}
+	return jsonData
+}
+
 func DataRoute(w http.ResponseWriter, r *http.Request) {
 	//fmt.Println("online users", sessions.GetOnlineUsers())
 	nickname, exist := sessions.Check(w, r)
+
+	if nickname != "" {
+		receiver := "testUser1"
+		getChatData(receiver, nickname)
+	}
+
 	if exist {
 		getAllUsersStatus(nickname)
 	}
@@ -270,7 +293,6 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 		case "allChats":
 			client.SendMessage(getAllUsersStatus(nickname))
 			break
-
 		default:
 			fmt.Println("default")
 			break
@@ -408,6 +430,9 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 				log.Println(errors.New("error saving message"), err)
 				continue
 			}
+		} else if string(messageData.MessageType) == "getMessages" {
+			testData := getChatData(messageData.Receiver, nickname)
+			Clients[nickname].WriteMessage(websocket.TextMessage, testData)
 		}
 		// how to send message to all clients
 

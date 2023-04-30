@@ -1,14 +1,13 @@
 export default class Chat {
-    constructor(element, socket, receive,message){
+    constructor(element, socket, receive, message) {
         //this.datamessage = this.messageToArr(message);
         this.datamessage = message;
         this.element = element;
         this.socket = socket;
         this.receive = receive;
-        this.activeUserName =  document.querySelector("#activeUserName").textContent;
+        this.activeUserName = document.querySelector("#activeUserName").textContent;
         this.chatHeader()
         this.index = 10
-        
     }
     messageToArr(message) {
         let arr = [];
@@ -17,11 +16,12 @@ export default class Chat {
         }
         return arr;
     }
-    async chatHeader(){
+    async chatHeader() {
+        console.log("in ChatClass", this.datamessage)
         this.element.appendChild(this.findChatBox(this.receive));
         this.updatedChatBox()
         const messageInput = document.querySelector("#message-input");
-        const sendTypingMessage = async () => {
+        const sendTypingMessage = async() => {
             console.log("typing");
             const payload = {
                 sender: document.getElementById("activeUserName").textContent,
@@ -33,7 +33,7 @@ export default class Chat {
             this.socket.send(JSON.stringify(payload));
         };
         let throttleValue = false;
-        messageInput.addEventListener("keydown", async (event) => {
+        messageInput.addEventListener("keydown", async(event) => {
             if (event.key === "Enter" && messageInput.value !== "") {
                 const message = messageInput.value;
                 messageInput.value = "";
@@ -46,42 +46,43 @@ export default class Chat {
                 };
                 this.socket.send(JSON.stringify(payload));
             } else {
-                const throttle = (sendTypingMessage, time) =>{if (throttleValue) return;throttleValue = true;setTimeout(() => {sendTypingMessage();throttleValue = false;}, time);};
-               throttle(sendTypingMessage, 500);
+                const throttle = (sendTypingMessage, time) => {
+                    if (throttleValue) return;
+                    throttleValue = true;
+                    setTimeout(() => {
+                        sendTypingMessage();
+                        throttleValue = false;
+                    }, time);
+                };
+                throttle(sendTypingMessage, 500);
             }
         });
-        
+
         this.socket.onmessage = async(event) => {
-           let value = await JSON.parse(event.data)
+            let value = await JSON.parse(event.data)
             if (value.type !== "typing") {
-            this.updatedChatBox(value);
-            } else if (value.type == "typing"&& value.receiver == this.activeUserName) {
-                console.log("typing received");
-              setTypingMessage()
+                this.updatedChatBox(value);
+            } else if (value.type == "typing" && value.receiver == this.activeUserName) {
+                setTypingMessage()
             }
 
         };
         // scroll event that add old 10 message to chat box
         const messageList = document.getElementById("message-list");
-        messageList.addEventListener('scroll', (event) => {
-            console.log("scroll",messageList.scrollTop)
-        })
         messageList.addEventListener('scroll', fthrottle((event) => {
-          if (messageList.scrollTop < 2) {
-            this.index += 10
-            if (this.index > this.withReceiver.length) {
-              this.index = this.withReceiver.length
+            if (messageList.scrollTop < 2) {
+                this.index += 10
+                if (this.index > this.withReceiver.length) {
+                    this.index = this.withReceiver.length
+                }
+                this.addOldMessage()
+                if (this.index !== this.withReceiver.length) {
+                    messageList.scrollTop = 450
+                }
             }
-            this.addOldMessage()
-            if (this.index !== this.withReceiver.length) {
-                console.log("scroll,location")
-                messageList.scrollTop = 450
-                console.log("scroll,location",messageList.scrollTop)
-            }
-          }
         }, 500));
 
-} 
+    }
     findChatBox(receiver) {
         const regex = /(chatWith)_(\w+)/;
 
@@ -103,22 +104,22 @@ export default class Chat {
     }
     async updatedChat(receiver) {
         let index = 0;
-        let messages = [];      
+        let messages = [];
         if (this.message) {
             if (this.message.sender == this.activeUserName)
-                if (this.datamessage.send){
+                if (this.datamessage.send) {
                     this.datamessage.send =
-                    this.datamessage.send.concat(this.message);
-                }else {
+                        this.datamessage.send.concat(this.message);
+                } else {
                     this.datamessage.send = [this.message];
                 }
             else if (this.message.receiver == this.activeUserName)
-                if (this.datamessage.receive){
+                if (this.datamessage.receive) {
                     this.datamessage.receive =
-                    this.datamessage.receive.concat(
-                        this.message
-                );
-                }else {
+                        this.datamessage.receive.concat(
+                            this.message
+                        );
+                } else {
                     this.datamessage.receive = [this.message];
                 }
         }
@@ -132,11 +133,11 @@ export default class Chat {
 
         // Sort messages by time
         messages.sort((a, b) => new Date(a.time) - new Date(b.time));
-        this.withReceiver = [] ;
+        this.withReceiver = [];
         messages.forEach((message) => {
-        if (((message.sender == this.activeUserName && message.receiver == receiver) ||
-            (message.receiver == this.activeUserName && message.sender == receiver))){
-               // add message to withReceiver
+            if (((message.sender == this.activeUserName && message.receiver == receiver) ||
+                    (message.receiver == this.activeUserName && message.sender == receiver))) {
+                // add message to withReceiver
                 this.withReceiver.push(message)
             }
         });
@@ -144,7 +145,7 @@ export default class Chat {
     }
 
     async printChat(receiver) {
-       
+
         let chat = "";
         // slice this.withReceiver like [[message],[message],[message]...] 
         // and print the last 10 messages
@@ -154,7 +155,7 @@ export default class Chat {
                         (message.receiver == this.activeUserName && message.sender == receiver)) &&
                     message.content.length > 39
                 ) {
-                    for (   
+                    for (
                         let i = 0; i < message.content.length; i += 40
                     ) {
                         message.content =
@@ -168,12 +169,12 @@ export default class Chat {
                 message.sender == this.activeUserName &&
                 message.receiver == receiver
             ) {
-               chat += `
+                chat += `
                             <div class="messageBox" style="justify-items: end;">
                             <div class="mInfo" style="float:right;"><b>Me:</b> ${message.time}</div>
                             <div class=" message"><span>${message.content}</span></div>
                             </div>
-                  `;   
+                  `;
             } else if (
                 message.receiver == this.activeUserName &&
                 message.sender == receiver
@@ -190,50 +191,50 @@ export default class Chat {
 
     // updatedChatBox return updated chatbox
     async updatedChatBox(message) {
-        if (
-            this.activeUserName != null &&
-            this.activeUserName !== "guest"
-        ) {
-            if (message != undefined) {
-                this.index = 10
-                this.message = message;
-                let parent =
-                    document.getElementById("message-list");
-                let children =
-                    document.querySelectorAll(".message");
-                if (children.length > 0) {
-                    children.forEach((child) => child.remove());
-                }
-                if (
-                    this.message.sender ==
-                    this.activeUserName ||
-                    this.message.receiver ==
-                    this.activeUserName
-                ) {
+            if (
+                this.activeUserName != null &&
+                this.activeUserName !== "guest"
+            ) {
+                if (message != undefined) {
+                    this.index = 10
+                    this.message = message;
+                    let parent =
+                        document.getElementById("message-list");
+                    let children =
+                        document.querySelectorAll(".message");
+                    if (children.length > 0) {
+                        children.forEach((child) => child.remove());
+                    }
+                    if (
+                        this.message.sender ==
+                        this.activeUserName ||
+                        this.message.receiver ==
+                        this.activeUserName
+                    ) {
+                        await this.updatedChat(document.getElementById("receiverName").textContent);
+                        parent.innerHTML = await this.printChat(document.getElementById("receiverName").textContent)
+                        document.getElementById("message-list").scrollTop = document.getElementById("message-list").scrollHeight;
+
+                    }
+                } else {
+                    let parent =
+                        document.getElementById("message-list");
+                    let children =
+                        document.querySelectorAll(".message");
+                    if (children.length > 0) {
+                        children.forEach((child) => child.remove());
+                    }
                     await this.updatedChat(document.getElementById("receiverName").textContent);
+
                     parent.innerHTML = await this.printChat(document.getElementById("receiverName").textContent)
                     document.getElementById("message-list").scrollTop = document.getElementById("message-list").scrollHeight;
-
                 }
-            } else {
-                let parent =
-                    document.getElementById("message-list");
-                let children =
-                    document.querySelectorAll(".message");
-                if (children.length > 0) {
-                    children.forEach((child) => child.remove());
-                }
-                await this.updatedChat(document.getElementById("receiverName").textContent);
-                
-                parent.innerHTML = await this.printChat(document.getElementById("receiverName").textContent)
-                document.getElementById("message-list").scrollTop = document.getElementById("message-list").scrollHeight;
             }
         }
-    }
-    // updateSeenMessage send seen messages to server with a websocket message 
+        // updateSeenMessage send seen messages to server with a websocket message 
     async updateSeenMessage(messages) {
         // push messages to a map of map[string]interface{} to send to sever 
-        const payload ={};
+        const payload = {};
         payload["message"] = messages;
         payload["type"] = "seen";
         this.socket.send(JSON.stringify(payload));
@@ -246,27 +247,29 @@ export default class Chat {
         if (children.length > 0) {
             children.forEach((child) => child.remove());
         }
-       /*  let chat =  await this.printChat(document.getElementById("receiverName").textContent)
-        console.log("this is chat",chat) */
+        /*  let chat =  await this.printChat(document.getElementById("receiverName").textContent)
+         console.log("this is chat",chat) */
         parent.innerHTML = await this.printChat(document.getElementById("receiverName").textContent);
 
     }
-   
+
 }
 
 let inThrottle = false;
+
 function fthrottle(func, limit) {
     return function() {
-      const args = arguments;
-      const context = this;
-      if (!inThrottle) {
-        func.apply(context, args);
-        inThrottle = true;
-        setTimeout(() => inThrottle = false, limit);
-      }
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
     };
-  }
-function setTypingMessage(){
+}
+
+function setTypingMessage() {
     let location = document.getElementById("typeEvent")
     location.innerHTML = "typing..."
     setTimeout(() => {
