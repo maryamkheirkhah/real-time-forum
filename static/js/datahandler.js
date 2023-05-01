@@ -32,30 +32,30 @@ export async function sendLoginData(socket, data) {
         console.log("WebSocket connection established.");
     });
     // Send the login data as JSON to the backend through the WebSocket
+    if (data.message["loginusername"] === "" || data.message["loginpassword"] === "") {
+        alert("Please fill in all fields");
+        return;
+    }
     socket.send(JSON.stringify(data));
-
     // Define a callback function to handle the response from the backend
     const handleResponse = (event) => {
         // Handle the response from the backend
-
         const response = JSON.parse(event.data);
         if (response) {
             if (
-                data["loginusername"] !== "" &&
-                data["loginusername"] !== "wrong"
+                response["sessionId"] !== "" 
             ) {
                 // Set a cookie with the user's username
-                document.cookie = `sessionID=${response["sessionId"]}; path=/; max-age=3600;`;
-                navigateTo("/blamer");
-            } else if (data["loginusername"] === "") {
-                alert("Please enter username");
-            } else if (data["loginusername"] === "wrong") {
-                alert("Password or username is wrong");
+                 document.cookie = `sessionID=${response["sessionId"]}; path=/; max-age=3600;`;
+                navigateTo("/blamer"); 
+            } else if (response["nickname"] ==="User does not exist") {
+                alert("User does not exist");
+            } else if (response["nickname"] === "password does not match") {
+                alert("Password Is Wrong");
             }
         } else {
-            alert("Invalid username or password");
+            alert("Enter a valid username and password");
         }
-        socket.close();
         location.reload();
     };
 

@@ -43,17 +43,6 @@ func redirectHandler(w http.ResponseWriter, r *http.Request, pageName string, me
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request, message map[string]interface{}) {
 	var rgData RegisterJsonData
-	userName, exist := sessions.Check(w, r)
-	if !exist {
-		// Reload login page if CheckSessions returns an error
-		//		renderTemplate(w, r, err.Error()+": please try logging in or registering",
-		//			"./frontend/static/login.html")
-		fmt.Println("error is : no cookie fuck")
-	} else if userName != "" {
-		fmt.Println("user is :", userName)
-		// Redirect to main page if user is logged in
-		//		redirectHandler(w, r, "/main", "You are already logged in")
-	}
 	jsonData, err := json.Marshal(message)
 	if err != nil {
 		log.Println("MainData: Failed to marshal JSON:", err)
@@ -88,31 +77,30 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, message map[string]int
 	var data LoginData
 	data.NickName = message["loginusername"].(string)
 	data.Password = message["loginpassword"].(string)
+	response := map[string]string{"nickname": "", "sessionId": ""}
 	user, err := db.SelectDataHandler("users", "NickName", data.NickName)
-	var msg string
 	if err != nil {
-		msg = "User with this nickname does not exist"
 		user, err = db.SelectDataHandler("users", "email", data.NickName)
 		if err != nil {
-			msg = "User with this email does not exist"
-			return []byte(msg)
-
+			response = map[string]string{"nickname": "User does not exist", "sessionId": ""}
+			responseData, err := json.Marshal(response)
+			if err != nil {
+				fmt.Println("error in marshal", err.Error())
+			}
+			return responseData
 		}
+
 	}
 	if !security.MatchPasswords([]byte(data.Password), user.(db.User).Pass) {
-		fmt.Println("login: error: password does not match")
+		response = map[string]string{"nickname": "password does not match", "sessionId": ""}
+
 	} else {
 		sessionId, err := sessions.CreateSession(w, user.(db.User).NickName)
 		if err != nil {
 			fmt.Println("error in create session", err.Error())
 			return nil
 		}
-		response := map[string]string{"nickname": user.(db.User).NickName, "sessionId": sessionId}
-		responseData, err := json.Marshal(response)
-		if err != nil {
-			fmt.Println("error in marshal", err.Error())
-			return nil
-		}
+		response = map[string]string{"nickname": user.(db.User).NickName, "sessionId": sessionId}
 		responseToAll := map[string]string{"type": "loginData", "nicknameData": user.(db.User).NickName}
 		responseDataToAll, err := json.Marshal(responseToAll)
 		if err != nil {
@@ -121,9 +109,14 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, message map[string]int
 		}
 		broadcastToAll(user.(db.User).NickName, responseDataToAll)
 		redirectHandler(w, r, "/", "You are successfully logged in")
-		return responseData
 	}
-	return nil
+	responseData, err := json.Marshal(response)
+	if err != nil {
+		fmt.Println("error in marshal", err.Error())
+		return nil
+	}
+	return responseData
+
 }
 func MainDataHandler(w http.ResponseWriter, r *http.Request, nickname string) []byte {
 	mainData, err := GetMainDataStruct(r, nickname)
@@ -162,7 +155,6 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request, message map[strin
 var newProfile string
 
 func getChatData(receiver, sender string) []byte {
-	fmt.Println("get chat data", receiver, sender)
 	messages, errMsg := GetMessages(sender)
 	if errMsg != nil {
 		fmt.Println("error in get messages", errMsg.Error())
@@ -179,30 +171,10 @@ func getChatData(receiver, sender string) []byte {
 }
 
 func DataRoute(w http.ResponseWriter, r *http.Request) {
-	//fmt.Println("online users", sessions.GetOnlineUsers())
 	nickname, exist := sessions.Check(w, r)
-
-	if nickname != "" {
-		receiver := "testUser1"
-		getChatData(receiver, nickname)
-	}
-
 	if exist {
 		getAllUsersStatus(nickname)
 	}
-	if !exist {
-		fmt.Println("you're not logged in")
-	} else if nickname != "" {
-
-	}
-	msg := ""
-	messageCookie, err := r.Cookie(MESSAGE_COOKIE_NAME)
-	if err == nil {
-		msg = messageCookie.Value
-		fmt.Println("msg", msg)
-
-	}
-
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println("Failed to upgrade connection to WebSocket:", err)
@@ -228,7 +200,6 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Println("error in unmarshaling", err.Error())
 		}
-		fmt.Println("data", data)
 		switch data.MessageType {
 		case "login":
 			client.SendMessage(LoginHandler(w, r, data.Message))
@@ -237,7 +208,6 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			RegisterHandler(w, r, data.Message)
 			break
 		case "logout":
-			fmt.Println("-------------------- ////////  ------------------- ")
 			response := map[string]string{"type": "logoutData", "nicknameData": nickname}
 			responseData, err := json.Marshal(response)
 			if err != nil {
@@ -247,7 +217,6 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			//client.SendMessage(responseData)
 			broadcastToAll(nickname, responseData)
 			sessions.DeleteSession(w, nickname)
-			fmt.Println("-------------------- ////////  ------------------- ")
 			break
 		case "mainData":
 			client.SendMessage(MainDataHandler(w, r, nickname))
@@ -276,7 +245,6 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			newProfile = data.Message["nickname"].(string)
 			break
 		case "getProfile":
-			fmt.Println("getProfile", newProfile)
 			client.SendMessage(profileHandler(r, nickname, newProfile))
 			break
 		case "reaction":
@@ -401,7 +369,6 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		var messageData ChatData
 		err = json.Unmarshal(message, &messageData)
 		if err != nil {
-			fmt.Println("error but not err")
 			err = handleUpdateSeen(message)
 			if err != nil {
 				log.Println("wwwwwwwhhhhhhhattttttt", err)
@@ -471,14 +438,8 @@ func handleUpdateSeen(message []byte) error {
 }
 func broadcastToAll(nickname string, message []byte) {
 
-	fmt.Println("broadcast to all", Clients)
-	fmt.Println("this the message", string(message))
-	//SocketHub.broadcast <- message
-
 	for cNickname, c := range Clients {
-		fmt.Println("broadcast to all", cNickname, nickname)
 		if cNickname != nickname && cNickname != "" {
-			fmt.Println("broadcasting to all", string(message))
 			err := c.WriteMessage(websocket.TextMessage, message)
 			if err != nil {
 				log.Println(err)
