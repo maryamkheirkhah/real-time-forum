@@ -1,7 +1,6 @@
+import { requestChat } from "../datahandler.js"
 export default class Chat {
-    constructor(element, socket, receive, message) {
-        //this.datamessage = this.messageToArr(message);
-        this.datamessage = message;
+    constructor(element, socket, receive) {
         this.element = element;
         this.socket = socket;
         this.receive = receive;
@@ -17,12 +16,22 @@ export default class Chat {
         return arr;
     }
     async chatHeader() {
-        console.log("in ChatClass", this.datamessage)
+        let payload = {
+            sender: document.getElementById("activeUserName").textContent,
+            receiver:  this.receive,
+            content: "",
+            type: "getMessages",
+            time: new Date().toLocaleString(),
+        };;
+        let dataMessage = JSON.parse(await requestChat(this.socket, payload))
+        this.datamessage = {
+            "receive": dataMessage.messages.receive,
+            "send": dataMessage.messages.send,
+        }
         this.element.appendChild(this.findChatBox(this.receive));
         this.updatedChatBox()
         const messageInput = document.querySelector("#message-input");
         const sendTypingMessage = async() => {
-            console.log("typing");
             const payload = {
                 sender: document.getElementById("activeUserName").textContent,
                 receiver: document.getElementById("receiverName").textContent,
