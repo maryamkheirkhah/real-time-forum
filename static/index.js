@@ -130,15 +130,15 @@ export const router = async() => {
     document.querySelector("#app").innerHTML = await view.getHtml(socket);
 
     if (match.route.view == blamer && online) {
-        const payload = {
+        let payload = {
             type: "status",
             content: "online",
             sender: document.getElementById("activeUserName").textContent,
         };
         socketChat.addEventListener("open", () => {
             console.log("WebSocket connection established. sending payload");
+            socketChat.send(JSON.stringify(payload));
         });
-        socketChat.send(JSON.stringify(payload));
         if (
             document.getElementById("activeUserName") !== null &&
             document.getElementById("activeUserName").textContent !==
@@ -167,7 +167,7 @@ export const router = async() => {
                     navigateTo("/blamer");
                 }
                 if (document.querySelectorAll(".bChatBox")) {
-
+                    console.log("chatbox found", document.querySelectorAll(".bChatBox"));
                     socketChat.onmessage = async(event) => {
                             const data = JSON.parse(event.data);
                             if (data.type === "status") {
@@ -178,13 +178,15 @@ export const router = async() => {
                                     document.getElementsByName(`Status_${data.sender}`)[0].style.backgroundColor = "#e3ded7";
                                 }
                             } else if (data.type === "message") {
-                                let numb = parseInt(document.querySelector(".notif").textContent)
+                                console.log(data.type, data.content, data.sender)
+
+                                let numb = parseInt(document.getElementsByName(`notif_${data.sender}`)[0].textContent)
                                 if (isNaN(numb)) {
                                     numb = 1
                                 } else {
                                     numb += 1
                                 }
-                                document.querySelector(".notif").textContent = numb.toString()
+                                document.getElementsByName(`notif_${data.sender}`)[0].textContent = numb.toString()
                             }
                         }
                         // update chatbox when receive message from server
@@ -195,21 +197,8 @@ export const router = async() => {
                                 box.remove()
                             })
 
-                            const payload = {
-                                sender: document.getElementById("activeUserName").textContent,
-                                receiver: button.id,
-                                content: "",
-                                type: "getMessages",
-                                time: new Date().toLocaleString(),
-                            };;
-                            let dataMessage = JSON.parse(await requestChat(socketChat, payload))
-                            view.getMessages()
-                            let message = {
-                                "receive": dataMessage.messages.receive,
-                                "send": dataMessage.messages.send,
-                            }
 
-                            const newChat = new Chat(document.getElementById("bRightSideArea"), socketChat, button.id, message);
+                            const newChat = new Chat(document.getElementById("bRightSideArea"), socketChat, button.id);
                         });
                     });
                     document.querySelectorAll(".bContactName").forEach((button) => {

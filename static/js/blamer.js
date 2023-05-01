@@ -168,9 +168,9 @@ export default class extends abstract {
                 }
 
                 if (numb <= 0) {
-                    numb = `<span class="notif"></span>`
+                    numb = `<span name="notif_${user}" class="notif"></span>`
                 } else {
-                    numb = `<span class="notif">${numb}</span>`
+                    numb = `<span name="notif_${user}" class="notif">${numb}</span>`
                 }
 
                 list += `
