@@ -12,7 +12,6 @@ export default class extends abstract {
     }
 
     async getData() {
-            console.log("blamer constructor socket", this.socket);
             this.data = await JSON.parse((await requestMainData(this.socket)));
             // Wait until this.data is set before proceeding
             while (!this.data) {
@@ -78,21 +77,8 @@ export default class extends abstract {
             }
             return false
         }
-        // findcontactList return contact list
-    UpdateOnlineUsers(nickname, online) {
-        console.log("UpdateOnlineUsers", nickname, online);
-        document.querySelectorAll("#fpUser").forEach((user) => {
-            console.log("user", user.textContent, nickname, online)
-            if (user.textContent === nickname) {
-                console.log("looking for ", document.querySelector(`[name^="Status_${nickname}"]`))
-                console.log("online", user.textContent, nickname, online);
-            }
-        });
-    }
-
-
+ 
     async findContactList() {
-        //console.log(await JSON.parse(await requestMainData(this.socket))) 
         this.onlineUsers = await (JSON.parse(await requestOnlineUsers(this.socket)));
         while (!this.onlineUsers) {
             await new Promise((resolve) => setTimeout(resolve, 100));
@@ -309,9 +295,5 @@ export default class extends abstract {
         </div>
         `;
         return postBox;
-    }
-    getMessages() {
-        console.log("in blamerClass", this.data.Messages)
-        return this.data.Messages;
     }
 }

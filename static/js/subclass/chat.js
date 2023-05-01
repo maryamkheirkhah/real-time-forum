@@ -256,8 +256,6 @@ export default class Chat {
         if (children.length > 0) {
             children.forEach((child) => child.remove());
         }
-        /*  let chat =  await this.printChat(document.getElementById("receiverName").textContent)
-         console.log("this is chat",chat) */
         parent.innerHTML = await this.printChat(document.getElementById("receiverName").textContent);
 
     }

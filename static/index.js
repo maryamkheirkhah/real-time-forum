@@ -120,7 +120,7 @@ export const router = async() => {
 
     });
     socket.addEventListener("close", (event) => {
-        console.log("WebSocket connection closed:", event);
+        console.log("WebSocket connection closed:");
     });
     socket.addEventListener("message", (event) => {
         console.log("WebSocket message:");
@@ -167,18 +167,15 @@ export const router = async() => {
                     navigateTo("/blamer");
                 }
                 if (document.querySelectorAll(".bChatBox")) {
-                    console.log("chatbox found", document.querySelectorAll(".bChatBox"));
                     socketChat.onmessage = async(event) => {
                             const data = JSON.parse(event.data);
                             if (data.type === "status") {
-                                console.log(data.type, data.content, data.sender)
                                 if (data.content === "online") {
                                     document.getElementsByName(`Status_${data.sender}`)[0].style.backgroundColor = "#8ead7c";
                                 } else if (data.content === "offline") {
                                     document.getElementsByName(`Status_${data.sender}`)[0].style.backgroundColor = "#e3ded7";
                                 }
                             } else if (data.type === "message") {
-                                console.log(data.type, data.content, data.sender)
 
                                 let numb = parseInt(document.getElementsByName(`notif_${data.sender}`)[0].textContent)
                                 if (isNaN(numb)) {
@@ -319,7 +316,7 @@ export const router = async() => {
         });
     }
     socket.addEventListener("close", (event) => {
-        console.log("WebSocket connection closed:", event);
+        console.log("WebSocket connection closed:");
     });
 };
 

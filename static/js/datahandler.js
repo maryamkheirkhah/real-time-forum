@@ -74,7 +74,6 @@ export async function sendRegisterData(socket, data) {
     let registerFields = []
     let errMsg = "Please fill\n"
     for (let [key, value] of Object.entries(data["message"])) {
-        console.log(key, value)
         if (value === '') {
             registerFields.push(key);
             errMsg += "* " + key + "\n"
@@ -95,9 +94,7 @@ export async function sendRegisterData(socket, data) {
             }
         }
     }
-    console.log(registerFields)
-    if (registerFields.length > 0) {
-        console.log(registerFields)
+    if (registerFields.length > 0) { 
         alert(errMsg);
         return;
     }
@@ -118,7 +115,7 @@ export async function sendNewPostData(socket, data) {
     socket.send(JSON.stringify(data));
     navigateTo("/blamer");
     socket.addEventListener("close", (event) => {
-        console.log("WebSocket connection closed:", event);
+        console.log("WebSocket connection closed:");
     });
     // Define a callback function to handle the response from the backend
 
@@ -141,14 +138,14 @@ export async function sendChatData(socket, data) {
     socket.send(JSON.stringify({ "message": data, "type": "chat" }));
 
     socket.addEventListener("close", (event) => {
-        console.log("WebSocket connection closed:", event);
+        console.log("WebSocket connection closed:");
     });
     socket.addEventListener("error", (event) => {
         console.error("WebSocket error:", event);
     });
 
     socket.addEventListener("message", (event) => {
-        console.log("WebSocket message:", event.data);
+        console.log("WebSocket message:");
         return event.data;
     });
 }
@@ -187,7 +184,7 @@ export async function requestMainData(socket) {
         });
 
         socket.addEventListener("error", (event) => {
-            console.error("WebSocket error:", event);
+            console.error("WebSocket error:");
             reject(event);
             socket.close();
         });
@@ -204,11 +201,11 @@ export async function requestPostData(socket, id) {
             resolve(event.data);
         });
         socket.addEventListener("close", (event) => {
-            console.log("WebSocket connection closed:", event);
+            console.log("WebSocket connection closed:");
             reject(event);
         });
         socket.addEventListener("error", (event) => {
-            console.error("WebSocket error:", event);
+            console.error("WebSocket error:");
             reject(event);
         });
     });
@@ -221,11 +218,11 @@ export async function requestProfileData(socket) {
             resolve(event.data);
         });
         socket.addEventListener("close", (event) => {
-            console.log("WebSocket connection closed:", event);
+            console.log("WebSocket connection closed:");
             reject(event);
         });
         socket.addEventListener("error", (event) => {
-            console.error("WebSocket error:", event);
+            console.error("WebSocket error:");
             reject(event);
         });
     });
@@ -234,10 +231,10 @@ export async function requestProfileData(socket) {
 export async function sendReactionData(socket, data) {
     socket.send(data);
     socket.addEventListener("close", (event) => {
-        console.log("WebSocket connection closed:", event);
+        console.log("WebSocket connection closed:");
     });
     socket.addEventListener("error", (event) => {
-        console.error("WebSocket error:", event);
+        console.error("WebSocket error:");
     });
 }
 
@@ -246,15 +243,15 @@ export async function requestAllChat(socket) {
     return new Promise((resolve, reject) => {
         socket.send(JSON.stringify({ "type": "allChats", "message": {} }));
         socket.addEventListener("message", (event) => {
-            console.log("WebSocket message:", event.data);
+            console.log("WebSocket message:");
             resolve(event.data);
         });
         socket.addEventListener("close", (event) => {
-            console.log("WebSocket connection closed:", event);
+            console.log("WebSocket connection closed:");
             reject(event);
         });
         socket.addEventListener("error", (event) => {
-            console.error("WebSocket error:", event);
+            console.error("WebSocket error:");
             reject(event);
         });
     });
@@ -265,15 +262,15 @@ export async function requestChat(socket, data) {
     return new Promise((resolve, reject) => {
         socket.send(JSON.stringify(data));
         socket.addEventListener("message", (event) => {
-            console.log("WebSocket message:", event.data);
+            console.log("WebSocket message:");
             resolve(event.data);
         });
         socket.addEventListener("close", (event) => {
-            console.log("WebSocket connection closed:", event.data);
+            console.log("WebSocket connection closed:");
             reject(event);
         });
         socket.addEventListener("error", (event) => {
-            console.error("WebSocket error:", event);
+            console.error("WebSocket error:");
             reject(event);
         });
     });
