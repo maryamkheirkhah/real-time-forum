@@ -651,6 +651,42 @@ body {
        padding: 2px;
        text-align: center;
 }
+.typing-animation{
+
+       display: none;
+}
+.typing-animation span {
+       display: inline-block;
+       margin: 0 5px;
+       width: 10px;
+       height: 10px;
+       border-radius: 50%;
+       animation: typing 1.7s ease-in-out infinite;
+     }
+
+     .typing-animation span:nth-child(1) {
+       animation-delay: 0.1s;
+     }
+     
+     .typing-animation span:nth-child(2) {
+       animation-delay: 0.2s;
+     }
+     
+     .typing-animation span:nth-child(3) {
+       animation-delay: 0.3s;
+     }
+     
+     @keyframes typing {
+       0% {
+         transform: translateY(0px);
+       }
+       50% {
+         transform: translateY(-10px);
+       }
+       100% {
+         transform: translateY(0px);
+       }
+     }
 .cArea{
        grid-area: cArea;
        width: 90%;

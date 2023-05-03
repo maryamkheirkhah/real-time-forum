@@ -72,7 +72,7 @@ export default class Chat {
                                           throttleValue = false;
                                    }, time);
                             };
-                            throttle(sendTypingMessage, 500);
+                            throttle(sendTypingMessage,1000);
                      }
               });
 
@@ -122,7 +122,7 @@ export default class Chat {
               container.id = "bChatBox";
               container.className = "bChatBox";
               container.innerHTML = `
-              <div class="cReceiverName"><span id="receiverName">${id}</span><span id="typeEvent"></span></div>
+              <div class="cReceiverName"><span id="receiverName">${id}</span><span class="typing-animation"><span>.</span><span>.</span><span>.</span></span></div>
               <div id="message-list"class="cArea"> </div>
               <div class="cInput">
               <input type="text" id="message-input" placeholder="Type your message here">
@@ -341,11 +341,17 @@ function fthrottle(func, limit) {
               }
        };
 }
+let typingTimer = null;
+let isTyping = false;
 
 function setTypingMessage() {
-       let location = document.getElementById("typeEvent");
-       location.innerHTML = "typing...";
-       setTimeout(() => {
-              location.innerHTML = "";
-       }, 500);
+  let location = document.querySelector(".typing-animation");
+  location.style.display = "inline-block";
+  isTyping = true;
+
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(() => {
+    location.style.display = "none";
+    isTyping = false;
+  }, 2000);
 }
