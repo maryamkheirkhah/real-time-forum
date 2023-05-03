@@ -9,8 +9,6 @@ import {
     sendRegisterData,
     sendNewPostData,
     dataGathering,
-    requestChat
-
 } from "./js/datahandler.js";
 import Content from "./js/subclass/content.js";
 import Chat from "./js/subclass/chat.js";
@@ -139,7 +137,7 @@ export const router = async() => {
 
     if (match.route.view == blamer && online) {
         // click on userNAme
-        document.getElementById("activeUserName").addEventListener("click", (e) => {
+/*         document.getElementById("activeUserName").addEventListener("click", (e) => {
             socket.send(JSON.stringify({
                 "type": "profile",
                 "message": {
@@ -153,14 +151,12 @@ export const router = async() => {
                 });
             }
             new Profile(socket, view);
-        });
+        }); */
         let payload = {
             type: "status",
             content: "online",
             sender: document.getElementById("activeUserName").textContent,
         };
-        
-
         socketChat.addEventListener("open", () => {
             console.log("WebSocket connection established. sending payload");
             socketChat.send(JSON.stringify(payload));
@@ -237,7 +233,7 @@ export const router = async() => {
                             await newChat.chatHeader()
                         });
                     });
-                    document.querySelectorAll(".bContactName").forEach((button) => {
+/*                     document.querySelectorAll(".bContactName").forEach((button) => {
                         button.addEventListener("click", async() => {
                             socket.send(JSON.stringify({
                                 "type": "profile",
@@ -255,7 +251,7 @@ export const router = async() => {
 
                         })
 
-                    });
+                    }); */
 
                 }
 
@@ -266,6 +262,7 @@ export const router = async() => {
                 .addEventListener("click", async(e) => {
                     e.preventDefault();
                     sendNewPostData(socket, await dataGathering("blameP"));
+                    navigateTo("/blamer");
                 });
 
             // delete cookie when click logout button

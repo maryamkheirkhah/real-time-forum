@@ -114,7 +114,6 @@ export async function sendNewPostData(socket, data) {
     }
 
     socket.send(JSON.stringify(data));
-    navigateTo("/blamer");
     socket.addEventListener("close", (event) => {
         console.log("WebSocket connection closed:");
     });
