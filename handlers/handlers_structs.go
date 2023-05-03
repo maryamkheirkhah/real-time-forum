@@ -106,6 +106,7 @@ type MainData struct {
 	CookieMessage string   // Message to be displayed to user if forum-message cookie is set
 	UserNicknames []string `json:"users"`
 	Messages      map[string][]ChatData
+	Type          string `json:"type"`
 }
 type PostData struct {
 	Username      string

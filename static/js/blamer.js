@@ -12,7 +12,10 @@ export default class extends abstract {
     }
 
     async getData() {
-            this.data = await JSON.parse((await requestMainData(this.socket)));
+            let temp = await JSON.parse((await requestMainData(this.socket)));
+            if (temp.type == "mainData") {
+                this.data = temp;
+            }
             // Wait until this.data is set before proceeding
             while (!this.data) {
                 await new Promise((resolve) => setTimeout(resolve, 100));
@@ -79,11 +82,13 @@ export default class extends abstract {
         }
  
     async findContactList() {
-        this.onlineUsers = await (JSON.parse(await requestOnlineUsers(this.socket)));
+        let temp = await (JSON.parse(await requestOnlineUsers(this.socket)));
+        if (temp.type == "onlineUsers") {
+            this.onlineUsers = temp.onlineUsers;
+        } 
         while (!this.onlineUsers) {
             await new Promise((resolve) => setTimeout(resolve, 100));
         }
-
         let list = "";
         this.data.users.sort(function(a, b) {
             return a.toLowerCase().localeCompare(b.toLowerCase());
@@ -194,6 +199,11 @@ export default class extends abstract {
         // findPost return all posts
     findPost(topics = "all") {
         let posts = "";
+        if (this.data == undefined) {
+            console.log("no posts", this.data)
+        }else if (this.data.Posts == undefined) {
+            console.log("no posts", this.data)
+        } 
         this.data.Posts.sort((b, a) => Date.parse(a.CreationTime) - Date.parse(b.CreationTime));
         if (topics == "all") {
             if (this.data.Posts.length == 0) {

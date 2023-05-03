@@ -36,6 +36,7 @@ export async function sendLoginData(socket, data) {
         alert("Please fill in all fields");
         return;
     }
+    console.log("socket", socket)
     socket.send(JSON.stringify(data));
     // Define a callback function to handle the response from the backend
     const handleResponse = (event) => {
@@ -151,7 +152,6 @@ export async function sendChatData(socket, data) {
 }
 export async function requestOnlineUsers(socket) {
     return new Promise((resolve, reject) => {
-
         socket.send(JSON.stringify({ "type": "onlineUsers", "message": {} }));
         socket.addEventListener("open", () => {
             console.log("WebSocket connection established. in online users");
@@ -159,14 +159,15 @@ export async function requestOnlineUsers(socket) {
         socket.addEventListener("message", (event) => {
             resolve(event.data);
         });
-
+        socket.addEventListener("close", (event) => {
+            console.log("WebSocket connection closed:");
+            reject(event);
+                });
         socket.addEventListener("error", (event) => {
             console.error("WebSocket error:", event);
             reject(event);
-            socket.close();
         });
     });
-
 }
 export async function requestMainData(socket) {
     socket.addEventListener("open", () => {
@@ -175,9 +176,6 @@ export async function requestMainData(socket) {
 
     });
     return new Promise((resolve, reject) => {
-        // const socket = new WebSocket(location);
-
-
         socket.addEventListener("message", (event) => {
             console.log("WebSocket message:");
             resolve(event.data);
@@ -186,7 +184,6 @@ export async function requestMainData(socket) {
         socket.addEventListener("error", (event) => {
             console.error("WebSocket error:");
             reject(event);
-            socket.close();
         });
 
     });

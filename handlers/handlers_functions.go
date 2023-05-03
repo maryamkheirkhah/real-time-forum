@@ -779,7 +779,7 @@ func GetMainDataStruct(r *http.Request, nickName string) (MainData, error) {
 	// Compile output struct
 	md.Posts = sortPostSlice(posts)     // Bubble sort posts in descending order of creation time
 	md.Topics = sortStringSlice(topics) // Bubble sort topics in alphabetical order
-
+	md.Type = "mainData"
 	return md, nil
 }
 func isOnline(nickName string) bool {

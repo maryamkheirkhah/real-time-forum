@@ -272,7 +272,9 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			reactionHandler(nickname, data.Message["Reaction"].(float64), data.Message["PostId"].(string))
 			break
 		case "onlineUsers":
-			jsonUsers, err := json.Marshal(sessions.GetOnlineUsers())
+			onlineUsersMessage := map[string]interface{}{"type": "onlineUsers", "onlineUsers": sessions.GetOnlineUsers()}
+
+			jsonUsers, err := json.Marshal(onlineUsersMessage)
 			if err != nil {
 				fmt.Println("error in marshal", err.Error())
 			}
@@ -361,9 +363,10 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	// Upgrade the HTTP connection to a WebSocket connection
 	nickname, exist := sessions.Check(w, r)
 	if !exist {
-		return
+		fmt.Println("not logged in yet")
 	} else if nickname == "" {
-		return
+		fmt.Println("not logged in yet")
+
 	}
 
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -374,40 +377,40 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Add the WebSocket connection to the clients map
 	Clients[nickname] = conn
+	/*
+		defer func() {
+			// Remove the WebSocket connection from the clients map
+			delete(Clients, nickname)
+			conn.Close()
+		}() */
+	/* 	const pingPeriod = 30 * time.Second
 
-	defer func() {
-		// Remove the WebSocket connection from the clients map
-		delete(Clients, nickname)
-		conn.Close()
-	}()
-	const pingPeriod = 30 * time.Second
+	   	conn.SetPongHandler(func(appData string) error {
+	   		conn.SetReadDeadline(time.Now().Add(pingPeriod))
+	   		return nil
+	   	})
 
-	conn.SetPongHandler(func(appData string) error {
-		conn.SetReadDeadline(time.Now().Add(pingPeriod))
-		return nil
-	})
+	   	ticker := time.NewTicker(pingPeriod)
+	   	defer ticker.Stop()
 
-	ticker := time.NewTicker(pingPeriod)
-	defer ticker.Stop()
-
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				err := conn.WriteMessage(websocket.PingMessage, []byte{})
-				if err != nil {
-					log.Println("Failed to send ping message:", err)
-					return
-				}
-			}
-		}
-	}()
+	   	go func() {
+	   		for {
+	   			select {
+	   			case <-ticker.C:
+	   				err := conn.WriteMessage(websocket.PingMessage, []byte{})
+	   				if err != nil {
+	   					log.Println("Failed to send ping message:", err)
+	   					return
+	   				}
+	   			}
+	   		}
+	   	}() */
 
 	for {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
-				//log.Println("WebSocket connection closed:", err)
+				log.Println("WebSocket connection closed:", err)
 			}
 			break
 		}

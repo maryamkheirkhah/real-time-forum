@@ -15,6 +15,11 @@ import {
 import Content from "./js/subclass/content.js";
 import Chat from "./js/subclass/chat.js";
 import Profile from "./js/subclass/profile.js";
+//import all of websocket.js
+import {
+    socket,
+    socketChat
+} from "./js/webSocket.js";
 const pathToRegex = (path) =>
     new RegExp(
         "^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$"
@@ -31,8 +36,7 @@ const getParams = (match) => {
             return [key, values[i]];
         })
     );
-};
-
+    }
 export const router = async() => {
     const cookies = document.cookie.split(";")
     let online = false;
@@ -94,10 +98,7 @@ export const router = async() => {
 
     const view = new match.route.view(getParams(match));
 
-    const loc = "ws://localhost:8080/api/data-route";
 
-    const socket = new WebSocket(loc);
-    const socketChat = new WebSocket("ws://localhost:8080/api/chat");
     view.socket = socket;
 
 
@@ -209,6 +210,7 @@ export const router = async() => {
                                 if (data.content === "online") {
                                     document.getElementsByName(`Status_${data.sender}`)[0].style.backgroundColor = "#8ead7c";
                                 } else if (data.content === "offline") {
+                                    console.log(data,  document.getElementsByName(`Status_${data.sender}`)[0])
                                     document.getElementsByName(`Status_${data.sender}`)[0].style.backgroundColor = "#e3ded7";
                                 }
                             } else if (data.type === "message") {
