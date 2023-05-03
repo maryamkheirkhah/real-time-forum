@@ -12,7 +12,6 @@ import {
 } from "./js/datahandler.js";
 import Content from "./js/subclass/content.js";
 import Chat from "./js/subclass/chat.js";
-import Profile from "./js/subclass/profile.js";
 //import all of websocket.js
 import {
     socket,
@@ -28,7 +27,6 @@ const getParams = (match) => {
     const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map(
         (result) => result[1]
     );
-
     return Object.fromEntries(
         keys.map((key, i) => {
             return [key, values[i]];
@@ -36,8 +34,10 @@ const getParams = (match) => {
     );
     }
 export const router = async() => {
+    // Define your routes here
     const cookies = document.cookie.split(";")
     let online = false;
+    console.log("looking for break point 1")
     for (var i = 0; i < cookies.length; i++) {
 
         // Get the name and value of each cookie
@@ -56,6 +56,7 @@ export const router = async() => {
         }
     }
     let routes = []
+    console.log("looking for break point 2")
     if (online) {
         routes = [{
             path: "/blamer",
@@ -74,7 +75,7 @@ export const router = async() => {
         ];
 
     }
-
+    console.log("looking for break point 3")
     // Test each route for potential match
     const potentialMatches = routes.map((route) => {
         return {
@@ -82,10 +83,12 @@ export const router = async() => {
             result: location.pathname.match(pathToRegex(route.path)),
         };
     });
+    console.log("looking for break point 4")
 
     let match = potentialMatches.find(
         (potentialMatch) => potentialMatch.result !== null
     );
+    console.log("looking for break point 5")
 
     if (!match) {
         match = {
@@ -93,13 +96,14 @@ export const router = async() => {
             result: [location.pathname],
         };
     }
+    console.log("looking for break point 6")
 
     const view = new match.route.view(getParams(match));
 
 
     view.socket = socket;
 
-
+    console.log("looking for break point 7")
     socket.addEventListener("open", () => {
         console.log("WebSocket connection established.");
     });
@@ -131,11 +135,11 @@ export const router = async() => {
             console.log('Received pong message.')
         })
     });
-
-    // make page
+    console.log("looking for break point 8")
     document.querySelector("#app").innerHTML = await view.getHtml(socket);
-
+    console.log("looking for break point 9")
     if (match.route.view == blamer && online) {
+        console.log("looking for break point 10")
         // click on userNAme
 /*         document.getElementById("activeUserName").addEventListener("click", (e) => {
             socket.send(JSON.stringify({
