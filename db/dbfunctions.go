@@ -128,6 +128,7 @@ func InsertData(tableName string, args ...any) (int64, error) {
 	case "reactions":
 		var errReact error
 		myQuery, errReact = insertReactionHandler(args...)
+		// fmt.Println("myQuery", myQuery)
 		if myQuery == "" {
 			return -1, errReact
 		}
@@ -169,6 +170,7 @@ func InsertData(tableName string, args ...any) (int64, error) {
 		return -1, err
 	}
 	defer statement.Close()
+	// fmt.Println("args", args)
 	res, err := statement.Exec(args...)
 	// id is the value of primery key of the data we insert we need it in some cases (e.g insert post)
 	if err != nil {
@@ -583,10 +585,12 @@ func insertReactionHandler(args ...any) (string, error) {
 		}
 		err = NotExistData("reactions", "userId", args[0], "postId", args[1])
 		if err == nil {
+			// fmt.Println("in error = nil", err)
 			return "insert into reactions (userId, postId, commentId, reaction) VALUES(?,?,?,?)", nil
 		}
 		res, err := SelectDataHandler("reactions", "userId", args[0], "postId", args[1])
 
+		// fmt.Println("user id:", args[0], "post id", args[1], "res:", res.(Reaction).Reaction, "args[3]:", args[3])
 		if res.(Reaction).Reaction == args[3] {
 			err = DeleteData("reactions", res.(Reaction).ReactionId)
 			if err != nil {

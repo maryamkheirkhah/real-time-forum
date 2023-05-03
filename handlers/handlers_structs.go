@@ -1,6 +1,9 @@
 package handlers
 
-var newProfile string
+import "github.com/gorilla/websocket"
+
+var Clients = make(map[string]*websocket.Conn)
+var Broadcast = make(chan MessageData)
 
 type StatusData struct {
 	Code int
@@ -124,23 +127,19 @@ type ChatData struct {
 	MessageType string `json:"type"`
 }
 
-/*
-	 type AllChats struct {
-		Chats       map[string][]ChatData
-		onlineUsers []string
-	}
-*/
+/* type AllChats struct {
+	Chats       map[string][]ChatData
+	onlineUsers []string
+} */
 type CertainChat struct {
 	ActiveUser string
 	OtherUser  string
 	Chats      [][10]ChatData
 }
 
-/*
-	 type AllUsersStatus struct {
-		UsersStatus map[string]UserStatus
-	}
-*/
+/* type AllUsersStatus struct {
+	UsersStatus map[string]UserStatus
+} */
 type UserStatus struct {
 	NickName string
 	Online   bool

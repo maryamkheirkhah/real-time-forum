@@ -29,15 +29,15 @@ var (
 
 func redirectHandler(w http.ResponseWriter, r *http.Request, pageName string, message string) {
 	// Create a new cookie with the message value
-	var messageCookie = http.Cookie{
-		Name:    MESSAGE_COOKIE_NAME,
-		Value:   message,
-		MaxAge:  1, // The cookie will last 10 seconds
-		Expires: time.Now().Add(1 * time.Second),
-		Path:    "/",
-	}
-	// Set the cookie on the response writer
-	http.SetCookie(w, &messageCookie)
+	/* 	var messageCookie = http.Cookie{
+	   		Name:    MESSAGE_COOKIE_NAME,
+	   		Value:   message,
+	   		MaxAge:  1, // The cookie will last 10 seconds
+	   		Expires: time.Now().Add(1 * time.Second),
+	   		Path:    "/",
+	   	}
+	   	// Set the cookie on the response writer
+	   	http.SetCookie(w, &messageCookie) */
 	//w.WriteHeader(http.StatusOK)
 }
 
@@ -152,6 +152,8 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request, message map[strin
 	return
 }
 
+var newProfile string
+
 func getChatData(receiver, sender string) []byte {
 	messages, errMsg := GetMessages(sender)
 	if errMsg != nil {
@@ -182,17 +184,38 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 	client := NewClient(SocketHub, conn)
 	SocketHub.register <- client
 
-	for {
-		err = conn.WriteMessage(websocket.PingMessage, []byte{})
-		if err != nil {
-			log.Println("WebSocket connection closed:", err)
-			break
+	const pingPeriod = 30 * time.Second
+
+	conn.SetPongHandler(func(appData string) error {
+		conn.SetReadDeadline(time.Now().Add(pingPeriod))
+		return nil
+	})
+
+	ticker := time.NewTicker(pingPeriod)
+	defer ticker.Stop()
+
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				err := conn.WriteMessage(websocket.PingMessage, []byte{})
+				if err != nil {
+					log.Println("Failed to send ping message:", err)
+					return
+				}
+			}
 		}
+	}()
+
+	for {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
-			log.Println("Failed to read message from WebSocket:", err)
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
+				//log.Println("WebSocket connection closed:", err)
+			}
 			break
 		}
+
 		var data MessageData
 		err = json.Unmarshal(message, &data)
 		if err != nil {
@@ -260,7 +283,7 @@ func DataRoute(w http.ResponseWriter, r *http.Request) {
 			client.SendMessage(getAllUsersStatus(nickname))
 			break
 		default:
-			fmt.Println("default")
+			//fmt.Println("default")
 			break
 		}
 	}
@@ -338,9 +361,9 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	// Upgrade the HTTP connection to a WebSocket connection
 	nickname, exist := sessions.Check(w, r)
 	if !exist {
-
+		return
 	} else if nickname == "" {
-
+		return
 	}
 
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -357,11 +380,35 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		delete(Clients, nickname)
 		conn.Close()
 	}()
-	// Read messages from the WebSocket connection
+	const pingPeriod = 30 * time.Second
+
+	conn.SetPongHandler(func(appData string) error {
+		conn.SetReadDeadline(time.Now().Add(pingPeriod))
+		return nil
+	})
+
+	ticker := time.NewTicker(pingPeriod)
+	defer ticker.Stop()
+
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				err := conn.WriteMessage(websocket.PingMessage, []byte{})
+				if err != nil {
+					log.Println("Failed to send ping message:", err)
+					return
+				}
+			}
+		}
+	}()
+
 	for {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
-			log.Println(err)
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
+				//log.Println("WebSocket connection closed:", err)
+			}
 			break
 		}
 		var messageData ChatData
@@ -383,12 +430,13 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		if string(messageData.MessageType) == "status" {
 			broadcastToAll("", jsonData)
-
+			continue
 		} else if string(messageData.MessageType) == "seen" {
 			err = handleUpdateSeen(message)
 			if err != nil {
 				log.Println("hahahahahahahahah", err)
 			}
+			continue
 		} else if string(messageData.MessageType) == "message" {
 			err = SaveMessage(messageData)
 			if err != nil {
@@ -400,13 +448,14 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 			Clients[nickname].WriteMessage(websocket.TextMessage, testData)
 		}
 		// how to send message to all clients
-
-		// Broadcast message to receiver
-		for cNickname, c := range Clients {
-			if cNickname == messageData.Receiver || cNickname == messageData.Sender {
-				err = c.WriteMessage(websocket.TextMessage, jsonData)
-				if err != nil {
-					log.Println(err)
+		if messageData.MessageType != "PING" {
+			// Broadcast message to receiver
+			for cNickname, c := range Clients {
+				if cNickname == messageData.Receiver || cNickname == messageData.Sender && cNickname != "" {
+					err = c.WriteMessage(websocket.TextMessage, jsonData)
+					if err != nil {
+						log.Println("error in writing message", err.Error(), "message", string(message), "CNickname", cNickname, "nickname", nickname, "sender", messageData.Sender, "receiver", messageData.Receiver, "messageType", messageData.MessageType)
+					}
 				}
 			}
 		}

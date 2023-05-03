@@ -12,6 +12,21 @@ import (
 )
 
 /*
+SendError is a function which takes a response writer, request, http error code and error
+message as input and writes the error code and message to the global Status struct. It then
+invokes the error handler, which executes the error template and writes the error page to the
+response writer (it also has its own error handling, thus no need to check for errors here).
+*/
+func SendError(w http.ResponseWriter, r *http.Request, errorCode int, errorMsg string) {
+	// Write error details to global Status struct
+	Status.Code = errorCode
+	Status.Msg = errorMsg
+
+	// Invoke error handler, which has its own error handling
+	//ErrorPage(w, r)
+}
+
+/*
 sortPostSlice is a function that takes a slice of Post structs as input and sorts
 them in descending order of creation time using the "bubble-sort algorithm". It returns
 a slice of Post structs.
