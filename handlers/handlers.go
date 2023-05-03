@@ -152,8 +152,6 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request, message map[strin
 	return
 }
 
-var newProfile string
-
 func getChatData(receiver, sender string) []byte {
 	messages, errMsg := GetMessages(sender)
 	if errMsg != nil {

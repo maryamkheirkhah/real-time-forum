@@ -8,6 +8,9 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+var Clients = make(map[string]*websocket.Conn)
+var Broadcast = make(chan MessageData)
+
 // hub.go
 type Hub struct {
 	clients    map[*Client]bool
@@ -39,7 +42,6 @@ func (h *Hub) Run() {
 			h.clients[client] = true
 			h.mutex.Unlock()
 		case client := <-h.unregister:
-			fmt.Println("Unregistering client")
 			h.mutex.Lock()
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
@@ -47,7 +49,6 @@ func (h *Hub) Run() {
 			}
 			h.mutex.Unlock()
 		case message := <-h.broadcast:
-			fmt.Println("Broadcasting message")
 			h.mutex.RLock()
 			for client := range h.clients {
 				select {
@@ -61,10 +62,6 @@ func (h *Hub) Run() {
 			h.mutex.RUnlock()
 		}
 	}
-}
-
-func (h *Hub) BroadcastMessage(message []byte) {
-	h.broadcast <- message
 }
 
 type Client struct {
