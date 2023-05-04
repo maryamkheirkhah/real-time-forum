@@ -266,7 +266,7 @@ export const router = async() => {
                 .addEventListener("click", async(e) => {
                     e.preventDefault();
                     sendNewPostData(socket, await dataGathering("blameP"));
-                    navigateTo("/blamer");
+                    
                 });
 
             // delete cookie when click logout button

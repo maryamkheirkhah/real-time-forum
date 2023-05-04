@@ -112,8 +112,10 @@ export async function sendNewPostData(socket, data) {
         alert("Please fill in all fields");
         return;
     }
-
+    console.log("socket", socket)
     socket.send(JSON.stringify(data));
+    location.reload();
+    console.log("wtffffff")
     socket.addEventListener("close", (event) => {
         console.log("WebSocket connection closed:");
     });
